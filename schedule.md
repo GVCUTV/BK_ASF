@@ -1,100 +1,99 @@
-[comment]: # "v0"
+[comment]: # "v1"
 ## **Project Schedule**
 
 ---
 
-### **Meeting 1 [8/7/2025] – Kickoff & System Familiarization**
+### **Meeting 1 [12/7/2025] – Kickoff & System Familiarization**
 
-* **1.1** (All): Rapid reading & discussion of the chosen paper and Alibaba trace data docs.
-* **1.2** (All): Outline the system’s structure, workflow, and conceptual model together.
+* **1.1** (All): Lettura rapida e discussione della documentazione ASF (“The Apache Way”), linee guida BookKeeper, overview Jira/GitHub.
+* **1.2** (All): Costruzione condivisa del modello concettuale del workflow BookKeeper: stati principali, transizioni, ipotesi chiave.
 * **1.3** (Split):
 
-  * Person A: Start drafting introduction & goals for the report.
-  * Person B: Sketch first draft of the system/conceptual diagrams (whiteboard/Miro/Figma).
-  * Person C: List data needs, begin exploring Alibaba dataset.
-* **End:** 15-min wrap-up, share findings, adjust plan.
+  * A: Inizio stesura dell’introduzione e degli obiettivi della relazione.
+  * B: Prima bozza di diagrammi del sistema (whiteboard/Miro/draw.io).
+  * C: Elenco dei dati necessari, esplorazione delle issue recenti BookKeeper e struttura dati JIRA/GitHub.
+* **End:** 15 min wrap-up, condivisione risultati, eventuale aggiustamento dei compiti e del piano.
 
 ---
 
-### **Meeting 2 [13/7/2025] – Conceptual Model & Data Exploration**
+### **Meeting 2 [13/7/2025] – Conceptual Model & Data Mapping**
 
-* **2.1** (All): Finalize conceptual and event model (define classes of jobs, states, events, resources).
+* **2.1** (All): Finalizzazione del modello concettuale e dei flussi principali (issue, review, test, feedback loop).
 * **2.2** (Split):
 
-  * A: Start writing conceptual model/event list section.
-  * B: Develop the first event diagrams/flow charts for the report.
-  * C: Continue data preprocessing, share parameter statistics for model inputs.
-* **All:** Review each other’s partial results, feedback, synchronize.
+  * A: Scrittura della sezione sul modello concettuale e mappatura stati Jira ↔ workflow reale.
+  * B: Sviluppo dei primi diagrammi/flow chart per la relazione.
+  * C: Raccolta e pulizia dati preliminare, estrazione ticket/PR, condivisione prime statistiche di base.
+* **All:** Review incrociato delle bozze, sincronizzazione, discussione dubbi.
 
 ---
 
-### **Meeting 3 [15/7/2025] – Analytical Model Construction**
+### **Meeting 3 [15/7/2025] – Analisi Dati & Costruzione Modello Analitico**
 
-* **3.1** (All): Build and discuss the analytical queueing model together.
+* **3.1** (All): Costruzione condivisa del modello a code analitico (rete Jackson con feedback) e delle ipotesi formali.
 * **3.2** (Split):
 
-  * A: Write up analytical traffic equations and state/routing matrix for report.
-  * B: Start parameter estimation from trace data.
-  * C: Draft explanation of metrics (utilization, queue time, response time, etc.).
-* **All:** Review, cross-check each other’s draft contributions.
+  * A: Scrittura di equazioni analitiche, matrice degli stati/transizioni e parametri di routing.
+  * B: Stima preliminare dei parametri da Jira/GitHub (rate arrivo, tempi medi di servizio, tasso reopening).
+  * C: Bozza delle metriche chiave (utilizzo, tempo medio in coda, throughput ecc.).
+* **All:** Revisione incrociata, verifica coerenza dei dati stimati.
 
 ---
 
-### **Meeting 4 [29/7/2025] – Simulation Architecture & Coding Start**
+### **Meeting 4 [29/7/2025] – Architettura Simulazione & Avvio Coding**
 
-* **4.1** (All): Design high-level architecture and agree on simulation flow (pseudo-code/whiteboard).
+* **4.1** (All): Definizione architettura della simulazione, flusso eventi/stati, strumenti (pseudo-codice o whiteboard).
 * **4.2** (Split):
 
-  * A: Set up simulation repo/project structure.
-  * B: Start coding event management and arrival processes.
-  * C: Implement initial service and departure logic.
-* **All:** Mini peer code review at end, update documentation.
+  * A: Setup repo/codice simulazione e base dati di input.
+  * B: Implementazione logica di arrivo ticket, gestione transizioni e ciclo feedback.
+  * C: Sviluppo logica di servizio, registrazione statistiche e output.
+* **All:** Mini code review tra pari, aggiornamento documentazione di progetto.
 
 ---
 
-### **Meeting 5 [3/8/2025] – Verification, First Runs, Debugging**
+### **Meeting 5 [3/8/2025] – Verifica, Debug e Prime Simulazioni**
 
-* **5.1** (All): Integrate, test, and run first full-system simulation.
+* **5.1** (All): Test integrato, esecuzione prima simulazione end-to-end, verifica funzionamento globale.
 * **5.2** (Split):
 
-  * A: Document and check consistency (Little’s Law, utilization, mean times).
-  * B: Run several parameter sweeps for initial results.
-  * C: Debug and optimize simulation code, keep notes for the report’s “Model Validation” and “Verification” sections.
-* **All:** Discuss anomalies, collectively refine model/logic.
+  * A: Documentazione e verifica delle consistenze (Legge di Little, utilizzo, tempi medi).
+  * B: Run di sweep parametrici su casi semplici, raccolta output.
+  * C: Debug, ottimizzazione codice simulazione e note per sezioni “Validazione”/“Verifica modello”.
+* **All:** Discussione anomalie, rifinitura collettiva della logica.
 
 ---
 
-### **Meeting 6 [19/8/2025] – Experimental Design & Result Analysis**
+### **Meeting 6 [19/8/2025] – Esperimenti & Analisi Risultati**
 
-* **6.1** (All): Define experimental scenarios—what variables to vary, what outputs to collect.
+* **6.1** (All): Definizione scenari sperimentali, variabili da esplorare e output da raccogliere.
 * **6.2** (Split):
 
-  * A: Run and document transient (startup) vs steady-state simulations.
-  * B: Generate and polish graphs/tables.
-  * C: Begin drafting “Design of Experiments” and “Bottleneck Analysis” sections.
-* **All:** Cross-check data, select best plots/tables for report.
+  * A: Esecuzione simulazioni in transitorio e regime, raccolta dati.
+  * B: Produzione e raffinamento di grafici e tabelle.
+  * C: Inizio stesura delle sezioni “Esperimenti” e “Analisi dei colli di bottiglia”.
+* **All:** Review incrociata dei risultati, scelta delle migliori visualizzazioni.
 
 ---
 
-### **Meeting 7 [26/8/2025] – Optimization & Improved Model**
+### **Meeting 7 [26/8/2025] – Miglioramento & Modello Ottimizzato**
 
-* **7.1** (All): Brainstorm and select improvement(s) (e.g., new scheduling, dynamic resource allocation).
+* **7.1** (All): Brainstorming e scelta di possibili miglioramenti (automatizzazione test, nuovi pattern review, ecc.).
 * **7.2** (All):
 
-  * Implement improvement in simulation.
-  * Run comparative simulations and extract results.
-  * Draft the improved model, highlight differences, update relevant report sections.
-* **All:** Interpret comparative results together, discuss findings, prepare for final report.
+  * Implementazione del miglioramento scelto nella simulazione.
+  * Run comparativa tra scenario base e ottimizzato, raccolta risultati.
+  * Bozza del nuovo modello e aggiornamento sezione confronto nel report.
+* **All:** Interpretazione collettiva dei risultati, preparazione agli ultimi step.
 
 ---
 
-### **Meeting 8 [TBD] – Report Completion & Presentation Prep**
+### **Meeting 8 [TBD] – Report Finale & Presentazione**
 
-* **8.1** (All): Assemble the report in sections, collaboratively edit, polish, and add references.
+* **8.1** (All): Assemblaggio finale della relazione, editing collaborativo, referenze.
 * **8.2** (Split):
 
-  * A: Prepare slides for introduction/model sections.
-  * B: Prepare slides for experiments/results.
-  * C: Prepare slides for improvements/conclusions.
-* **All:** Full mock presentation (each practices their part), group Q\&A, finalize code and deliverables.
-
+  * A: Slide su introduzione/modello e motivazioni.
+  * B: Slide su esperimenti, simulazioni e risultati.
+  * C: Slide su miglioramenti, conclusioni e raccomandazioni.
+* **All:** Prova presentazione (ognuno simula la propria parte), Q&A tra colleghi, finalizzazione di codice e materiali.
