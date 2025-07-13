@@ -1,89 +1,62 @@
-[comment]: # "v0"
-# MLaaS GPU Cluster Performance Modeling and Simulation
+[comment]: # "v1"
+# ASF Project
 
-## Overview
+## 1. Introduzione
 
-This project analyzes and models the performance of a large-scale heterogeneous GPU cluster running Machine Learning as a Service (MLaaS), inspired by Alibaba’s production system as described in the paper ["MLaaS in the Wild: Workload Analysis and Scheduling in Large-Scale Heterogeneous GPU Clusters"](https://arxiv.org/abs/2007.01235).
+Il caso di studio presentato in questo elaborato riguarda l’analisi delle prestazioni del processo di sviluppo software del progetto open source Apache BookKeeper, parte della Apache Software Foundation (ASF). L'obiettivo è applicare le tecniche di modellazione viste nel corso, e in particolare la teoria delle code, per rappresentare e valutare quantitativamente il ciclo di vita di una nuova funzionalità o correzione di bug: dalla creazione del ticket nel sistema di issue tracking Jira, attraverso le fasi di sviluppo e revisione collaborativa su GitHub, fino al rilascio finale.
 
-The goal is to use real workload traces ([Alibaba Cluster Trace v2020, GPU edition](https://github.com/alibaba/clusterdata/tree/master/cluster-trace-gpu-v2020)), queueing theory, and discrete-event simulation to:
-- Understand system bottlenecks
-- Analyze scheduling and resource allocation policies
-- Propose and evaluate improvements
+La specificità di BookKeeper, come di altri progetti ASF, risiede nell’organizzazione basata su contributi volontari, processi decisionali trasparenti e collaborazione asincrona. Queste caratteristiche differenziano fortemente il flusso di lavoro rispetto a quello di una tipica azienda software, introducendo variabilità nei tempi di risposta, iterazioni multiple tra sviluppo, testing e bugfix, e la possibilità di cicli di revisione multipli prima della chiusura definitiva di una issue.
 
----
+Il lavoro presentato segue una struttura classica di performance engineering: dopo la descrizione concettuale del sistema e la definizione degli obiettivi, viene costruito un modello a code per rappresentare i principali stati e transizioni del workflow di sviluppo. I parametri del modello verranno stimati tramite dati reali estratti dagli archivi pubblici di Jira e GitHub del progetto. Seguiranno la verifica di consistenza, la simulazione per la validazione del modello computazionale tramite confronto dei risultati prodotti con quelli rilevati e la proposta di possibili miglioramenti organizzativi basati sulle evidenze emerse.
 
-## System Description
+## 2. Background e contesto open-source
 
-The studied system consists of a large GPU cluster hosting a mix of ML workloads:
-- **Diverse job classes:** Short/long, low/high GPU demand, different ML frameworks (e.g., TensorFlow, PyTorch)
-- **Dynamic resource management:** GPU sharing (time-multiplexing), packing strategies, and autoscaling
-- **Key challenges:** Underutilization, queueing delays (esp. for short jobs), head-of-line blocking, CPU-GPU imbalance
+Apache BookKeeper è un progetto open-source della Apache Software Foundation (ASF), il che significa che il suo sviluppo segue un modello di contributo volontario guidato dalla comunità piuttosto che un processo aziendale tradizionale. Nei progetti ASF non ci sono manager formali che assegnano i compiti; non si utilizza una classica strategia di gestione top-down (tipica delle organizzazioni gerarchiche, ma volunteer-driven, con i collaboratori che scelgono le questioni di loro interesse o più affini alle loro capacità.
 
----
+Le decisioni vengono prese pubblicamente sulle mailing list o su GitHub attraverso la discussione e la votazione per consenso da parte della comunità. La cosiddetta "Apache Way" porta a un flusso di lavoro con caratteristiche uniche: le funzionalità e le correzioni sono sviluppate in modo collaborativo da volontari distribuiti geograficamente, facendo forte affidamento sulla comunicazione asincrona (e-mail, issue tracker) e sulla peer review. 
 
-## Project Objectives
+Non ci sono programmi fissi o deliverable formali definiti in anticipo, e la progettazione si evolve in modo iterativo. Queste differenze significano che la nostra analisi deve tenere conto di tempi più lenti (i volontari lavorano nelle ore libere), dimensioni variabili del team e progressi non lineari (i problemi possono rallentare o accelerare improvvisamente in base al numero di collaboratori attivi volta per volta). 
 
-- **Model Construction:** Build an analytical (queueing theory) and simulation model of the MLaaS cluster.
-- **Validation:** Use real cluster trace data to validate model accuracy.
-- **Bottleneck Analysis:** Identify sources of delay and resource contention.
-- **Optimization:** Evaluate improvements such as predictive scheduling and enhanced GPU sharing.
+Allineeremo il nostro studio a questo contesto, in modo da cogliere le sfumature delle dinamiche di un progetto ASF piuttosto che assumere una rigida pipeline aziendale.
 
----
+## 3. Analisi preliminare
 
-## Data
+Prima della definizione degli obiettivi abbiamo ritenuto necessario uno studio preliminare del dominio del problema al fine di ottenere una visione più completa possibile di ciò che riguarda la realtà attorno ASF,  lavorando su questi due punti principali:
 
-Workload trace data is sourced from the Alibaba Cluster Trace Program:
+- **Mappatura del flusso di lavoro:** Comprendere e modellare il flusso di sviluppo di BookKeeper come risulta da Jira e GitHub. Tracceremo il percorso di una nuova richiesta di funzionalità o di una segnalazione di bug attraverso le varie fasi del processo comunitario di Apache: dalla creazione del ticket iniziale, allo sviluppo e alla revisione del codice, ai test, alle iterazioni di correzione dei bug e infine al rilascio, tenendo conto delle pratiche dell'ASF (volunteer-driven work, consensus approval, and code review norms).
+- **Tracciamento della vita delle funzionalità end-to-end:** Concentrarsi sull'intera vita di una funzionalità, dal ticket Jira "New Feature" alla sua messa in produzione (inclusa in una release che gli utenti distribuiscono). Verranno rilevati tutti gli stati intermedi e tutti i cicli (ad esempio, una funzionalità che richiede più cicli di test e correzione di bug prima di essere veramente pronta per la produzione in una release stabile).
 
-- [Alibaba Cluster GPU Trace (2020)](https://github.com/alibaba/clusterdata/tree/master/cluster-trace-gpu-v2020)
-- Trace includes: Job arrival times, durations, GPU/CPU requirements, placement, and more
+## 3. Obiettivi
 
----
+Il nostro obiettivo è studiare il ciclo di vita completo di una funzionalità o di un problema nel progetto Apache BookKeeper, dall'idea iniziale al rilascio finale. In particolare, ci proponiamo di:
 
-## Repository Structure
+- **Misurare le metriche chiave:** Analizzare quantitativamente il processo con metriche derivate dai dati di Jira e GitHub. Una metrica fondamentale sarà il tempo di risoluzione dei problemi (tempo di risposta), ovvero il tempo medio necessario affinché una funzionalità o una correzione di bug passi dall'inizio (creazione del ticket) alla risoluzione (chiusura in una release) con particolare attenzione al tempo d’attesa, che va dall’apertura del ticket alla presa in carico dello stesso da parte dello sviluppatore. Queste metriche forniranno una visione basata sui dati dell'efficienza del flusso di lavoro.
+- **Identificare i colli di bottiglia e proporre miglioramenti:** Utilizzando le metriche di cui sopra e le osservazioni qualitative, individuiamo eventuali colli di bottiglia o inefficienze nel flusso di lavoro attuale. Ad esempio, cercheremo le fasi che dominano la tempistica (magari le revisioni del codice che richiedono molto tempo o i test che rivelano molti bug) e ne individueremo il motivo. Nella fase finale, proporremo miglioramenti concreti al processo di sviluppo e idee per ridurre i tempi di risposta. Queste raccomandazioni terranno conto della natura volontaria di ASF (ad esempio, migliorare l'automazione o la comunicazione, piuttosto che aspettarsi un impegno a tempo pieno da parte degli sviluppatori).
+- **Aggiungere obiettivo QoS**
 
-```
-.
-├── README.md               # Project overview and instructions
-├── data/                   # Scripts to preprocess and analyze the Alibaba trace
-├── analysis/               # Analytical queueing model scripts/notebooks
-├── simulation/             # Discrete-event simulation code and configs
-├── results/                # Generated plots, tables, and summaries
-├── report/                 # Project report, write-up, and references
-└── utils/                  # Shared utilities (plotting, data loading, etc.)
-```
+Raggiungendo questi obiettivi, non solo tracceremo il flusso di lavoro in dettaglio, ma forniremo anche indicazioni su come la comunità di BookKeeper possa potenzialmente semplificare il proprio processo di sviluppo, preservando i punti di forza della collaborazione aperta.
 
----
+## 4. Ambito e fonti dei dati
 
-## Getting Started
+La nostra analisi si concentra sull'issue tracker Jira e sul repository GitHub di Apache BookKeeper come fonti primarie di dati. L'attenzione a questi due sistemi copre sia il lato di gestione del progetto che quello di sviluppo del codice del flusso di lavoro:
 
-1. **Clone the repository**
-   ```bash
-   git clone <repo_url>
-   cd <repo_name>
-   ```
+- **Dati Jira**: Estrarremo tutti i problemi rilevanti da Jira di BookKeeper (che tiene traccia dei ticket per nuove funzionalità, miglioramenti, bug, ecc.). I campi chiave da raccogliere includono il tipo di problema, la cronologia dello stato (timestamp delle transizioni come Aperto → In corso → Risolto/Chiuso), la data di risoluzione e qualsiasi collegamento tra i problemi (ad esempio, un bug ticket collegato a una funzionalità). Jira fornisce un registro strutturato degli stati del flusso di lavoro formale che ogni problema attraversa. Mostrerà come i problemi passano attraverso stati come “*Aperto, In corso, Revisione del codice, Risolto, Chiuso”* e se vengono riaperti. Questi cambiamenti di stato e i loro timestamp ci permettono di ricostruire la cronologia della vita di ogni problema. Utilizzeremo Jira anche per identificare i cicli di iterazione - per esempio, se un problema è stato riaperto o se è stato creato un bug "sub-task" dopo che una funzionalità era stata presumibilmente completata, indicando che la funzionalità doveva passare attraverso un altro ciclo di correzione/test.
+- **Dati GitHub**: Analizzeremo il repository GitHub di BookKeeper per la visione del codice, concentrandoci sulle pull request (PR), sui commit e sui risultati dei test di continuous integration (CI). Molti problemi di Jira hanno PR corrispondenti (gli sviluppatori spesso menzionano l'ID del problema di Jira nei messaggi di commit o nei titoli delle PR). Collegando i commit e le PR ai Jira Issues, possiamo vedere quando il codice è stato scritto e sottoposto a un merge per un determinato problema. GitHub ci dirà quando è stata aperta una PR, quanto tempo è rimasta in revisione del codice, quanti commit o revisioni ha attraversato e quando è stata finalmente  sottoposta a merge verso la codebase. Verranno anche analizzati i risultati della CI, ad esempio se i test di una PR non sono andati a buon fine, il che potrebbe essere correlato a un ulteriore sforzo di sviluppo o alla correzione di bug prima del merge. Correlando gli eventi di GitHub con i cambiamenti di stato di Jira, possiamo ottenere un quadro completo (ad esempio, un problema di Jira passa a "Risolto" nello stesso momento in cui la sua PR viene unita, e poi magari passa a "Chiuso" quando viene tagliata una release).
 
-2. **Download the Alibaba trace data**
-   - Place data files in the `data/` directory.
+L'ambito è limitato alla storia e ai dati del progetto BookKeeper (non faremo confronti con altri progetti, se non come contesto). Probabilmente esamineremo un periodo significativo della storia del progetto (per esempio, gli ultimi anni di attività di sviluppo) per avere dati sufficienti sui cicli di vita delle funzionalità. Se disponibile e necessario, potremo incorporare altre fonti, come le discussioni nelle mailing list o i documenti di progettazione per un contesto qualitativo (ad esempio, per capire perché si sono verificati determinati ritardi), ma l'analisi principale sarà basata sui dati di Jira e GitHub. Questa analisi selettiva mantiene il progetto gestibile e assicura che il nostro studio rimanga fondato su prove derivate dagli artefatti di sviluppo del progetto.
 
-3. **Environment Setup**
-   - Install Python 3.x and required libraries:
-     ```bash
-     pip install -r requirements.txt
-     ```
+## 4. Modello concettuale
 
-4. **Run Analyses and Simulations**
-   - Analytical modeling scripts: `analysis/`
-   - Simulation experiments: `simulation/`
-   - Results and plots: `results/`
+## Flusso di lavoro
 
-5. **View Report**
-   - See the `report/` directory for detailed write-up and final results.
+Prima di immergerci nei dati, delineiamo la nostra attuale comprensione del tipico flusso di sviluppo di BookKeeper, basato sul processo della comunità Apache e su ciò che ci aspettiamo di vedere in Jira/GitHub. Questo serve come modello concettuale degli stati e delle transizioni attraverso cui passa una funzionalità o un bug:
 
----
-
-## References
-
-- Wang, Y., et al., "MLaaS in the Wild: Workload Analysis and Scheduling in Large-Scale Heterogeneous GPU Clusters", [arXiv:2007.01235](https://arxiv.org/abs/2007.01235)
-- [Alibaba Cluster Trace Program](https://github.com/alibaba/clusterdata)
-
-
+- Creazione di un problema o di un ticket: Il lavoro di sviluppo inizia spesso con un nuovo ticket su Jira. Un collaboratore o un utente identifica un'esigenza, ad esempio una richiesta di funzionalità o una segnalazione di bug, e crea un problema in Jira (stato del problema= "Aperto"). Può esserci una discussione
+sul ticket Jira (o sulla mailing list) per chiarire l'idea e creare un consenso sulla necessità di affrontarla. Nei progetti Apache, chiunque può presentare problemi e i collaboratori di solito discutono pubblicamente su come affrontarli.
+- Assegnazione e inizio dello sviluppo: A differenza di un'azienda in cui è un manager ad assegnare i compiti, in BookKeeper un problema viene solitamente preso in carico da un volontario. Il problema su Jira può essere assegnato alla persona che si offre volontaria (spesso il segnalatore stesso o qualcuno che dice "lavorerò su questo"). Se nessuno è disponibile immediatamente, il problema può rimanere aperto e non assegnato per qualche tempo (una potenziale causa di ritardo). Quando qualcuno inizia a lavorare, lo stato del problema passa a "In corso". La codifica vera e propria avviene in questa fase su un ramo Git separato.
+- Implementazione del codice e richiesta di pull: Lo sviluppatore implementa la correzione o la funzionalità nel suo fork del repo e poi apre una richiesta di pull su GitHub. La descrizione della PR di solito fa riferimento al problema di Jira (ad esempio, "BOOKKEEPER-XYZ: descrizione..."). L'apertura della PR segnala che il codice è pronto per la revisione. In questo momento, i test CI automatizzati vengono eseguiti sulla PR. Il ticket Jira può essere aggiornato (o collegato alla PR) e spesso rimane "In progress" durante la codifica.
+- Revisione del codice (Peer Review e CI): BookKeeper, come la maggior parte dei progetti ASF, richiede che almeno un altro committer riveda e approvi la PR prima di poterla unire. Quindi, la PR entra in una fase di revisione del codice in cui i membri della comunità commentano. Arrivano anche i risultati del CI: se i test falliscono, il contributore dovrà correggere il codice. È comune avere più cicli di feedback: i revisori possono richiedere modifiche, portando lo sviluppatore ad aggiornare la PR con nuovi commit. Questo corrisponde a un ciclo iterativo tra sviluppo e revisione. In Jira, potrebbe esserci uno stato separato "Code Review" per indicare che il problema è in fase di revisione. La durata di questa fase può variare molto in base alla disponibilità dei revisori e alla qualità del codice iniziale. Se vengono richieste delle modifiche, il problema può rimanere "In corso" finché non vengono soddisfatte tutte le revisioni.
+- Unisci e risolvi: Una volta che il codice è stato approvato e tutti i test sono stati superati, il PR viene unito al ramo principale. A questo punto, la funzionalità è presente nella base di codice. Il problema su Jira viene contrassegnato come "Risolto" o "Corretto", con un riferimento al commit che lo ha chiuso. Tuttavia, risolto non significa completamente finito: nel flusso di lavoro di Apache, di solito significa "la modifica del codice è completa e unita", ma la convalida finale avverrà al momento del rilascio del progetto. Dopo la fusione, il problema può passare allo stato "Risolto/Fisso", ma non ancora "Chiuso".
+- Test e verifica del rilascio: Dopo la fusione, la modifica sarà disponibile nelle build snapshot o nella prossima release candidate. La comunità (o un processo di QA, se presente) testa la nuova funzionalità in un contesto più ampio. Nel caso dell'open source, questo può avvenire attraverso la prova di build notturne da parte degli utenti o attraverso l'esecuzione di ulteriori test da parte degli stessi collaboratori. Se la funzionalità è di grandi dimensioni, BookKeeper potrebbe includerla in una release candidate e lasciare il tempo di far emergere eventuali problemi. Solo una volta confermato che la funzionalità funziona in pratica (e che non sono stati riscontrati nuovi problemi durante i test) sarà considerata completamente completata.
+In Jira, i progetti spesso contrassegnano il problema come "Chiuso" quando la correzione è stata rilasciata e verificata.
+- Rilevamento di bug e iterazione: È importante che se i test o l'utilizzo reale rivelano un problema con la nuova funzionalità, si innesca un nuovo ciclo. A volte il problema originale su Jira viene riaperto (lo stato torna a "Riaperto" o "In corso"), oppure viene creato un nuovo bug ticket su Jira per risolvere il problema successivo. In entrambi i casi, il processo di sviluppo si ripete: una correzione viene codificata (nuova PR), revisionata e unita. L'aspetto fondamentale è che il flusso di lavoro non è strettamente lineare: una funzionalità può passare attraverso più cicli di correzione/test.
