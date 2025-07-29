@@ -16,7 +16,7 @@
 
 ---
 
-### **Meeting 2 [13/7/2025] – Conceptual Model & Data Mapping**
+### **Meeting 2 [29/7/2025] – Conceptual Model & Data Mapping**
 
 * **2.1** (All): Finalizzazione del modello concettuale e dei flussi principali (issue, review, test, feedback loop).
 * **2.2** (Split):
@@ -28,7 +28,7 @@
 
 ---
 
-### **Meeting 3 [15/7/2025] – Analisi Dati & Costruzione Modello Analitico**
+### **Meeting 3 [3/8/2025] – Analisi Dati & Costruzione Modello Analitico**
 
 * **3.1** (All): Costruzione condivisa del modello a code analitico (rete Jackson con feedback) e delle ipotesi formali.
 * **3.2** (Split):
@@ -40,7 +40,7 @@
 
 ---
 
-### **Meeting 4 [29/7/2025] – Architettura Simulazione & Avvio Coding**
+### **Meeting 4 [19/8/2025] – Architettura Simulazione & Avvio Coding**
 
 * **4.1** (All): Definizione architettura della simulazione, flusso eventi/stati, strumenti (pseudo-codice o whiteboard).
 * **4.2** (Split):
@@ -52,7 +52,7 @@
 
 ---
 
-### **Meeting 5 [3/8/2025] – Verifica, Debug e Prime Simulazioni**
+### **Meeting 5 [31/8/2025] – Verifica, Debug e Prime Simulazioni**
 
 * **5.1** (All): Test integrato, esecuzione prima simulazione end-to-end, verifica funzionamento globale.
 * **5.2** (Split):
@@ -64,7 +64,7 @@
 
 ---
 
-### **Meeting 6 [19/8/2025] – Esperimenti & Analisi Risultati**
+### **Meeting 6 [2/9/2025] – Esperimenti & Analisi Risultati**
 
 * **6.1** (All): Definizione scenari sperimentali, variabili da esplorare e output da raccogliere.
 * **6.2** (Split):
@@ -76,7 +76,7 @@
 
 ---
 
-### **Meeting 7 [26/8/2025] – Miglioramento & Modello Ottimizzato**
+### **Meeting 7 [7/9/2025] – Miglioramento & Modello Ottimizzato**
 
 * **7.1** (All): Brainstorming e scelta di possibili miglioramenti (automatizzazione test, nuovi pattern review, ecc.).
 * **7.2** (All):
