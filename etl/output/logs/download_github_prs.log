@@ -1,0 +1,165 @@
+2025-07-29 18:00:17,985 - INFO - Scarico PR pagina 1
+2025-07-29 18:00:20,138 - INFO - Scarico PR pagina 2
+2025-07-29 18:00:22,416 - INFO - Scarico PR pagina 3
+2025-07-29 18:00:24,680 - INFO - Scarico PR pagina 4
+2025-07-29 18:00:26,830 - INFO - Scarico PR pagina 5
+2025-07-29 18:00:29,514 - INFO - Scarico PR pagina 6
+2025-07-29 18:00:32,208 - INFO - Scarico PR pagina 7
+2025-07-29 18:00:34,991 - INFO - Scarico PR pagina 8
+2025-07-29 18:00:37,451 - INFO - Scarico PR pagina 9
+2025-07-29 18:00:40,080 - INFO - Scarico PR pagina 10
+2025-07-29 18:00:42,740 - INFO - Scarico PR pagina 11
+2025-07-29 18:00:45,253 - INFO - Scarico PR pagina 12
+2025-07-29 18:00:48,252 - INFO - Scarico PR pagina 13
+2025-07-29 18:00:52,611 - INFO - Scarico PR pagina 14
+2025-07-29 18:00:55,127 - INFO - Scarico PR pagina 15
+2025-07-29 18:00:57,541 - INFO - Scarico PR pagina 16
+2025-07-29 18:01:00,044 - INFO - Scarico PR pagina 17
+2025-07-29 18:01:02,803 - INFO - Scarico PR pagina 18
+2025-07-29 18:01:05,324 - INFO - Scarico PR pagina 19
+2025-07-29 18:01:08,088 - INFO - Scarico PR pagina 20
+2025-07-29 18:01:10,808 - INFO - Scarico PR pagina 21
+2025-07-29 18:01:13,216 - INFO - Scarico PR pagina 22
+2025-07-29 18:01:15,956 - INFO - Scarico PR pagina 23
+2025-07-29 18:01:18,298 - INFO - Scarico PR pagina 24
+2025-07-29 18:01:20,786 - INFO - Scarico PR pagina 25
+2025-07-29 18:01:23,273 - INFO - Scarico PR pagina 26
+2025-07-29 18:01:25,716 - INFO - Scarico PR pagina 27
+2025-07-29 18:01:28,132 - INFO - Scarico PR pagina 28
+2025-07-29 18:01:30,509 - INFO - Scarico PR pagina 29
+2025-07-29 18:01:32,772 - INFO - Scarico PR pagina 30
+2025-07-29 18:01:34,921 - INFO - Scarico PR pagina 31
+2025-07-29 18:01:37,304 - INFO - Scarico PR pagina 32
+2025-07-29 18:01:39,308 - INFO - Scarico PR pagina 33
+2025-07-29 18:01:41,170 - INFO - Scarico PR pagina 34
+2025-07-29 18:01:42,630 - INFO - Scarico PR pagina 35
+2025-07-29 18:02:26,653 - INFO - Scarico PR pagina 1
+2025-07-29 18:02:28,953 - INFO - Scarico PR pagina 2
+2025-07-29 18:02:31,026 - INFO - Scarico PR pagina 3
+2025-07-29 18:02:33,494 - INFO - Scarico PR pagina 4
+2025-07-29 18:02:35,669 - INFO - Scarico PR pagina 5
+2025-07-29 18:02:38,446 - INFO - Scarico PR pagina 6
+2025-07-29 18:02:40,731 - INFO - Scarico PR pagina 7
+2025-07-29 18:02:42,983 - INFO - Scarico PR pagina 8
+2025-07-29 18:02:45,374 - INFO - Scarico PR pagina 9
+2025-07-29 18:02:47,798 - INFO - Scarico PR pagina 10
+2025-07-29 18:02:50,287 - INFO - Scarico PR pagina 11
+2025-07-29 18:02:52,682 - INFO - Scarico PR pagina 12
+2025-07-29 18:02:54,689 - INFO - Scarico PR pagina 13
+2025-07-29 18:02:56,577 - INFO - Scarico PR pagina 14
+2025-07-29 18:02:58,847 - INFO - Scarico PR pagina 15
+2025-07-29 18:03:01,273 - INFO - Scarico PR pagina 16
+2025-07-29 18:03:03,735 - INFO - Scarico PR pagina 17
+2025-07-29 18:03:06,216 - INFO - Scarico PR pagina 18
+2025-07-29 18:03:09,599 - INFO - Scarico PR pagina 19
+2025-07-29 18:03:11,913 - INFO - Scarico PR pagina 20
+2025-07-29 18:03:14,369 - INFO - Scarico PR pagina 21
+2025-07-29 18:03:16,604 - INFO - Scarico PR pagina 22
+2025-07-29 18:03:18,829 - INFO - Scarico PR pagina 23
+2025-07-29 18:03:21,053 - INFO - Scarico PR pagina 24
+2025-07-29 18:03:23,304 - INFO - Scarico PR pagina 25
+2025-07-29 18:03:25,897 - INFO - Scarico PR pagina 26
+2025-07-29 18:03:26,771 - INFO - Salvate 2500 PR in ./output/csv/github_prs_raw.csv
+2025-07-29 18:06:35,335 - INFO - Scarico PR pagina 1
+2025-07-29 18:06:35,535 - INFO - Salvate 0 PR in ./output/csv/github_prs_raw.csv
+2025-07-29 18:10:22,736 - INFO - Scarico /issues pagina 1
+2025-07-29 18:10:22,931 - ERROR - Errore 403: {"message":"API rate limit exceeded for 160.80.255.20. (But here's the good news: Authenticated requests get a higher rate limit. Check out the documentation for more details.)","documentation_url":"https://docs.github.com/rest/overview/resources-in-the-rest-api#rate-limiting"}
+
+2025-07-29 18:10:22,931 - WARNING - Nessuna PR scaricata!
+2025-07-29 18:15:41,958 - INFO - Uso autenticazione GitHub per aumentare il rate limit.
+2025-07-29 18:15:41,958 - INFO - Scarico /issues pagina 1
+2025-07-29 18:15:43,290 - INFO - Pagina 1: aggiunte 100 PR, totale finora 100
+2025-07-29 18:15:43,590 - INFO - Scarico /issues pagina 2
+2025-07-29 18:15:44,645 - INFO - Pagina 2: aggiunte 94 PR, totale finora 194
+2025-07-29 18:15:44,946 - INFO - Scarico /issues pagina 3
+2025-07-29 18:15:46,244 - INFO - Pagina 3: aggiunte 44 PR, totale finora 238
+2025-07-29 18:15:46,544 - INFO - Scarico /issues pagina 4
+2025-07-29 18:15:47,802 - INFO - Pagina 4: aggiunte 41 PR, totale finora 279
+2025-07-29 18:15:48,102 - INFO - Scarico /issues pagina 5
+2025-07-29 18:15:49,587 - INFO - Pagina 5: aggiunte 48 PR, totale finora 327
+2025-07-29 18:15:49,887 - INFO - Scarico /issues pagina 6
+2025-07-29 18:15:51,143 - INFO - Pagina 6: aggiunte 25 PR, totale finora 352
+2025-07-29 18:15:51,443 - INFO - Scarico /issues pagina 7
+2025-07-29 18:15:52,474 - INFO - Pagina 7: aggiunte 41 PR, totale finora 393
+2025-07-29 18:15:52,774 - INFO - Scarico /issues pagina 8
+2025-07-29 18:15:54,074 - INFO - Pagina 8: aggiunte 59 PR, totale finora 452
+2025-07-29 18:15:54,375 - INFO - Scarico /issues pagina 9
+2025-07-29 18:15:55,569 - INFO - Pagina 9: aggiunte 74 PR, totale finora 526
+2025-07-29 18:15:55,870 - INFO - Scarico /issues pagina 10
+2025-07-29 18:15:57,250 - INFO - Pagina 10: aggiunte 65 PR, totale finora 591
+2025-07-29 18:15:57,551 - INFO - Scarico /issues pagina 11
+2025-07-29 18:15:58,737 - INFO - Pagina 11: aggiunte 75 PR, totale finora 666
+2025-07-29 18:15:59,038 - INFO - Scarico /issues pagina 12
+2025-07-29 18:16:00,298 - INFO - Pagina 12: aggiunte 76 PR, totale finora 742
+2025-07-29 18:16:00,599 - INFO - Scarico /issues pagina 13
+2025-07-29 18:16:02,461 - INFO - Pagina 13: aggiunte 84 PR, totale finora 826
+2025-07-29 18:16:02,761 - INFO - Scarico /issues pagina 14
+2025-07-29 18:16:03,937 - INFO - Pagina 14: aggiunte 68 PR, totale finora 894
+2025-07-29 18:16:04,237 - INFO - Scarico /issues pagina 15
+2025-07-29 18:16:05,630 - INFO - Pagina 15: aggiunte 76 PR, totale finora 970
+2025-07-29 18:16:05,931 - INFO - Scarico /issues pagina 16
+2025-07-29 18:16:07,293 - INFO - Pagina 16: aggiunte 73 PR, totale finora 1043
+2025-07-29 18:16:07,593 - INFO - Scarico /issues pagina 17
+2025-07-29 18:16:08,950 - INFO - Pagina 17: aggiunte 74 PR, totale finora 1117
+2025-07-29 18:16:09,251 - INFO - Scarico /issues pagina 18
+2025-07-29 18:16:10,628 - INFO - Pagina 18: aggiunte 78 PR, totale finora 1195
+2025-07-29 18:16:10,928 - INFO - Scarico /issues pagina 19
+2025-07-29 18:16:12,242 - INFO - Pagina 19: aggiunte 84 PR, totale finora 1279
+2025-07-29 18:16:12,543 - INFO - Scarico /issues pagina 20
+2025-07-29 18:16:14,262 - INFO - Pagina 20: aggiunte 64 PR, totale finora 1343
+2025-07-29 18:16:14,562 - INFO - Scarico /issues pagina 21
+2025-07-29 18:16:15,804 - INFO - Pagina 21: aggiunte 56 PR, totale finora 1399
+2025-07-29 18:16:16,104 - INFO - Scarico /issues pagina 22
+2025-07-29 18:16:17,442 - INFO - Pagina 22: aggiunte 70 PR, totale finora 1469
+2025-07-29 18:16:17,742 - INFO - Scarico /issues pagina 23
+2025-07-29 18:16:19,041 - INFO - Pagina 23: aggiunte 59 PR, totale finora 1528
+2025-07-29 18:16:19,341 - INFO - Scarico /issues pagina 24
+2025-07-29 18:16:20,586 - INFO - Pagina 24: aggiunte 68 PR, totale finora 1596
+2025-07-29 18:16:20,886 - INFO - Scarico /issues pagina 25
+2025-07-29 18:16:22,348 - INFO - Pagina 25: aggiunte 66 PR, totale finora 1662
+2025-07-29 18:16:22,648 - INFO - Scarico /issues pagina 26
+2025-07-29 18:16:23,899 - INFO - Pagina 26: aggiunte 56 PR, totale finora 1718
+2025-07-29 18:16:24,199 - INFO - Scarico /issues pagina 27
+2025-07-29 18:16:25,615 - INFO - Pagina 27: aggiunte 73 PR, totale finora 1791
+2025-07-29 18:16:25,915 - INFO - Scarico /issues pagina 28
+2025-07-29 18:16:27,166 - INFO - Pagina 28: aggiunte 66 PR, totale finora 1857
+2025-07-29 18:16:27,466 - INFO - Scarico /issues pagina 29
+2025-07-29 18:16:28,753 - INFO - Pagina 29: aggiunte 79 PR, totale finora 1936
+2025-07-29 18:16:29,053 - INFO - Scarico /issues pagina 30
+2025-07-29 18:16:30,446 - INFO - Pagina 30: aggiunte 78 PR, totale finora 2014
+2025-07-29 18:16:30,747 - INFO - Scarico /issues pagina 31
+2025-07-29 18:16:32,290 - INFO - Pagina 31: aggiunte 71 PR, totale finora 2085
+2025-07-29 18:16:32,590 - INFO - Scarico /issues pagina 32
+2025-07-29 18:16:33,863 - INFO - Pagina 32: aggiunte 82 PR, totale finora 2167
+2025-07-29 18:16:34,164 - INFO - Scarico /issues pagina 33
+2025-07-29 18:16:35,327 - INFO - Pagina 33: aggiunte 64 PR, totale finora 2231
+2025-07-29 18:16:35,627 - INFO - Scarico /issues pagina 34
+2025-07-29 18:16:36,946 - INFO - Pagina 34: aggiunte 81 PR, totale finora 2312
+2025-07-29 18:16:37,247 - INFO - Scarico /issues pagina 35
+2025-07-29 18:16:38,715 - INFO - Pagina 35: aggiunte 77 PR, totale finora 2389
+2025-07-29 18:16:39,016 - INFO - Scarico /issues pagina 36
+2025-07-29 18:16:40,341 - INFO - Pagina 36: aggiunte 79 PR, totale finora 2468
+2025-07-29 18:16:40,641 - INFO - Scarico /issues pagina 37
+2025-07-29 18:16:41,800 - INFO - Pagina 37: aggiunte 82 PR, totale finora 2550
+2025-07-29 18:16:42,100 - INFO - Scarico /issues pagina 38
+2025-07-29 18:16:43,372 - INFO - Pagina 38: aggiunte 80 PR, totale finora 2630
+2025-07-29 18:16:43,673 - INFO - Scarico /issues pagina 39
+2025-07-29 18:16:44,803 - INFO - Pagina 39: aggiunte 86 PR, totale finora 2716
+2025-07-29 18:16:45,103 - INFO - Scarico /issues pagina 40
+2025-07-29 18:16:46,417 - INFO - Pagina 40: aggiunte 88 PR, totale finora 2804
+2025-07-29 18:16:46,717 - INFO - Scarico /issues pagina 41
+2025-07-29 18:16:48,121 - INFO - Pagina 41: aggiunte 78 PR, totale finora 2882
+2025-07-29 18:16:48,421 - INFO - Scarico /issues pagina 42
+2025-07-29 18:16:49,759 - INFO - Pagina 42: aggiunte 75 PR, totale finora 2957
+2025-07-29 18:16:50,059 - INFO - Scarico /issues pagina 43
+2025-07-29 18:16:51,227 - INFO - Pagina 43: aggiunte 89 PR, totale finora 3046
+2025-07-29 18:16:51,527 - INFO - Scarico /issues pagina 44
+2025-07-29 18:16:52,698 - INFO - Pagina 44: aggiunte 88 PR, totale finora 3134
+2025-07-29 18:16:52,998 - INFO - Scarico /issues pagina 45
+2025-07-29 18:16:54,248 - INFO - Pagina 45: aggiunte 81 PR, totale finora 3215
+2025-07-29 18:16:54,548 - INFO - Scarico /issues pagina 46
+2025-07-29 18:16:55,923 - INFO - Pagina 46: aggiunte 79 PR, totale finora 3294
+2025-07-29 18:16:56,223 - INFO - Scarico /issues pagina 47
+2025-07-29 18:16:56,980 - INFO - Pagina 47: aggiunte 35 PR, totale finora 3329
+2025-07-29 18:16:56,980 - INFO - Ultima pagina raggiunta.
+2025-07-29 18:16:57,341 - INFO - Salvate 3329 PR in ./output/csv/github_prs_raw.csv

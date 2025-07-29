@@ -1,0 +1,3 @@
+2025-07-29 18:22:08,045 - INFO - Salvati 943 ticket puliti in ./output/csv/jira_issues_clean.csv
+2025-07-29 18:22:08,364 - INFO - Salvate 3329 PR pulite in ./output/csv/github_prs_clean.csv
+2025-07-29 18:22:08,408 - INFO - Salvati dati mergeati (ticket+PR) in ./output/csv/tickets_prs_merged.csv

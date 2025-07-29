@@ -1,0 +1,18 @@
+2025-07-29 17:46:35,001 - INFO - Inizio download di tutti i ticket Jira di BOOKKEEPER...
+2025-07-29 17:46:35,001 - INFO - Richiesta Jira issues 0–999
+2025-07-29 17:46:35,615 - INFO - Batch 1: scaricate 1000 issue, totale finora 1000
+2025-07-29 17:46:35,815 - INFO - Richiesta Jira issues 1000–1999
+2025-07-29 17:46:36,059 - INFO - Batch 2: scaricate 95 issue, totale finora 1095
+2025-07-29 17:46:36,059 - INFO - Batch incompleto, raggiunta la fine delle issue disponibili.
+2025-07-29 17:46:36,101 - INFO - Salvati 1095 ticket Jira in jira_issues_raw.csv
+2025-07-29 17:50:08,961 - INFO - Inizio download di tutti i ticket Jira di BOOKKEEPER...
+2025-07-29 17:50:08,961 - INFO - Richiesta Jira issues 0–999
+2025-07-29 17:51:05,007 - ERROR - Errore durante la richiesta a Jira: HTTPSConnectionPool(host='issues.apache.org', port=443): Max retries exceeded with url: /jira/rest/api/2/search?jql=project+%3D+BOOKKEEPER+ORDER+BY+created+DESC&fields=key%2Csummary%2Cissuetype%2Cstatus%2Cresolution%2Cresolutiondate%2Ccreated%2Cupdated%2Cassignee%2Cdescription&maxResults=1000&startAt=0 (Caused by NameResolutionError("<urllib3.connection.HTTPSConnection object at 0x7f8937311d10>: Failed to resolve 'issues.apache.org' ([Errno -3] Temporary failure in name resolution)"))
+2025-07-29 17:51:05,008 - WARNING - Nessun ticket Jira trovato o errore durante il download.
+2025-07-29 17:54:27,819 - INFO - Inizio download di tutti i ticket Jira di BOOKKEEPER...
+2025-07-29 17:54:27,819 - INFO - Richiesta Jira issues 0–999
+2025-07-29 17:54:28,542 - INFO - Batch 1: scaricate 1000 issue, totale finora 1000
+2025-07-29 17:54:28,742 - INFO - Richiesta Jira issues 1000–1999
+2025-07-29 17:54:29,053 - INFO - Batch 2: scaricate 95 issue, totale finora 1095
+2025-07-29 17:54:29,053 - INFO - Batch incompleto, raggiunta la fine delle issue disponibili.
+2025-07-29 17:54:29,096 - INFO - Salvati 1095 ticket Jira in ./output/csv/jira_issues_raw.csv

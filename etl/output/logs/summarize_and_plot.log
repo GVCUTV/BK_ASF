@@ -1,0 +1,13 @@
+2025-07-29 18:24:52,749 - INFO - Ticket totali: 960
+2025-07-29 18:24:52,750 - INFO - Ticket riaperti: 3 (0.3%)
+2025-07-29 18:24:52,750 - INFO - In Progress: 3 (0.3%)
+2025-07-29 18:24:52,751 - INFO - Ticket chiusi senza PR: 699 (72.8%)
+2025-07-29 18:27:45,475 - INFO - Ticket totali: 960
+2025-07-29 18:27:45,477 - INFO - Ticket riaperti: 3 (0.3%)
+2025-07-29 18:27:45,477 - INFO - In Progress: 3 (0.3%)
+2025-07-29 18:27:45,478 - INFO - Ticket chiusi senza PR: 699 (72.8%)
+2025-07-29 18:28:31,477 - INFO - Ticket totali: 960
+2025-07-29 18:28:31,479 - INFO - Ticket riaperti: 3 (0.3%)
+2025-07-29 18:28:31,479 - INFO - In Progress: 3 (0.3%)
+2025-07-29 18:28:31,480 - INFO - Ticket chiusi senza PR: 699 (72.8%)
+2025-07-29 18:28:31,568 - INFO - Statistiche esportate in ./output/csv/statistiche_riassuntive.csv
