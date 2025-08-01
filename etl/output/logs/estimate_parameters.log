@@ -15,3 +15,40 @@
 2025-08-01 11:50:23,269 - WARNING - Cannot estimate utilization (missing data).
 2025-08-01 11:50:23,271 - INFO - Parameter estimates and key metrics saved to CSV.
 2025-08-01 11:50:23,271 - INFO - === Parameter estimation and metrics computation complete ===
+2025-08-01 12:10:40,253 - INFO - Caricato dataset: ./output/csv/tickets_prs_merged.csv (960 righe)
+2025-08-01 12:10:40,256 - INFO - Colonna 'created' convertita a datetime.
+2025-08-01 12:10:40,259 - INFO - Tasso di arrivo stimato (ticket/ora): 0.01280
+2025-08-01 12:10:40,259 - WARNING - Mancano colonne 'dev_review_start' o 'dev_review_end' per 'dev_review'.
+2025-08-01 12:10:40,259 - WARNING - Mancano colonne 'test_start' o 'test_end' per 'test'.
+2025-08-01 12:10:40,259 - WARNING - Colonna 'review_feedback_count' mancante per feedback review.
+2025-08-01 12:10:40,259 - WARNING - Colonna 'test_feedback_count' mancante per feedback test.
+2025-08-01 12:10:40,259 - WARNING - Colonna 'reopened_count' mancante per feedback reopen.
+2025-08-01 12:10:40,259 - WARNING - Impossibile calcolare la resolution time: colonne mancanti.
+2025-08-01 12:10:40,259 - WARNING - Impossibile plottare backlog: colonne data mancanti.
+2025-08-01 12:10:40,259 - WARNING - Impossibile calcolare iterazioni feedback: colonne mancanti.
+2025-08-01 12:10:40,259 - WARNING - Impossibile calcolare throughput: colonna 'closed' mancante.
+2025-08-01 12:10:40,259 - WARNING - Impossibile stimare utilization: dati mancanti.
+2025-08-01 12:10:40,261 - INFO - Parametri e metriche salvati in ./output/csv/parameter_estimates.csv
+2025-08-01 12:10:40,261 - INFO - === STIMA PARAMETRI COMPLETATA ===
+2025-08-01 12:19:44,390 - INFO - Caricato dataset: ./output/csv/tickets_prs_merged.csv (960 righe)
+2025-08-01 12:19:44,392 - INFO - Colonna 'fields.created' convertita a datetime.
+2025-08-01 12:19:44,393 - INFO - Colonna 'fields.resolutiondate' convertita a datetime.
+2025-08-01 12:19:44,396 - INFO - Tasso di arrivo stimato (ticket/ora): 0.01280
+2025-08-01 12:19:44,400 - INFO - Resolution time media: 5177.49 h, mediana: 507.64 h
+2025-08-01 12:19:45,048 - INFO - Grafico backlog nel tempo salvato.
+2025-08-01 12:19:45,051 - INFO - Throughput medio mensile: 11.83 ticket/mese
+2025-08-01 12:19:45,051 - INFO - Reopen rate stimato: 0.003
+2025-08-01 12:19:45,052 - INFO - Suddivisione ticket per tipo:
+fields.issuetype.name
+Bug              494
+Improvement      217
+Sub-task         142
+New Feature       54
+Task              27
+Test              12
+Wish               7
+Documentation      5
+Story              2
+Name: count, dtype: int64
+2025-08-01 12:19:45,054 - INFO - Parametri chiave salvati in ./output/csv/parameter_estimates.csv
+2025-08-01 12:19:45,054 - INFO - === ESTRAZIONE PARAMETRI COMPLETATA ===

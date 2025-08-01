@@ -1,0 +1,49 @@
+2025-08-01 12:26:57,029 - INFO - Caricato dataset: ./output/csv/tickets_prs_merged.csv (960 righe)
+2025-08-01 12:26:57,031 - INFO - Colonna 'fields.created' convertita a datetime.
+2025-08-01 12:26:57,032 - INFO - Colonna 'fields.resolutiondate' convertita a datetime.
+2025-08-01 12:26:57,033 - INFO - Inizio stampa diagnostica ticket:
+2025-08-01 12:26:57,045 - WARNING - Ticket key=BOOKKEEPER-976: INCONGRUENZA: ticket chiuso senza data risoluzione
+2025-08-01 12:26:57,264 - INFO - Grafico distribuzione tempi di risoluzione salvato in ./output/png/distribuzione_resolution_times.png
+2025-08-01 12:26:57,264 - INFO - Analisi diagnostica completata.
+2025-08-01 12:29:50,441 - INFO - Caricato dataset: ./output/csv/tickets_prs_merged.csv (960 righe)
+2025-08-01 12:29:50,443 - INFO - Colonna 'fields.created' convertita a datetime.
+2025-08-01 12:29:50,444 - INFO - Colonna 'fields.resolutiondate' convertita a datetime.
+2025-08-01 12:29:50,445 - INFO - Inizio stampa diagnostica ticket:
+2025-08-01 12:29:50,457 - WARNING - Ticket key=BOOKKEEPER-976: INCONGRUENZA: ticket chiuso senza data risoluzione
+2025-08-01 12:29:50,820 - INFO - Grafico distribuzione tempi di risoluzione (0-10.000h) salvato in ./output/png/distribuzione_resolution_times_0_10000.png
+2025-08-01 12:29:50,821 - INFO - Analisi diagnostica completata.
+2025-08-01 12:32:58,656 - INFO - Caricato dataset: ./output/csv/tickets_prs_merged.csv (960 righe)
+2025-08-01 12:32:58,659 - INFO - Colonna 'fields.created' convertita a datetime.
+2025-08-01 12:32:58,660 - INFO - Colonna 'fields.resolutiondate' convertita a datetime.
+2025-08-01 12:32:58,661 - INFO - Inizio stampa diagnostica ticket:
+2025-08-01 12:32:58,673 - WARNING - Ticket key=BOOKKEEPER-976: INCONGRUENZA: ticket chiuso senza data risoluzione
+2025-08-01 12:32:59,041 - INFO - Grafico distribuzione tempi di risoluzione (0-10.000h) salvato in ./output/png/distribuzione_resolution_times_0_10000.png
+2025-08-01 12:32:59,041 - INFO - Analisi diagnostica completata.
+2025-08-01 12:33:36,632 - INFO - Caricato dataset: ./output/csv/tickets_prs_merged.csv (960 righe)
+2025-08-01 12:33:36,634 - INFO - Colonna 'fields.created' convertita a datetime.
+2025-08-01 12:33:36,635 - INFO - Colonna 'fields.resolutiondate' convertita a datetime.
+2025-08-01 12:33:36,636 - INFO - Inizio stampa diagnostica ticket:
+2025-08-01 12:33:36,648 - WARNING - Ticket key=BOOKKEEPER-976: INCONGRUENZA: ticket chiuso senza data risoluzione
+2025-08-01 12:33:37,015 - INFO - Grafico distribuzione tempi di risoluzione (0-10.000h) salvato in ./output/png/distribuzione_resolution_times_0_10000.png
+2025-08-01 12:33:37,015 - INFO - Analisi diagnostica completata.
+2025-08-01 12:33:49,935 - INFO - Caricato dataset: ./output/csv/tickets_prs_merged.csv (960 righe)
+2025-08-01 12:33:49,937 - INFO - Colonna 'fields.created' convertita a datetime.
+2025-08-01 12:33:49,938 - INFO - Colonna 'fields.resolutiondate' convertita a datetime.
+2025-08-01 12:33:49,939 - INFO - Inizio stampa diagnostica ticket:
+2025-08-01 12:33:49,950 - WARNING - Ticket key=BOOKKEEPER-976: INCONGRUENZA: ticket chiuso senza data risoluzione
+2025-08-01 12:33:50,319 - INFO - Grafico distribuzione tempi di risoluzione (0-10.000h) salvato in ./output/png/distribuzione_resolution_times_0_10000.png
+2025-08-01 12:33:50,319 - INFO - Analisi diagnostica completata.
+2025-08-01 12:35:01,582 - INFO - Caricato dataset: ./output/csv/tickets_prs_merged.csv (960 righe)
+2025-08-01 12:35:01,584 - INFO - Colonna 'fields.created' convertita a datetime.
+2025-08-01 12:35:01,586 - INFO - Colonna 'fields.resolutiondate' convertita a datetime.
+2025-08-01 12:35:01,586 - INFO - Inizio stampa diagnostica ticket:
+2025-08-01 12:35:01,599 - WARNING - Ticket key=BOOKKEEPER-976: INCONGRUENZA: ticket chiuso senza data risoluzione
+2025-08-01 12:35:02,285 - INFO - Grafico distribuzione tempi di risoluzione (0-10.000h) salvato in ./output/png/distribuzione_resolution_times_0_10000.png
+2025-08-01 12:35:02,285 - INFO - Analisi diagnostica completata.
+2025-08-01 12:35:18,936 - INFO - Caricato dataset: ./output/csv/tickets_prs_merged.csv (960 righe)
+2025-08-01 12:35:18,938 - INFO - Colonna 'fields.created' convertita a datetime.
+2025-08-01 12:35:18,940 - INFO - Colonna 'fields.resolutiondate' convertita a datetime.
+2025-08-01 12:35:18,940 - INFO - Inizio stampa diagnostica ticket:
+2025-08-01 12:35:18,952 - WARNING - Ticket key=BOOKKEEPER-976: INCONGRUENZA: ticket chiuso senza data risoluzione
+2025-08-01 12:35:19,369 - INFO - Grafico distribuzione tempi di risoluzione (0-10.000h) salvato in ./output/png/distribuzione_resolution_times_0_10000.png
+2025-08-01 12:35:19,369 - INFO - Analisi diagnostica completata.

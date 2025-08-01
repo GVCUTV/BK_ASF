@@ -1,2 +1,2 @@
-arrival_rate_per_hour,mean_resolution_time_hours,median_resolution_time_hours,feedback_review_prob,feedback_test_prob,reopen_rate,mean_feedback_iterations,median_feedback_iterations,throughput_monthly_mean,utilization_estimate
-0.01280204210889934,,,,,,,,,
+arrival_rate_per_hour,mean_resolution_time_hours,median_resolution_time_hours,reopen_rate,throughput_monthly_mean
+0.01280204210889934,5177.49210603783,507.6361111111111,0.003125,11.826666666666666
