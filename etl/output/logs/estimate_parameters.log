@@ -1,0 +1,17 @@
+2025-08-01 11:46:14,424 - ERROR - Failed to load input CSV: [Errno 2] No such file or directory: '/mnt/data/tickets_prs_merged.csv'
+2025-08-01 11:50:23,178 - INFO - === PMCSN BookKeeper Parameter Estimation Started ===
+2025-08-01 11:50:23,257 - INFO - Loaded dataset: ./output/csv/tickets_prs_merged.csv (960 rows)
+2025-08-01 11:50:23,264 - INFO - Parsed dates in column 'created'.
+2025-08-01 11:50:23,268 - INFO - Estimated arrival rate (tickets/hour): 0.01280
+2025-08-01 11:50:23,268 - WARNING - Cannot compute dev_review duration: missing columns 'dev_review_start' or 'dev_review_end'.
+2025-08-01 11:50:23,269 - WARNING - Cannot compute test duration: missing columns 'test_start' or 'test_end'.
+2025-08-01 11:50:23,269 - WARNING - Missing column 'review_feedback_count' for feedback calculation.
+2025-08-01 11:50:23,269 - WARNING - Missing column 'test_feedback_count' for feedback calculation.
+2025-08-01 11:50:23,269 - WARNING - Missing column 'reopened_count' for feedback calculation.
+2025-08-01 11:50:23,269 - WARNING - Cannot compute resolution time (missing columns).
+2025-08-01 11:50:23,269 - WARNING - Cannot plot backlog (missing date columns).
+2025-08-01 11:50:23,269 - WARNING - Cannot compute feedback iterations (missing columns).
+2025-08-01 11:50:23,269 - WARNING - Cannot compute throughput (missing 'closed').
+2025-08-01 11:50:23,269 - WARNING - Cannot estimate utilization (missing data).
+2025-08-01 11:50:23,271 - INFO - Parameter estimates and key metrics saved to CSV.
+2025-08-01 11:50:23,271 - INFO - === Parameter estimation and metrics computation complete ===
