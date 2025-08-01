@@ -1,5 +1,5 @@
 # v3
-# file: download_github_prs.py
+# file: 2_download_github_prs.py
 
 """
 Scarica tutte le Pull Request di Apache BookKeeper e le salva in CSV.

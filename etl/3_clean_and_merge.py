@@ -1,5 +1,5 @@
 # v1
-# file: clean_and_merge.py
+# file: 3_clean_and_merge.py
 
 """
 Pulizia dei ticket, rimozione duplicati/wont-fix, uniforma le date e cerca link ticket-PR tramite key nel titolo.

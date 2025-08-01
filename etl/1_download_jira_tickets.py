@@ -1,5 +1,5 @@
 # v2
-# file: download_jira_tickets.py
+# file: 1_download_jira_tickets.py
 
 """
 Scarica tutti i ticket Jira di Apache BookKeeper, usando la paginazione dell'API.
