@@ -1,11 +1,12 @@
-# v1
-# file: 6_fit_distributions.py
+# v2
+# file: 7_fit_distributions.py
 
 """
-Script diagnostico per confrontare diverse distribuzioni sui tempi di risoluzione dei ticket.
-- Carica i dati prodotti dallo script 5
-- Fit lognormale, Weibull, Gamma, Esponenziale, Normale
-- Logga, salva statistiche, e plottizza tutto per confronto visivo e quantitativo
+Fit e confronto visivo/quantitativo di distribuzioni candidate sui tempi di risoluzione.
+- Histogram ben visibile
+- Fit di: lognormale, Weibull, Gamma, Esponenziale, Normale (PDF)
+- MAE fra istogramma osservato e PDF di ogni distribuzione
+- Tutte le statistiche (KS, AIC, BIC, MAE) salvate e mostrate
 """
 
 import pandas as pd
@@ -14,6 +15,15 @@ import matplotlib.pyplot as plt
 import scipy.stats as stats
 import logging
 import os
+
+def mean_absolute_error_hist_pdf(data, pdf_func, bins):
+    """Compute MAE between normalized histogram and PDF curve, for fair comparison."""
+    hist_vals, bin_edges = np.histogram(data, bins=bins, density=True)
+    # Bin centers for comparison
+    bin_centers = (bin_edges[:-1] + bin_edges[1:]) / 2
+    pdf_vals = pdf_func(bin_centers)
+    mae = np.mean(np.abs(hist_vals - pdf_vals))
+    return mae
 
 if __name__ == "__main__":
     # === Setup logging/output dirs ===
@@ -63,14 +73,18 @@ if __name__ == "__main__":
 
     # Store fit results
     fit_stats = []
+    # For reproducible bins and PDF/MAE calculation
+    bins = np.linspace(filtered.min(), filtered.max(), 120)
 
-    # X range for PDF plotting
-    x = np.linspace(filtered.min(), filtered.max(), 500)
+    # Plot: data histogram as filled bars, high alpha
+    plt.figure(figsize=(16, 7))
+    hist_vals, _, _ = plt.hist(filtered, bins=bins, density=True,
+                               alpha=0.5, color="tab:blue",
+                               edgecolor="black", label="Dati osservati", linewidth=1.3)
+    # X for PDF plotting
+    x = np.linspace(filtered.min(), filtered.max(), 1000)
 
-    plt.figure(figsize=(14, 7))
-    plt.hist(filtered, bins=80, density=True, alpha=0.4, label="Dati osservati (hist)", color="gray", edgecolor="black")
-
-    # ---- Fit and plot for each distribution ----
+    # ---- Fit, plot, compute metrics for each distribution ----
     for label, dist in candidate_distributions.items():
         try:
             # Fit the distribution
@@ -78,9 +92,13 @@ if __name__ == "__main__":
                 params = dist.fit(filtered, floc=0)
             else:
                 params = dist.fit(filtered)
-            # PDF
+            # PDF and MAE
             pdf = dist.pdf(x, *params)
-            plt.plot(x, pdf, label=label)
+            # For MAE, match binning of histogram
+            pdf_func = lambda z: dist.pdf(z, *params)
+            mae = mean_absolute_error_hist_pdf(filtered, pdf_func, bins)
+            # Plot with strong line
+            plt.plot(x, pdf, label=f"{label}", linewidth=2.8)
             # K-S test
             ks_stat, ks_pval = stats.kstest(filtered, dist.name, args=params)
             # Log-likelihood, AIC, BIC
@@ -93,29 +111,34 @@ if __name__ == "__main__":
                 "Parametri": params,
                 "KS_pvalue": ks_pval,
                 "AIC": aic,
-                "BIC": bic
+                "BIC": bic,
+                "MAE_hist_pdf": mae
             })
-            logging.info(f"{label}: KS_pvalue={ks_pval:.4f} | AIC={aic:.1f} | BIC={bic:.1f}")
+            logging.info(f"{label:12s} | KS_p={ks_pval:.4f} | AIC={aic:9.2f} | BIC={bic:9.2f} | MAE={mae:8.5f}")
         except Exception as e:
             logging.warning(f"Errore fit {label}: {e}")
 
-    plt.title("Fit di diverse distribuzioni sui tempi di risoluzione (0-10.000 ore)")
-    plt.xlabel("Tempo di risoluzione (ore)")
-    plt.ylabel("Densità (PDF)")
-    plt.legend()
+    plt.title("Confronto Fit: Tempi di Risoluzione (0-10.000 ore)", fontsize=17)
+    plt.xlabel("Tempo di risoluzione (ore)", fontsize=15)
+    plt.ylabel("Densità (PDF)", fontsize=15)
+    plt.legend(fontsize=12, frameon=True)
     plt.tight_layout()
     plt.savefig('./output/png/confronto_fit_distribuzioni.png', dpi=200)
     plt.close()
     logging.info("Grafico confronto fit salvato in ./output/png/confronto_fit_distribuzioni.png")
 
-    # --- Save summary statistics ---
+    # --- Save and print summary statistics (sorted by MAE) ---
     stats_df = pd.DataFrame(fit_stats)
+    stats_df = stats_df.sort_values("MAE_hist_pdf")
     stats_df.to_csv('./output/csv/distribution_fit_stats.csv', index=False)
-    logging.info("Statistiche dei fit salvate in ./output/csv/distribution_fit_stats.csv")
+    print("\n=== SOMMARIO FIT DISTRIBUZIONI (ordinato per MAE) ===\n")
+    print(stats_df[["Distribuzione", "KS_pvalue", "AIC", "BIC", "MAE_hist_pdf"]])
+    logging.info("\n" + stats_df[["Distribuzione", "KS_pvalue", "AIC", "BIC", "MAE_hist_pdf"]].to_string(index=False))
 
 """
 Note:
-- Scegli la miglior distribuzione valutando sia K-S p-value che AIC/BIC.
-- I parametri esatti delle distribuzioni sono esportati in distribution_fit_stats.csv.
-- Se vuoi aggiungere altre distribuzioni, basta aggiungerle al dict candidate_distributions.
+- L'istogramma (area blu) mostra la distribuzione reale.
+- Le curve spesse mostrano il fit di ciascuna distribuzione.
+- Scegli la "migliore" combinando MAE, p-value, AIC e BIC.
+- Tutte le statistiche sono esportate e stampate/visibili a colpo d'occhio.
 """
