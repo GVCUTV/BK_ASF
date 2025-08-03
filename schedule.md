@@ -30,7 +30,7 @@
 
 ### **Meeting 3 [1/8/2025] – Analisi Dati & Costruzione Modello Analitico**
 
-* **3.1** (All): Costruzione condivisa del modello a code analitico (rete Jackson con feedback) e delle ipotesi formali.
+* **3.1** (All): Costruzione condivisa del modello a code analitico e delle ipotesi formali.
 * **3.2** (Split):
 
   * A: Scrittura di equazioni analitiche, matrice degli stati/transizioni e parametri di routing.
