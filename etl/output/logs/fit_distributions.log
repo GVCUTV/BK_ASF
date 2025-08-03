@@ -1,0 +1,104 @@
+2025-08-01 12:39:44,707 - INFO - Caricato dataset: ./output/csv/tickets_prs_merged.csv (960 righe)
+2025-08-01 12:39:44,717 - INFO - Ticket validi per il fit: 786
+2025-08-01 12:39:44,820 - INFO - Lognormale: KS_pvalue=0.0080 | AIC=12328.2 | BIC=12342.2
+2025-08-01 12:39:44,883 - INFO - Weibull: KS_pvalue=0.0000 | AIC=12374.4 | BIC=12388.4
+2025-08-01 12:39:44,929 - INFO - Gamma: KS_pvalue=0.0404 | AIC=12210.3 | BIC=12224.3
+2025-08-01 12:39:44,932 - INFO - Esponenziale: KS_pvalue=0.0000 | AIC=12704.9 | BIC=12714.3
+2025-08-01 12:39:44,935 - INFO - Normale: KS_pvalue=0.0000 | AIC=14009.6 | BIC=14019.0
+2025-08-01 12:39:45,428 - INFO - Grafico confronto fit salvato in ./output/png/confronto_fit_distribuzioni.png
+2025-08-01 12:39:45,430 - INFO - Statistiche dei fit salvate in ./output/csv/distribution_fit_stats.csv
+2025-08-01 12:44:49,123 - INFO - Caricato dataset: ./output/csv/tickets_prs_merged.csv (960 righe)
+2025-08-01 12:44:49,130 - INFO - Ticket validi per il fit: 786
+2025-08-01 12:44:49,190 - INFO - Lognormale   | KS_p=0.0080 | AIC= 12328.23 | BIC= 12342.23 | MAE= 0.00003
+2025-08-01 12:44:49,217 - INFO - Weibull      | KS_p=0.0000 | AIC= 12374.38 | BIC= 12388.38 | MAE= 0.00005
+2025-08-01 12:44:49,239 - INFO - Gamma        | KS_p=0.0404 | AIC= 12210.33 | BIC= 12224.33 | MAE= 0.00004
+2025-08-01 12:44:49,241 - INFO - Esponenziale | KS_p=0.0000 | AIC= 12704.92 | BIC= 12714.26 | MAE= 0.00006
+2025-08-01 12:44:49,242 - INFO - Normale      | KS_p=0.0000 | AIC= 14009.65 | BIC= 14018.98 | MAE= 0.00008
+2025-08-01 12:44:49,528 - INFO - Grafico confronto fit salvato in ./output/png/confronto_fit_distribuzioni.png
+2025-08-01 12:44:49,535 - INFO - 
+Distribuzione    KS_pvalue          AIC          BIC  MAE_hist_pdf
+   Lognormale 7.964899e-03 12328.229079 12342.229950      0.000026
+        Gamma 4.037152e-02 12210.329106 12224.329976      0.000037
+      Weibull 9.302988e-29 12374.377630 12388.378501      0.000047
+ Esponenziale 1.261499e-41 12704.924361 12714.258275      0.000064
+      Normale 4.509546e-45 14009.647314 14018.981228      0.000083
+2025-08-01 12:52:53,052 - INFO - Caricato dataset: ./output/csv/tickets_prs_merged.csv (960 righe)
+2025-08-01 12:52:53,057 - INFO - Ticket validi per il fit: 786
+2025-08-01 12:52:53,151 - INFO - Lognormale   | KS_p=0.0080 | AIC= 12328.23 | BIC= 12342.23 | MAE= 0.00006
+2025-08-01 12:52:53,221 - INFO - Weibull      | KS_p=0.0000 | AIC= 12374.38 | BIC= 12388.38 | MAE=21.92861
+2025-08-01 12:52:53,245 - INFO - Gamma        | KS_p=0.0404 | AIC= 12210.33 | BIC= 12224.33 | MAE=3271.21487
+2025-08-01 12:52:53,246 - INFO - Esponenziale | KS_p=0.0000 | AIC= 12704.92 | BIC= 12714.26 | MAE= 0.00003
+2025-08-01 12:52:53,247 - INFO - Normale      | KS_p=0.0000 | AIC= 14009.65 | BIC= 14018.98 | MAE= 0.00005
+2025-08-01 12:52:53,513 - INFO - Grafico confronto fit (linee) salvato in ./output/png/confronto_fit_distribuzioni_linee.png
+2025-08-01 12:52:53,520 - INFO - 
+Distribuzione    KS_pvalue          AIC          BIC  MAE_KDE_PDF
+ Esponenziale 1.261499e-41 12704.924361 12714.258275     0.000033
+      Normale 4.509546e-45 14009.647314 14018.981228     0.000049
+   Lognormale 7.964899e-03 12328.229079 12342.229950     0.000055
+      Weibull 9.302988e-29 12374.377630 12388.378501    21.928607
+        Gamma 4.037152e-02 12210.329106 12224.329976  3271.214868
+2025-08-01 12:54:45,202 - INFO - Caricato dataset: ./output/csv/tickets_prs_merged.csv (960 righe)
+2025-08-01 12:54:45,228 - INFO - Ticket validi per il fit: 786
+2025-08-01 12:54:45,353 - INFO - Lognormale   | KS_p=0.0080 | AIC= 12328.23 | BIC= 12342.23 | MAE= 0.00006
+2025-08-01 12:54:45,441 - INFO - Weibull      | KS_p=0.0000 | AIC= 12374.38 | BIC= 12388.38 | MAE=21.92861
+2025-08-01 12:54:45,445 - INFO - Esponenziale | KS_p=0.0000 | AIC= 12704.92 | BIC= 12714.26 | MAE= 0.00003
+2025-08-01 12:54:45,449 - INFO - Normale      | KS_p=0.0000 | AIC= 14009.65 | BIC= 14018.98 | MAE= 0.00005
+2025-08-01 12:54:46,001 - INFO - Grafico confronto fit (linee) salvato in ./output/png/confronto_fit_distribuzioni_linee.png
+2025-08-01 12:54:46,013 - INFO - 
+Distribuzione    KS_pvalue          AIC          BIC  MAE_KDE_PDF
+ Esponenziale 1.261499e-41 12704.924361 12714.258275     0.000033
+      Normale 4.509546e-45 14009.647314 14018.981228     0.000049
+   Lognormale 7.964899e-03 12328.229079 12342.229950     0.000055
+      Weibull 9.302988e-29 12374.377630 12388.378501    21.928607
+2025-08-01 12:55:06,301 - INFO - Caricato dataset: ./output/csv/tickets_prs_merged.csv (960 righe)
+2025-08-01 12:55:06,316 - INFO - Ticket validi per il fit: 786
+2025-08-01 12:55:06,486 - INFO - Lognormale   | KS_p=0.0080 | AIC= 12328.23 | BIC= 12342.23 | MAE= 0.00006
+2025-08-01 12:55:06,490 - INFO - Esponenziale | KS_p=0.0000 | AIC= 12704.92 | BIC= 12714.26 | MAE= 0.00003
+2025-08-01 12:55:06,494 - INFO - Normale      | KS_p=0.0000 | AIC= 14009.65 | BIC= 14018.98 | MAE= 0.00005
+2025-08-01 12:55:07,082 - INFO - Grafico confronto fit (linee) salvato in ./output/png/confronto_fit_distribuzioni_linee.png
+2025-08-01 12:55:07,095 - INFO - 
+Distribuzione    KS_pvalue          AIC          BIC  MAE_KDE_PDF
+ Esponenziale 1.261499e-41 12704.924361 12714.258275     0.000033
+      Normale 4.509546e-45 14009.647314 14018.981228     0.000049
+   Lognormale 7.964899e-03 12328.229079 12342.229950     0.000055
+2025-08-01 12:55:41,143 - INFO - Caricato dataset: ./output/csv/tickets_prs_merged.csv (960 righe)
+2025-08-01 12:55:41,148 - INFO - Ticket validi per il fit: 786
+2025-08-01 12:55:41,192 - INFO - Esponenziale | KS_p=0.0000 | AIC= 12704.92 | BIC= 12714.26 | MAE= 0.00003
+2025-08-01 12:55:41,193 - INFO - Normale      | KS_p=0.0000 | AIC= 14009.65 | BIC= 14018.98 | MAE= 0.00005
+2025-08-01 12:55:41,508 - INFO - Grafico confronto fit (linee) salvato in ./output/png/confronto_fit_distribuzioni_linee.png
+2025-08-01 12:55:41,515 - INFO - 
+Distribuzione    KS_pvalue          AIC          BIC  MAE_KDE_PDF
+ Esponenziale 1.261499e-41 12704.924361 12714.258275     0.000033
+      Normale 4.509546e-45 14009.647314 14018.981228     0.000049
+2025-08-01 13:00:47,048 - INFO - Caricato dataset: ./output/csv/tickets_prs_merged.csv (960 righe)
+2025-08-01 13:00:47,088 - INFO - Ticket validi per il fit: 786
+2025-08-01 13:00:48,763 - INFO - Grafico confronto fit (linee) salvato in ./output/png/confronto_fit_distribuzioni_linee.png
+2025-08-01 13:00:48,931 - INFO - 
+Distribuzione    FitType    KS_pvalue          AIC          BIC  MAE_KDE_PDF
+ Esponenziale     floc=0 1.391442e-41 12705.230316 12714.564229     0.000033
+ Esponenziale MLE libero 1.261499e-41 12704.924361 12714.258275     0.000033
+      Normale        MLE 4.509546e-45 14009.647314 14018.981228     0.000049
+      Weibull     floc=0 2.532206e-01 12234.490689 12248.491560     0.000054
+   Lognormale     floc=0 7.964899e-03 12328.229079 12342.229950     0.000055
+   Lognormale MLE libero 1.392405e-02 12324.776599 12338.777469     0.000055
+      Weibull MLE libero 9.302988e-29 12374.377630 12388.378501    21.928607
+2025-08-01 13:01:43,214 - INFO - Caricato dataset: ./output/csv/tickets_prs_merged.csv (960 righe)
+2025-08-01 13:01:43,236 - INFO - Ticket validi per il fit: 786
+2025-08-01 13:01:44,351 - INFO - Grafico confronto fit (linee) salvato in ./output/png/confronto_fit_distribuzioni_linee.png
+2025-08-01 13:01:44,429 - INFO - 
+Distribuzione    FitType    KS_pvalue          AIC          BIC  MAE_KDE_PDF
+ Esponenziale     floc=0 1.391442e-41 12705.230316 12714.564229     0.000033
+ Esponenziale MLE libero 1.261499e-41 12704.924361 12714.258275     0.000033
+      Normale        MLE 4.509546e-45 14009.647314 14018.981228     0.000049
+      Weibull     floc=0 2.532206e-01 12234.490689 12248.491560     0.000054
+   Lognormale     floc=0 7.964899e-03 12328.229079 12342.229950     0.000055
+   Lognormale MLE libero 1.392405e-02 12324.776599 12338.777469     0.000055
+      Weibull MLE libero 9.302988e-29 12374.377630 12388.378501    21.928607
+2025-08-01 13:03:02,788 - INFO - Caricato dataset: ./output/csv/tickets_prs_merged.csv (960 righe)
+2025-08-01 13:03:02,794 - INFO - Ticket validi per il fit: 786
+2025-08-01 13:03:03,121 - INFO - Grafico confronto fit (linee) salvato in ./output/png/confronto_fit_distribuzioni_linee.png
+2025-08-01 13:03:03,140 - INFO - 
+Distribuzione    FitType    KS_pvalue          AIC          BIC  MAE_KDE_PDF
+ Esponenziale     floc=0 1.391442e-41 12705.230316 12714.564229     0.000033
+ Esponenziale MLE libero 1.261499e-41 12704.924361 12714.258275     0.000033
+      Normale        MLE 4.509546e-45 14009.647314 14018.981228     0.000049

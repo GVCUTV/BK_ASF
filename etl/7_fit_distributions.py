@@ -63,8 +63,8 @@ if __name__ == "__main__":
 
     # ---- Fit each candidate with different strategies ----
     candidate_distributions = {
-        'Lognormale': stats.lognorm,
-        'Weibull': stats.weibull_min,
+        #'Lognormale': stats.lognorm,
+        #'Weibull': stats.weibull_min,
         'Esponenziale': stats.expon,
         'Normale': stats.norm
     }
@@ -72,6 +72,7 @@ if __name__ == "__main__":
     fit_stats = []
     best_fit_per_family = {}
 
+    """
     # LOGNORMALE (try both fit, and fit with floc=0)
     dist = stats.lognorm
     label = 'Lognormale'
@@ -162,6 +163,7 @@ if __name__ == "__main__":
     best_weibull = min(weibull_fits, key=lambda d: d["MAE_KDE_PDF"])
     fit_stats.extend(weibull_fits)
     best_fit_per_family[label] = best_weibull
+    """
 
     # ESPONENZIALE (fit free and floc=0)
     dist = stats.expon
