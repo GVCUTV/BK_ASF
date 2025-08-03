@@ -1,38 +1,59 @@
-# v1
-
-# file: USAGE_GUIDE.md
+# v2
+# file: SETUP_AND_USAGE_GUIDE.md
 
 # BookKeeper Workflow Simulation – Environment Setup & ETL Instructions
 
-This guide covers how to set up your Python environment for running the simulation, and provides ETL (Extract, Transform, Load) scripts to generate the input data/distribution parameters for the simulation from Jira/GitHub exports.
+This guide covers how to set up your Python environment for running the simulation, **including a virtual environment**, and provides ETL (Extract, Transform, Load) scripts to generate the input data/distribution parameters for the simulation from Jira/GitHub exports.
 
 ---
 
 ## 1. Environment Setup
 
-### A. Install Python
+### A. (Recommended) Create a Python Virtual Environment
 
-* Make sure you have **Python 3.7+** installed:
+From your project root (e.g., `BK_ASF/`):
 
-  ```bash
-  python --version
-  ```
+```bash
+# Create the virtual environment (only once)
+python3 -m venv .venv
 
-  If not, download from [https://www.python.org/downloads/](https://www.python.org/downloads/)
+# Activate the virtual environment (Linux/Mac)
+source .venv/bin/activate
+
+# ...or on Windows
+.venv\Scripts\activate
+```
+
+- Your terminal prompt should now start with `(.venv)` indicating you're in the virtual environment.
+- **Every time you work on the project, activate the environment** using the command above.
+
+---
 
 ### B. Install Dependencies
 
-* Install the required Python packages:
+With your virtual environment activated:
 
-  ```bash
-  pip install numpy pandas matplotlib scipy
-  ```
+```bash
+pip install --upgrade pip
+pip install numpy pandas matplotlib scipy
+```
 
-* (Optional, for further development:)
+- (Optional, for further development:)
 
-  ```bash
-  pip install jupyter requests
-  ```
+```bash
+pip install jupyter requests
+```
+
+---
+
+### C. Check Python Version
+
+Make sure you have **Python 3.7+**:
+
+```bash
+python --version
+```
+If not, download from https://www.python.org/downloads/
 
 ---
 
@@ -53,6 +74,7 @@ BK_ASF/
 │   ├── logs/
 │   ├── output/
 │   └── ...
+├── .venv/
 └── SETUP_AND_ETL_GUIDE.md
 ```
 
@@ -62,18 +84,16 @@ BK_ASF/
 
 ### A. Extract: Download Data
 
-* Export raw data from Jira and GitHub as CSVs (e.g. issues, PRs, status changes)
-
-  * Save as `raw_jira.csv`, `raw_github.csv` in `simulation/input/`
+- Export raw data from Jira and GitHub as CSVs (e.g. issues, PRs, status changes)
+  - Save as `raw_jira.csv`, `raw_github.csv` in `simulation/input/`
 
 ### B. Transform: Clean and Merge Data
 
-* Use the script below to:
-
-  1. Load CSVs
-  2. Clean irrelevant/non-issue records
-  3. Merge on common fields (e.g. issue key, PR link)
-  4. Compute per-ticket lifetimes, #feedback cycles, etc.
+- Use the script below to:
+    1. Load CSVs
+    2. Clean irrelevant/non-issue records
+    3. Merge on common fields (e.g. issue key, PR link)
+    4. Compute per-ticket lifetimes, #feedback cycles, etc.
 
 ```python
 # v1
@@ -127,7 +147,7 @@ if __name__ == "__main__":
     jira_path = "simulation/input/raw_jira.csv"
     github_path = "simulation/input/raw_github.csv"
     os.makedirs("simulation/input", exist_ok=True)
-    
+
     jira_df = clean_jira(jira_path)
     logging.info(f"Loaded and cleaned Jira: {len(jira_df)} tickets.")
     github_df = clean_github(github_path)
@@ -139,13 +159,13 @@ if __name__ == "__main__":
     logging.info("Saved cleaned/merged dataset for fitting and simulation input.")
 ```
 
-* Edit field names as needed to match your real exports.
-* Output is `simulation/output/tickets_prs_merged.csv`
+- Edit field names as needed to match your real exports.
+- Output is `simulation/output/tickets_prs_merged.csv`
 
 ### C. Load: Fitting Distributions for Simulation
 
-* Use this output to fit service time distributions (see your existing fitting scripts, e.g., `7_fit_distributions.py`).
-* Place chosen distribution types and fitted parameters in `config.py` under `SERVICE_TIME_PARAMS`.
+- Use this output to fit service time distributions (see your existing fitting scripts, e.g., `7_fit_distributions.py`).
+- Place chosen distribution types and fitted parameters in `config.py` under `SERVICE_TIME_PARAMS`.
 
 ---
 
@@ -156,18 +176,20 @@ if __name__ == "__main__":
 3. Run:
 
    ```bash
+   source .venv/bin/activate  # (or .venv\Scripts\activate on Windows)
    python simulation/simulate.py
    ```
+
 4. Check logs in `simulation/logs/`, and output stats in `simulation/output/`.
 
 ---
 
 ## 5. Troubleshooting & Notes
 
-* Always check `simulation/logs/etl.log` and `simulation/logs/simulation.log` for errors or process info.
-* Edit column names as needed to match your exported Jira/GitHub fields.
-* The provided ETL script is modular—extend it for extra cleaning/merging as needed.
-* For advanced ETL (API extraction, advanced feedback cycles, etc.), build from this template.
+- Always check `simulation/logs/etl.log` and `simulation/logs/simulation.log` for errors or process info.
+- Edit column names as needed to match your exported Jira/GitHub fields.
+- The provided ETL script is modular—extend it for extra cleaning/merging as needed.
+- For advanced ETL (API extraction, advanced feedback cycles, etc.), build from this template.
 
 ---
 
