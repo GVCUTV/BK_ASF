@@ -1,10 +1,10 @@
 # v1
-# file: simulation/simulate.py
+# file: simulate.py
 
 """
 Main entry point for BookKeeper workflow event-driven simulation.
 Handles simulation loop, initial event scheduling, and coordination of all modules.
-Logs every operation to stdout and to simulation/logs/simulation.log.
+Logs every operation to stdout and to logs/simulation.log.
 """
 
 import logging
@@ -17,7 +17,7 @@ from config import SIM_DURATION, LOG_FILE
 from stats import StatsCollector
 
 # Setup logging: to file and stdout
-os.makedirs("simulation/logs", exist_ok=True)
+os.makedirs("logs", exist_ok=True)
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s [%(levelname)s] %(message)s",

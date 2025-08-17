@@ -10,7 +10,7 @@ Tune all parameters and distributions here.
 SIM_DURATION = 5000.0  # Simulated time units (can be hours, days...)
 
 # Logging
-LOG_FILE = "simulation/logs/simulation.log"
+LOG_FILE = "logs/simulation.log"
 
 # Arrival process
 ARRIVAL_RATE = 0.15  # tickets per time unit (lambda for Poisson process)

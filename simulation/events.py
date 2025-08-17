@@ -1,15 +1,17 @@
-# v1
+# v2
 # file: simulation/events.py
 
 """
 Defines event classes and priority event queue for BookKeeper simulation.
-Handles ticket arrival, service completions, and feedback cycles.
+Handles ticket arrival, service completions, and feedback cycles
+by delegating to WorkflowLogic for all workflow transitions.
 """
 
 import heapq
 import numpy as np
 import logging
 from config import ARRIVAL_RATE
+from workflow_logic import WorkflowLogic
 
 class Event:
     def __init__(self, time, ticket_id):
@@ -17,7 +19,6 @@ class Event:
         self.ticket_id = ticket_id
 
     def __lt__(self, other):
-        # For heapq: events are ordered by scheduled time
         return self.time < other.time
 
     def process(self, event_queue, state, stats):
@@ -31,14 +32,11 @@ class TicketArrivalEvent(Event):
         super().__init__(time, ticket_id)
 
     def process(self, event_queue, state, stats):
-        logging.info(f"Ticket {self.ticket_id} arrived at time {self.time:.2f}")
+        logic = WorkflowLogic(state, stats)
         ticket = state.create_ticket(self.ticket_id, self.time)
-        # Try to add ticket to dev/review queue (may be idle or wait)
-        state.enter_dev_review(ticket, self.time, event_queue, stats)
+        logic.handle_ticket_arrival(ticket, self.time, event_queue)
         # Schedule next arrival
-        next_arrival = self.time + np.random.exponential(1/ARRIVAL_RATE)
-        if next_arrival < state.sim_duration:
-            event_queue.push(TicketArrivalEvent(next_arrival, self.ticket_id + 1))
+        logic.schedule_next_arrival(event_queue, self.time, self.ticket_id, state.sim_duration, TicketArrivalEvent)
 
 class ServiceCompletionEvent(Event):
     def __init__(self, time, ticket_id, stage):
@@ -46,8 +44,9 @@ class ServiceCompletionEvent(Event):
         self.stage = stage  # 'dev_review' or 'testing'
 
     def process(self, event_queue, state, stats):
-        logging.info(f"Ticket {self.ticket_id} completed {self.stage} at {self.time:.2f}")
-        state.complete_service(self.ticket_id, self.stage, self.time, event_queue, stats)
+        logic = WorkflowLogic(state, stats)
+        ticket = state.tickets[self.ticket_id]
+        logic.handle_service_completion(ticket, self.stage, self.time, event_queue, ServiceCompletionEvent)
 
 class EventQueue:
     def __init__(self):
@@ -67,8 +66,6 @@ class EventQueue:
         return self._q[0].time if self._q else float('inf')
 
     def schedule_initial_arrivals(self, sim_duration, state, stats):
-        # Start with ticket 1 at t=0
         self.push(TicketArrivalEvent(0.0, 1))
         state.sim_duration = sim_duration
         logging.info("Initial arrival event scheduled at t=0.")
-

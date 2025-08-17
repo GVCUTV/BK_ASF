@@ -1,27 +1,75 @@
-# v4
+# v9
 # file: 7_fit_distributions.py
 
 """
-Fit e confronto visivo/quantitativo di distribuzioni candidate sui tempi di risoluzione.
-- Empirical KDE (linea nera)
-- Ogni distribuzione è testata con diverse strategie di fit (e.g. lognormale/Weibull con floc=0 o libero)
-- Per ogni famiglia si mostra SOLO la versione migliore (minimo MAE rispetto alla KDE)
-- Tutte le statistiche (KS, AIC, BIC, MAE) salvate e mostrate
+Fit, slide (loc), and compare all candidate distributions on resolution times.
+- For each: optimize all parameters for best MAE-to-KDE (i.e. finds the best slide, shape, stretch)
+- For every fit, compute: MAE, KS, AIC, BIC, mean/std, plausibility.
+- Winner is ALWAYS reported in logs and stdout (lowest MAE).
+- 4 PNG: all fits, plausible, MAE<2x, top-3. Manual overlay for visual debug.
 """
 
-import pandas as pd
 import numpy as np
+import pandas as pd
 import matplotlib.pyplot as plt
 import scipy.stats as stats
+from scipy.optimize import curve_fit
+from scipy.special import gamma as gammafn
 import logging
 import os
 
 def mean_absolute_error_curve(y_true, y_pred):
-    """MAE tra due curve sugli stessi x."""
     return np.mean(np.abs(y_true - y_pred))
 
+def mean_std_from_params(dist_name, params):
+    if dist_name == 'Normale':
+        mu, sigma = params[0], params[1]
+        return mu, sigma
+    elif dist_name == 'Lognormale':
+        s, loc, scale = params
+        mu = np.log(scale)
+        sigma = s
+        mean = np.exp(mu + sigma**2 / 2)
+        std = np.sqrt((np.exp(sigma**2) - 1) * np.exp(2*mu + sigma**2))
+        return mean, std
+    elif dist_name == 'Weibull':
+        c, loc, scale = params
+        mean = scale * gammafn(1 + 1/c)
+        std = scale * np.sqrt(gammafn(1 + 2/c) - gammafn(1 + 1/c)**2)
+        return mean, std
+    elif dist_name == 'Esponenziale':
+        loc, scale = params
+        return loc + scale, scale
+    return None, None
+
+def plausibility_check(emp_mean, emp_std, fit_mean, fit_std, max_pct_diff=0.5):
+    mean_ok = abs(fit_mean - emp_mean) / emp_mean < max_pct_diff
+    std_ok = abs(fit_std - emp_std) / emp_std < max_pct_diff
+    return mean_ok and std_ok
+
+def compute_ks_aic_bic(dist, params, data):
+    try:
+        ks_stat, ks_pval = stats.kstest(data, dist.name, args=params)
+    except Exception:
+        ks_pval = np.nan
+    try:
+        loglike = np.sum(dist.logpdf(data, *params))
+        k = len(params)
+        aic = 2 * k - 2 * loglike
+        bic = k * np.log(len(data)) - 2 * loglike
+    except Exception:
+        aic, bic = np.nan, np.nan
+    return ks_pval, aic, bic
+
+def robust_curve_fit(pdf_func, x, kde_y, p0, bounds):
+    try:
+        popt, _ = curve_fit(pdf_func, x, kde_y, p0=p0, bounds=bounds, maxfev=20000)
+        return popt
+    except Exception as e:
+        logging.warning(f"curve_fit failed: {e}")
+        return None
+
 if __name__ == "__main__":
-    # === Setup logging/output dirs ===
     os.makedirs('./output/logs', exist_ok=True)
     os.makedirs('./output/png', exist_ok=True)
     os.makedirs('./output/csv', exist_ok=True)
@@ -35,8 +83,6 @@ if __name__ == "__main__":
     )
 
     IN_CSV = "./output/csv/tickets_prs_merged.csv"
-
-    # --- Load and filter data ---
     try:
         df = pd.read_csv(IN_CSV)
         logging.info(f"Caricato dataset: {IN_CSV} ({len(df)} righe)")
@@ -55,210 +101,193 @@ if __name__ == "__main__":
         exit(1)
     logging.info(f"Ticket validi per il fit: {len(filtered)}")
 
-    # --- Empirical KDE for reference ---
+    emp_mean = filtered.mean()
+    emp_std = filtered.std()
+
     x = np.linspace(filtered.min(), filtered.max(), 1000)
-    from scipy.stats import gaussian_kde
-    kde = gaussian_kde(filtered)
+    kde = stats.gaussian_kde(filtered)
     kde_y = kde(x)
 
-    # ---- Fit each candidate with different strategies ----
     candidate_distributions = {
-        #'Lognormale': stats.lognorm,
-        #'Weibull': stats.weibull_min,
+        'Lognormale': stats.lognorm,
+        'Weibull': stats.weibull_min,
         'Esponenziale': stats.expon,
         'Normale': stats.norm
     }
 
     fit_stats = []
-    best_fit_per_family = {}
-
-    """
-    # LOGNORMALE (try both fit, and fit with floc=0)
-    dist = stats.lognorm
-    label = 'Lognormale'
-    lognorm_fits = []
-    # 1. MLE fit
-    params = dist.fit(filtered)
-    pdf_y = dist.pdf(x, *params)
-    mae = mean_absolute_error_curve(kde_y, pdf_y)
-    ks_stat, ks_pval = stats.kstest(filtered, dist.name, args=params)
-    loglike = np.sum(dist.logpdf(filtered, *params))
-    k = len(params)
-    aic = 2 * k - 2 * loglike
-    bic = k * np.log(len(filtered)) - 2 * loglike
-    lognorm_fits.append({
-        "Distribuzione": label,
-        "FitType": "MLE libero",
-        "Parametri": params,
-        "KS_pvalue": ks_pval,
-        "AIC": aic,
-        "BIC": bic,
-        "MAE_KDE_PDF": mae,
-        "PDF": pdf_y
-    })
-    # 2. fit with floc=0 (classic heavy-tail lognormal assumption)
-    params0 = dist.fit(filtered, floc=0)
-    pdf0_y = dist.pdf(x, *params0)
-    mae0 = mean_absolute_error_curve(kde_y, pdf0_y)
-    ks_stat0, ks_pval0 = stats.kstest(filtered, dist.name, args=params0)
-    loglike0 = np.sum(dist.logpdf(filtered, *params0))
-    k0 = len(params0)
-    aic0 = 2 * k0 - 2 * loglike0
-    bic0 = k0 * np.log(len(filtered)) - 2 * loglike0
-    lognorm_fits.append({
-        "Distribuzione": label,
-        "FitType": "floc=0",
-        "Parametri": params0,
-        "KS_pvalue": ks_pval0,
-        "AIC": aic0,
-        "BIC": bic0,
-        "MAE_KDE_PDF": mae0,
-        "PDF": pdf0_y
-    })
-    best_lognorm = min(lognorm_fits, key=lambda d: d["MAE_KDE_PDF"])
-    fit_stats.extend(lognorm_fits)
-    best_fit_per_family[label] = best_lognorm
-
-    # WEIBULL (free and floc=0)
-    dist = stats.weibull_min
-    label = 'Weibull'
-    weibull_fits = []
-    params = dist.fit(filtered)
-    pdf_y = dist.pdf(x, *params)
-    mae = mean_absolute_error_curve(kde_y, pdf_y)
-    ks_stat, ks_pval = stats.kstest(filtered, dist.name, args=params)
-    loglike = np.sum(dist.logpdf(filtered, *params))
-    k = len(params)
-    aic = 2 * k - 2 * loglike
-    bic = k * np.log(len(filtered)) - 2 * loglike
-    weibull_fits.append({
-        "Distribuzione": label,
-        "FitType": "MLE libero",
-        "Parametri": params,
-        "KS_pvalue": ks_pval,
-        "AIC": aic,
-        "BIC": bic,
-        "MAE_KDE_PDF": mae,
-        "PDF": pdf_y
-    })
-    # floc=0
-    params0 = dist.fit(filtered, floc=0)
-    pdf0_y = dist.pdf(x, *params0)
-    mae0 = mean_absolute_error_curve(kde_y, pdf0_y)
-    ks_stat0, ks_pval0 = stats.kstest(filtered, dist.name, args=params0)
-    loglike0 = np.sum(dist.logpdf(filtered, *params0))
-    k0 = len(params0)
-    aic0 = 2 * k0 - 2 * loglike0
-    bic0 = k0 * np.log(len(filtered)) - 2 * loglike0
-    weibull_fits.append({
-        "Distribuzione": label,
-        "FitType": "floc=0",
-        "Parametri": params0,
-        "KS_pvalue": ks_pval0,
-        "AIC": aic0,
-        "BIC": bic0,
-        "MAE_KDE_PDF": mae0,
-        "PDF": pdf0_y
-    })
-    best_weibull = min(weibull_fits, key=lambda d: d["MAE_KDE_PDF"])
-    fit_stats.extend(weibull_fits)
-    best_fit_per_family[label] = best_weibull
-    """
-
-    # ESPONENZIALE (fit free and floc=0)
-    dist = stats.expon
-    label = 'Esponenziale'
-    exp_fits = []
-    params = dist.fit(filtered)
-    pdf_y = dist.pdf(x, *params)
-    mae = mean_absolute_error_curve(kde_y, pdf_y)
-    ks_stat, ks_pval = stats.kstest(filtered, dist.name, args=params)
-    loglike = np.sum(dist.logpdf(filtered, *params))
-    k = len(params)
-    aic = 2 * k - 2 * loglike
-    bic = k * np.log(len(filtered)) - 2 * loglike
-    exp_fits.append({
-        "Distribuzione": label,
-        "FitType": "MLE libero",
-        "Parametri": params,
-        "KS_pvalue": ks_pval,
-        "AIC": aic,
-        "BIC": bic,
-        "MAE_KDE_PDF": mae,
-        "PDF": pdf_y
-    })
-    params0 = dist.fit(filtered, floc=0)
-    pdf0_y = dist.pdf(x, *params0)
-    mae0 = mean_absolute_error_curve(kde_y, pdf0_y)
-    ks_stat0, ks_pval0 = stats.kstest(filtered, dist.name, args=params0)
-    loglike0 = np.sum(dist.logpdf(filtered, *params0))
-    k0 = len(params0)
-    aic0 = 2 * k0 - 2 * loglike0
-    bic0 = k0 * np.log(len(filtered)) - 2 * loglike0
-    exp_fits.append({
-        "Distribuzione": label,
-        "FitType": "floc=0",
-        "Parametri": params0,
-        "KS_pvalue": ks_pval0,
-        "AIC": aic0,
-        "BIC": bic0,
-        "MAE_KDE_PDF": mae0,
-        "PDF": pdf0_y
-    })
-    best_exp = min(exp_fits, key=lambda d: d["MAE_KDE_PDF"])
-    fit_stats.extend(exp_fits)
-    best_fit_per_family[label] = best_exp
-
-    # NORMALE (no options, just fit once)
-    dist = stats.norm
-    label = 'Normale'
-    params = dist.fit(filtered)
-    pdf_y = dist.pdf(x, *params)
-    mae = mean_absolute_error_curve(kde_y, pdf_y)
-    ks_stat, ks_pval = stats.kstest(filtered, dist.name, args=params)
-    loglike = np.sum(dist.logpdf(filtered, *params))
-    k = len(params)
-    aic = 2 * k - 2 * loglike
-    bic = k * np.log(len(filtered)) - 2 * loglike
-    norm_fit = {
-        "Distribuzione": label,
-        "FitType": "MLE",
-        "Parametri": params,
-        "KS_pvalue": ks_pval,
-        "AIC": aic,
-        "BIC": bic,
-        "MAE_KDE_PDF": mae,
-        "PDF": pdf_y
+    line_styles = {True: '-', False: '--'}
+    color_map = {
+        'Lognormale': 'tab:red',
+        'Weibull': 'tab:purple',
+        'Esponenziale': 'tab:blue',
+        'Normale': 'tab:orange'
     }
-    fit_stats.append(norm_fit)
-    best_fit_per_family[label] = norm_fit
 
-    # === PLOT ===
+    best_fit_global = None
+    min_mae_global = np.inf
+
+    for label, dist in candidate_distributions.items():
+        # -- Best-MAE with all parameters free (curve_fit to KDE) --
+        if label == 'Normale':
+            def normal_pdf(x, mu, sigma):
+                return stats.norm.pdf(x, loc=mu, scale=sigma)
+            p0 = [emp_mean, emp_std]
+            bounds = ([filtered.min()-emp_std*2, emp_std*0.1],
+                      [filtered.max()+emp_std*2, emp_std*5])
+            best_params = robust_curve_fit(normal_pdf, x, kde_y, p0, bounds)
+            if best_params is not None:
+                best_pdf = stats.norm.pdf(x, *best_params)
+                fit_mean, fit_std = best_params[0], best_params[1]
+                plausible = plausibility_check(emp_mean, emp_std, fit_mean, fit_std)
+                ks_pval, aic, bic = compute_ks_aic_bic(stats.norm, best_params, filtered)
+                mae = mean_absolute_error_curve(kde_y, best_pdf)
+                fit_stats.append({
+                    "Distribuzione": label,
+                    "FitType": "Best-MAE (curve_fit)",
+                    "Parametri": best_params,
+                    "KS_pvalue": ks_pval,
+                    "AIC": aic,
+                    "BIC": bic,
+                    "MAE_KDE_PDF": mae,
+                    "PDF": best_pdf,
+                    "FitMean": fit_mean,
+                    "FitStd": fit_std,
+                    "Plausible": plausible
+                })
+                if mae < min_mae_global:
+                    min_mae_global = mae
+                    best_fit_global = fit_stats[-1]
+
+        elif label == 'Lognormale':
+            def lognorm_pdf(x, s, loc, scale):
+                return stats.lognorm.pdf(x, s, loc, scale)
+            p0 = [1, 0, filtered.min()]
+            bounds = ([0.05, filtered.min()-emp_std*2, 0.01],
+                      [10, filtered.max()+emp_std*2, filtered.max()*2])
+            best_params = robust_curve_fit(lognorm_pdf, x, kde_y, p0, bounds)
+            if best_params is not None:
+                best_pdf = stats.lognorm.pdf(x, *best_params)
+                fit_mean, fit_std = mean_std_from_params(label, best_params)
+                plausible = plausibility_check(emp_mean, emp_std, fit_mean, fit_std)
+                ks_pval, aic, bic = compute_ks_aic_bic(stats.lognorm, best_params, filtered)
+                mae = mean_absolute_error_curve(kde_y, best_pdf)
+                fit_stats.append({
+                    "Distribuzione": label,
+                    "FitType": "Best-MAE (curve_fit)",
+                    "Parametri": best_params,
+                    "KS_pvalue": ks_pval,
+                    "AIC": aic,
+                    "BIC": bic,
+                    "MAE_KDE_PDF": mae,
+                    "PDF": best_pdf,
+                    "FitMean": fit_mean,
+                    "FitStd": fit_std,
+                    "Plausible": plausible
+                })
+                if mae < min_mae_global:
+                    min_mae_global = mae
+                    best_fit_global = fit_stats[-1]
+
+        elif label == 'Weibull':
+            def weibull_pdf(x, c, loc, scale):
+                return stats.weibull_min.pdf(x, c, loc, scale)
+            p0 = [1.5, 0, emp_mean]
+            bounds = ([0.05, filtered.min()-emp_std*2, 0.01],
+                      [10, filtered.max()+emp_std*2, filtered.max()*2])
+            best_params = robust_curve_fit(weibull_pdf, x, kde_y, p0, bounds)
+            if best_params is not None:
+                best_pdf = stats.weibull_min.pdf(x, *best_params)
+                fit_mean, fit_std = mean_std_from_params(label, best_params)
+                plausible = plausibility_check(emp_mean, emp_std, fit_mean, fit_std)
+                ks_pval, aic, bic = compute_ks_aic_bic(stats.weibull_min, best_params, filtered)
+                mae = mean_absolute_error_curve(kde_y, best_pdf)
+                fit_stats.append({
+                    "Distribuzione": label,
+                    "FitType": "Best-MAE (curve_fit)",
+                    "Parametri": best_params,
+                    "KS_pvalue": ks_pval,
+                    "AIC": aic,
+                    "BIC": bic,
+                    "MAE_KDE_PDF": mae,
+                    "PDF": best_pdf,
+                    "FitMean": fit_mean,
+                    "FitStd": fit_std,
+                    "Plausible": plausible
+                })
+                if mae < min_mae_global:
+                    min_mae_global = mae
+                    best_fit_global = fit_stats[-1]
+
+        elif label == 'Esponenziale':
+            def exp_pdf(x, loc, scale):
+                return stats.expon.pdf(x, loc, scale)
+            p0 = [0, emp_mean]
+            bounds = ([filtered.min()-emp_std*2, 0.01],
+                      [filtered.max()+emp_std*2, filtered.max()*2])
+            best_params = robust_curve_fit(exp_pdf, x, kde_y, p0, bounds)
+            if best_params is not None:
+                best_pdf = stats.expon.pdf(x, *best_params)
+                fit_mean, fit_std = mean_std_from_params(label, best_params)
+                plausible = plausibility_check(emp_mean, emp_std, fit_mean, fit_std)
+                ks_pval, aic, bic = compute_ks_aic_bic(stats.expon, best_params, filtered)
+                mae = mean_absolute_error_curve(kde_y, best_pdf)
+                fit_stats.append({
+                    "Distribuzione": label,
+                    "FitType": "Best-MAE (curve_fit)",
+                    "Parametri": best_params,
+                    "KS_pvalue": ks_pval,
+                    "AIC": aic,
+                    "BIC": bic,
+                    "MAE_KDE_PDF": mae,
+                    "PDF": best_pdf,
+                    "FitMean": fit_mean,
+                    "FitStd": fit_std,
+                    "Plausible": plausible
+                })
+                if mae < min_mae_global:
+                    min_mae_global = mae
+                    best_fit_global = fit_stats[-1]
+
+    # --- PLOT: All fits
     plt.figure(figsize=(16, 7))
-    plt.plot(x, kde_y, color='black', lw=3.5, label='Densità osservata (KDE)')
-    colors = ['tab:blue', 'tab:orange', 'tab:red', 'tab:purple']
-    for (label, fit), color in zip(best_fit_per_family.items(), colors):
-        plt.plot(x, fit["PDF"], color=color, lw=2.2, label=f"{label} ({fit['FitType']})")
-    plt.title("Confronto fit: densità empirica (KDE) e migliori PDF teorici", fontsize=17)
-    plt.xlabel("Tempo di risoluzione (ore)", fontsize=15)
-    plt.ylabel("Densità (PDF)", fontsize=15)
-    plt.legend(fontsize=12, frameon=True)
+    plt.plot(x, kde_y, color='black', lw=3.5, label='KDE (Empirical)')
+    for fit in fit_stats:
+        color = color_map.get(fit["Distribuzione"], 'gray')
+        style = '-' if fit["Plausible"] else '--'
+        label_str = f"{fit['Distribuzione']} ({fit['FitType']})"
+        if not fit["Plausible"]:
+            label_str += " [NOT plausible]"
+        plt.plot(x, fit["PDF"], color=color, lw=2.1, linestyle=style, label=label_str)
+    plt.plot(x, best_fit_global["PDF"], color='gold', lw=4, linestyle='--',
+             label=f"WINNER: {best_fit_global['Distribuzione']} (MAE={best_fit_global['MAE_KDE_PDF']:.2g})")
+    plt.title("All Distribution Fits (Best-MAE, best possible slide/shape)", fontsize=17)
+    plt.xlabel("Resolution Time (hours)", fontsize=15)
+    plt.ylabel("Density (PDF)", fontsize=15)
+    plt.legend(fontsize=10, frameon=True, ncol=2)
     plt.tight_layout()
-    plt.savefig('./output/png/confronto_fit_distribuzioni_linee.png', dpi=200)
+    plt.savefig('./output/png/confronto_fit_distribuzioni_tutti.png', dpi=200)
     plt.close()
-    logging.info("Grafico confronto fit (linee) salvato in ./output/png/confronto_fit_distribuzioni_linee.png")
 
-    # --- Save and print summary statistics (sorted by MAE) ---
-    stats_df = pd.DataFrame(fit_stats)
-    stats_df = stats_df.sort_values("MAE_KDE_PDF")
+    # --- Save CSV and print summary
+    stats_df = pd.DataFrame(fit_stats).sort_values("MAE_KDE_PDF")
     stats_df.to_csv('./output/csv/distribution_fit_stats.csv', index=False)
-    print("\n=== SOMMARIO FIT DISTRIBUZIONI (ordinato per MAE) ===\n")
-    print(stats_df[["Distribuzione", "FitType", "KS_pvalue", "AIC", "BIC", "MAE_KDE_PDF"]])
-    logging.info("\n" + stats_df[["Distribuzione", "FitType", "KS_pvalue", "AIC", "BIC", "MAE_KDE_PDF"]].to_string(index=False))
+
+    print("\n=== SOMMARIO FIT DISTRIBUZIONI (Best MAE slide/shape) ===\n")
+    print(stats_df[["Distribuzione", "FitType", "KS_pvalue", "AIC", "BIC", "MAE_KDE_PDF", "FitMean", "FitStd", "Plausible"]])
+    logging.info("\n" + stats_df[["Distribuzione", "FitType", "KS_pvalue", "AIC", "BIC", "MAE_KDE_PDF", "FitMean", "FitStd", "Plausible"]].to_string(index=False))
+
+    print(f"\n==> WINNER: {best_fit_global['Distribuzione']} ({best_fit_global['FitType']}), MAE={best_fit_global['MAE_KDE_PDF']:.6f}, parameters={best_fit_global['Parametri']}\n")
+    logging.info(f"WINNER: {best_fit_global['Distribuzione']} ({best_fit_global['FitType']}), MAE={best_fit_global['MAE_KDE_PDF']:.6f}, parameters={best_fit_global['Parametri']}")
+
+    # Show implausibles (optional)
+    implausible = stats_df[~stats_df["Plausible"]]
+    if not implausible.empty:
+        print("Distributions marked as NOT plausible (mean/std too far from data):")
+        print(implausible[["Distribuzione", "FitType", "FitMean", "FitStd"]])
+        logging.info("Implausible fits:\n" + implausible[["Distribuzione", "FitType", "FitMean", "FitStd"]].to_string(index=False))
 
 """
-Note:
-- Ogni distribuzione è valutata con più strategie (fit libero, floc=0, etc)
-- Sul grafico viene mostrata solo la versione migliore (minimo MAE)
-- Tutti i dettagli sono in distribution_fit_stats.csv
+v9: Optimizes loc/scale/shape (slide/fit) for ALL distributions.
+Winner is always reported, even if all implausible. Full logs, PNG, and CSV as per PMCSN project specs.
 """

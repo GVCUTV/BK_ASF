@@ -102,3 +102,148 @@ Distribuzione    FitType    KS_pvalue          AIC          BIC  MAE_KDE_PDF
  Esponenziale     floc=0 1.391442e-41 12705.230316 12714.564229     0.000033
  Esponenziale MLE libero 1.261499e-41 12704.924361 12714.258275     0.000033
       Normale        MLE 4.509546e-45 14009.647314 14018.981228     0.000049
+2025-08-03 16:45:58,577 - INFO - Caricato dataset: ./output/csv/tickets_prs_merged.csv (960 righe)
+2025-08-03 16:45:58,588 - INFO - Ticket validi per il fit: 786
+2025-08-03 16:45:58,629 - WARNING - Tutti i fit per Lognormale non plausibili! (media/std troppo lontani dai dati)
+2025-08-03 16:45:58,705 - WARNING - MLE fit failed for Weibull: unsupported operand type(s) for *: 'float' and 'rv_continuous_frozen'
+2025-08-03 16:45:58,721 - WARNING - MLE floc=0 fit failed for Weibull: unsupported operand type(s) for *: 'float' and 'rv_continuous_frozen'
+2025-08-03 16:45:58,726 - WARNING - Best-MAE fit failed for Weibull: unsupported operand type(s) for *: 'float' and 'rv_continuous_frozen'
+2025-08-03 16:45:58,726 - WARNING - Tutti i fit per Weibull non plausibili! (media/std troppo lontani dai dati)
+2025-08-03 16:45:59,496 - INFO - Grafico confronto fit (linee) salvato in ./output/png/confronto_fit_distribuzioni_linee.png
+2025-08-03 16:45:59,603 - INFO - 
+Distribuzione            FitType    KS_pvalue          AIC          BIC  MAE_KDE_PDF      FitMean       FitStd  Plausible
+ Esponenziale           Best-MAE          NaN          NaN          NaN     0.000033 1.187568e+03 1.187568e+03       True
+ Esponenziale       MLE (floc=0) 1.391442e-41 12705.230316 12714.564229     0.000033 1.187568e+03 1.187568e+03       True
+ Esponenziale                MLE 1.261499e-41 12704.924361 12714.258275     0.000033 1.187568e+03 1.187337e+03       True
+      Normale Empiric (mean/std)          NaN          NaN          NaN     0.000049 1.187568e+03 1.792099e+03       True
+      Normale           Best-MAE          NaN          NaN          NaN     0.000049 1.187568e+03 1.792099e+03       True
+      Normale                MLE 4.509546e-45 14009.647314 14018.981228     0.000049 1.187568e+03 1.790959e+03       True
+   Lognormale       MLE (floc=0) 7.964899e-03 12328.229079 12342.229950     0.000055 2.793038e+03 2.695024e+04      False
+   Lognormale                MLE 1.392405e-02 12324.776599 12338.777469     0.000055 2.485739e+03 2.064609e+04      False
+   Lognormale           Best-MAE          NaN          NaN          NaN     0.000238 9.876335e+20 5.120589e+42      False
+2025-08-03 16:45:59,604 - INFO - BEST FIT: Esponenziale (MLE (floc=0)), MAE=0.000033, parameters=(0.0, 1187.568300819904)
+2025-08-03 16:45:59,604 - INFO - Distribuzioni escluse per parametri non plausibili: Lognormale, Weibull
+2025-08-03 17:01:09,771 - INFO - Caricato dataset: ./output/csv/tickets_prs_merged.csv (960 righe)
+2025-08-03 17:01:09,789 - INFO - Ticket validi per il fit: 786
+2025-08-03 17:01:10,642 - INFO - Grafico confronto fit (linee) salvato in ./output/png/confronto_fit_distribuzioni_linee.png
+2025-08-03 17:01:10,768 - INFO - 
+Distribuzione            FitType     KS_pvalue          AIC          BIC  MAE_KDE_PDF      FitMean       FitStd  Plausible
+ Esponenziale       MLE (floc=0)  1.391442e-41 12705.230316 12714.564229     0.000033 1.187568e+03 1.187568e+03       True
+ Esponenziale           Best-MAE  1.391442e-41 12705.230316 12714.564229     0.000033 1.187568e+03 1.187568e+03       True
+ Esponenziale                MLE  1.261499e-41 12704.924361 12714.258275     0.000033 1.187568e+03 1.187337e+03       True
+      Normale Empiric (mean/std)  4.035331e-45 14009.647951 14018.981864     0.000049 1.187568e+03 1.792099e+03       True
+      Normale           Best-MAE  4.035331e-45 14009.647951 14018.981864     0.000049 1.187568e+03 1.792099e+03       True
+      Normale                MLE  4.509546e-45 14009.647314 14018.981228     0.000049 1.187568e+03 1.790959e+03       True
+      Weibull       MLE (floc=0)  2.532206e-01 12234.490689 12248.491560     0.000054 1.209462e+03 2.200394e+03       True
+   Lognormale       MLE (floc=0)  7.964899e-03 12328.229079 12342.229950     0.000055 2.793038e+03 2.695024e+04      False
+   Lognormale                MLE  1.392405e-02 12324.776599 12338.777469     0.000055 2.485739e+03 2.064609e+04      False
+      Weibull           Best-MAE  0.000000e+00 14683.111491 14697.112362     0.000227 8.386577e+05 3.604814e+08      False
+   Lognormale           Best-MAE 7.226616e-252 14428.942462 14442.943333     0.000238 9.876335e+20 5.120589e+42      False
+      Weibull                MLE  9.302988e-29 12374.377630 12388.378501    21.928607 2.780122e+03 4.836740e+03      False
+2025-08-03 17:01:10,768 - INFO - BEST FIT: Esponenziale (MLE (floc=0)), MAE=0.000033, parameters=(0.0, 1187.568300819904)
+2025-08-03 17:01:10,775 - INFO - Distribuzioni/fitti non plausibili:
+Distribuzione      FitType      FitMean       FitStd
+   Lognormale MLE (floc=0) 2.793038e+03 2.695024e+04
+   Lognormale          MLE 2.485739e+03 2.064609e+04
+      Weibull     Best-MAE 8.386577e+05 3.604814e+08
+   Lognormale     Best-MAE 9.876335e+20 5.120589e+42
+      Weibull          MLE 2.780122e+03 4.836740e+03
+2025-08-03 17:17:49,599 - INFO - Caricato dataset: ./output/csv/tickets_prs_merged.csv (960 righe)
+2025-08-03 17:17:49,616 - INFO - Ticket validi per il fit: 786
+2025-08-03 17:17:50,626 - INFO - Grafico fit (tutti i fit) salvato in ./output/png/confronto_fit_distribuzioni_tutti.png
+2025-08-03 17:17:51,266 - INFO - Grafico fit (solo plausibili) salvato in ./output/png/confronto_fit_distribuzioni_plausibili.png
+2025-08-03 17:17:51,930 - INFO - Grafico fit (MAE < 6.7e-05) salvato in ./output/png/confronto_fit_distribuzioni_mae.png
+2025-08-03 17:17:52,058 - INFO - 
+Distribuzione            FitType     KS_pvalue          AIC          BIC  MAE_KDE_PDF      FitMean       FitStd  Plausible
+ Esponenziale       MLE (floc=0)  1.391442e-41 12705.230316 12714.564229     0.000033 1.187568e+03 1.187568e+03       True
+ Esponenziale           Best-MAE  1.391442e-41 12705.230316 12714.564229     0.000033 1.187568e+03 1.187568e+03       True
+ Esponenziale                MLE  1.261499e-41 12704.924361 12714.258275     0.000033 1.187568e+03 1.187337e+03       True
+      Normale Empiric (mean/std)  4.035331e-45 14009.647951 14018.981864     0.000049 1.187568e+03 1.792099e+03       True
+      Normale           Best-MAE  4.035331e-45 14009.647951 14018.981864     0.000049 1.187568e+03 1.792099e+03       True
+      Normale                MLE  4.509546e-45 14009.647314 14018.981228     0.000049 1.187568e+03 1.790959e+03       True
+      Weibull       MLE (floc=0)  2.532206e-01 12234.490689 12248.491560     0.000054 1.209462e+03 2.200394e+03       True
+   Lognormale       MLE (floc=0)  7.964899e-03 12328.229079 12342.229950     0.000055 2.793038e+03 2.695024e+04      False
+   Lognormale                MLE  1.392405e-02 12324.776599 12338.777469     0.000055 2.485739e+03 2.064609e+04      False
+      Weibull           Best-MAE  0.000000e+00 14683.111491 14697.112362     0.000227 8.386577e+05 3.604814e+08      False
+   Lognormale           Best-MAE 7.226616e-252 14428.942462 14442.943333     0.000238 9.876335e+20 5.120589e+42      False
+      Weibull                MLE  9.302988e-29 12374.377630 12388.378501    21.928607 2.780122e+03 4.836740e+03      False
+2025-08-03 17:17:52,059 - INFO - BEST FIT: Esponenziale (MLE (floc=0)), MAE=0.000033, parameters=(0.0, 1187.568300819904)
+2025-08-03 17:17:52,065 - INFO - Distribuzioni/fitti non plausibili:
+Distribuzione      FitType      FitMean       FitStd
+   Lognormale MLE (floc=0) 2.793038e+03 2.695024e+04
+   Lognormale          MLE 2.485739e+03 2.064609e+04
+      Weibull     Best-MAE 8.386577e+05 3.604814e+08
+   Lognormale     Best-MAE 9.876335e+20 5.120589e+42
+      Weibull          MLE 2.780122e+03 4.836740e+03
+2025-08-03 17:23:57,526 - INFO - Caricato dataset: ./output/csv/tickets_prs_merged.csv (960 righe)
+2025-08-03 17:23:57,552 - INFO - Ticket validi per il fit: 786
+2025-08-03 17:23:58,805 - INFO - Grafico fit (tutti i fit) salvato in ./output/png/confronto_fit_distribuzioni_tutti.png
+2025-08-03 17:23:59,624 - INFO - Grafico fit (solo plausibili) salvato in ./output/png/confronto_fit_distribuzioni_plausibili.png
+2025-08-03 17:24:00,350 - INFO - Grafico fit (MAE < 6.7e-05) salvato in ./output/png/confronto_fit_distribuzioni_mae.png
+2025-08-03 17:24:00,941 - INFO - Grafico fit (top-3) salvato in ./output/png/confronto_fit_distribuzioni_top3.png
+2025-08-03 17:24:01,076 - INFO - 
+Distribuzione            FitType     KS_pvalue          AIC          BIC  MAE_KDE_PDF      FitMean       FitStd  Plausible
+ Esponenziale       MLE (floc=0)  1.391442e-41 12705.230316 12714.564229     0.000033 1.187568e+03 1.187568e+03       True
+ Esponenziale           Best-MAE  1.391442e-41 12705.230316 12714.564229     0.000033 1.187568e+03 1.187568e+03       True
+ Esponenziale                MLE  1.261499e-41 12704.924361 12714.258275     0.000033 1.187568e+03 1.187337e+03       True
+      Normale Empiric (mean/std)  4.035331e-45 14009.647951 14018.981864     0.000049 1.187568e+03 1.792099e+03       True
+      Normale           Best-MAE  4.035331e-45 14009.647951 14018.981864     0.000049 1.187568e+03 1.792099e+03       True
+      Normale                MLE  4.509546e-45 14009.647314 14018.981228     0.000049 1.187568e+03 1.790959e+03       True
+      Weibull       MLE (floc=0)  2.532206e-01 12234.490689 12248.491560     0.000054 1.209462e+03 2.200394e+03       True
+   Lognormale       MLE (floc=0)  7.964899e-03 12328.229079 12342.229950     0.000055 2.793038e+03 2.695024e+04      False
+   Lognormale                MLE  1.392405e-02 12324.776599 12338.777469     0.000055 2.485739e+03 2.064609e+04      False
+      Weibull           Best-MAE  0.000000e+00 14683.111491 14697.112362     0.000227 8.386577e+05 3.604814e+08      False
+   Lognormale           Best-MAE 7.226616e-252 14428.942462 14442.943333     0.000238 9.876335e+20 5.120589e+42      False
+      Weibull                MLE  9.302988e-29 12374.377630 12388.378501    21.928607 2.780122e+03 4.836740e+03      False
+2025-08-03 17:24:01,076 - INFO - BEST FIT: Esponenziale (MLE (floc=0)), MAE=0.000033, parameters=(0.0, 1187.568300819904)
+2025-08-03 17:24:01,082 - INFO - Distribuzioni/fitti non plausibili:
+Distribuzione      FitType      FitMean       FitStd
+   Lognormale MLE (floc=0) 2.793038e+03 2.695024e+04
+   Lognormale          MLE 2.485739e+03 2.064609e+04
+      Weibull     Best-MAE 8.386577e+05 3.604814e+08
+   Lognormale     Best-MAE 9.876335e+20 5.120589e+42
+      Weibull          MLE 2.780122e+03 4.836740e+03
+2025-08-03 17:53:07,462 - INFO - Caricato dataset: ./output/csv/tickets_prs_merged.csv (960 righe)
+2025-08-03 17:53:07,486 - INFO - Ticket validi per il fit: 786
+2025-08-03 17:53:07,624 - INFO - Lognormale curve_fit params: [8.13854140e+00 2.31111120e-01 3.19886273e+02], plausible=False
+2025-08-03 17:53:07,782 - INFO - Weibull curve_fit params: [9.60000846e-01 1.68863048e-16 1.87456792e+03], plausible=False
+2025-08-03 17:53:07,800 - INFO - Esponenziale curve_fit params: [3.39661671e-19 1.76776220e+03], plausible=True
+2025-08-03 17:53:07,819 - INFO - Normale curve_fit params: [153.61628936 848.96193296], plausible=False
+2025-08-03 17:53:08,972 - INFO - 
+Distribuzione              FitType     KS_pvalue          AIC          BIC  MAE_KDE_PDF      FitMean       FitStd  Plausible
+      Normale Best-MAE (curve_fit) 1.925363e-131 16714.002520 16723.336433     0.000025 1.536163e+02 8.489619e+02      False
+ Esponenziale Best-MAE (curve_fit)  3.016169e-70 12814.639261 12823.973174     0.000026 1.767762e+03 1.767762e+03       True
+      Weibull Best-MAE (curve_fit)  7.826813e-71 12780.398467 12794.399337     0.000026 1.908941e+03 1.988972e+03      False
+ Esponenziale         MLE (floc=0)  1.391442e-41 12705.230316 12714.564229     0.000033 1.187568e+03 1.187568e+03       True
+ Esponenziale                  MLE  1.261499e-41 12704.924361 12714.258275     0.000033 1.187568e+03 1.187337e+03       True
+      Normale   Empiric (mean/std)  4.035331e-45 14009.647951 14018.981864     0.000049 1.187568e+03 1.792099e+03       True
+      Normale                  MLE  4.509546e-45 14009.647314 14018.981228     0.000049 1.187568e+03 1.790959e+03       True
+      Weibull         MLE (floc=0)  2.532206e-01 12234.490689 12248.491560     0.000054 1.209462e+03 2.200394e+03       True
+   Lognormale         MLE (floc=0)  7.964899e-03 12328.229079 12342.229950     0.000055 2.793038e+03 2.695024e+04      False
+   Lognormale                  MLE  1.392405e-02 12324.776599 12338.777469     0.000055 2.485739e+03 2.064609e+04      False
+   Lognormale Best-MAE (curve_fit)  1.435936e-80          inf          inf     0.000060 7.725543e+16 1.865789e+31      False
+      Weibull                  MLE  9.302988e-29 12374.377630 12388.378501    21.928607 2.780122e+03 4.836740e+03      False
+2025-08-03 17:59:33,297 - INFO - Caricato dataset: ./output/csv/tickets_prs_merged.csv (960 righe)
+2025-08-03 17:59:33,314 - INFO - Ticket validi per il fit: 786
+2025-08-03 17:59:34,512 - INFO - 
+Distribuzione              FitType     KS_pvalue          AIC          BIC  MAE_KDE_PDF     FitMean      FitStd  Plausible
+   Lognormale Best-MAE (curve_fit)  1.458398e-43 13129.176034 13143.176905     0.000011 1684.524401 1634.204168       True
+ Esponenziale Best-MAE (curve_fit)  6.339957e-55 13221.360018 13230.693932     0.000014  815.923255 1214.317062       True
+      Weibull Best-MAE (curve_fit)  2.699986e-60 13305.955597 13319.956468     0.000015 1190.252330 1119.917601       True
+      Normale Best-MAE (curve_fit) 1.887797e-131 16714.638729 16723.972642     0.000025  153.576610  848.902095      False
+2025-08-03 17:59:34,512 - INFO - WINNER: Lognormale (Best-MAE (curve_fit)), MAE=0.000011, parameters=[ 8.14419826e-01 -6.96758149e+02  1.20906030e+03]
+2025-08-03 17:59:34,519 - INFO - Implausible fits:
+Distribuzione              FitType   FitMean     FitStd
+      Normale Best-MAE (curve_fit) 153.57661 848.902095
+2025-08-03 18:00:54,090 - INFO - Caricato dataset: ./output/csv/tickets_prs_merged.csv (960 righe)
+2025-08-03 18:00:54,100 - INFO - Ticket validi per il fit: 786
+2025-08-03 18:00:55,133 - INFO - 
+Distribuzione              FitType     KS_pvalue          AIC          BIC  MAE_KDE_PDF     FitMean      FitStd  Plausible
+   Lognormale Best-MAE (curve_fit)  1.458398e-43 13129.176034 13143.176905     0.000011 1684.524401 1634.204168       True
+ Esponenziale Best-MAE (curve_fit)  6.339957e-55 13221.360018 13230.693932     0.000014  815.923255 1214.317062       True
+      Weibull Best-MAE (curve_fit)  2.699986e-60 13305.955597 13319.956468     0.000015 1190.252330 1119.917601       True
+      Normale Best-MAE (curve_fit) 1.887797e-131 16714.638729 16723.972642     0.000025  153.576610  848.902095      False
+2025-08-03 18:00:55,133 - INFO - WINNER: Lognormale (Best-MAE (curve_fit)), MAE=0.000011, parameters=[ 8.14419826e-01 -6.96758149e+02  1.20906030e+03]
+2025-08-03 18:00:55,139 - INFO - Implausible fits:
+Distribuzione              FitType   FitMean     FitStd
+      Normale Best-MAE (curve_fit) 153.57661 848.902095
