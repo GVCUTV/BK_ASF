@@ -22,22 +22,6 @@
             }
           }
         ]
-      },
-      {
-        "id": "902dfe72273c43e1",
-        "type": "tabs",
-        "children": [
-          {
-            "id": "64fce56e651fb072",
-            "type": "leaf",
-            "state": {
-              "type": "graph",
-              "state": {},
-              "icon": "lucide-git-fork",
-              "title": "Graph view"
-            }
-          }
-        ]
       }
     ],
     "direction": "vertical"
@@ -94,7 +78,8 @@
       }
     ],
     "direction": "horizontal",
-    "width": 300
+    "width": 300,
+    "collapsed": true
   },
   "right": {
     "id": "93c88cebcd5918ac",
@@ -186,7 +171,9 @@
   },
   "active": "82346907ce62f25d",
   "lastOpenFiles": [
-    "Welcome.md",
-    "Formulario PMCSN v2.md"
+    "Distribuzioni a fasi.png",
+    "Distribuzioni a fasi.png.md",
+    "Formulario PMCSN v2.md",
+    "Welcome.md"
   ]
 }

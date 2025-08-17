@@ -1,4 +1,4 @@
-## Metodi analitici
+# Metodi analitici
 ### Terminologia
 Si utilizza la seguente terminologia:
 - $S$ tempo di servizio (o $\mu$ tasso medio di servizio, con $S={1 \over \mu}$)
@@ -44,6 +44,7 @@ Alcune misure su questi criteri sono indipendenti dalla dimensione.
 Se, invece, si guarda alla disciplina di interruzione dei job in fase di processamento, si distingue tra:
 - **scheduling preemptive**: il processamento di un job può essere interrotto per riportare il job in coda e iniziare/riprendere il processamento di un altro job
 - **scheduling non-preemptive**: una volta iniziato il processamento di un job, questo deve terminare senza interruzioni.
+Infine, un server ha uno scheduling **work-conserving** se esegue costantemente operazioni su dei job finché ce ne sono nel sistema.
 
 Un generico centro di servizio può avere una o più code (ad esempio nel caso di scheduling con priorità) e uno o più serventi. Per distinguere i vari casi, includendo anche le caratteristiche descritte sopra, si ricorre alla **notazione di Kendall**, che consente di rappresentare in maniera coincisa le caratteristiche di una coda di servizio:
 $$
@@ -83,9 +84,11 @@ Si consideri una coda con disciplina FIFO, capacità infinita e bilanciamento de
 
 Si può applicare la legge di Little considerando che $E(T_S)=E(T_Q)+E(S)$ e $E(N_S)=E(N_Q)+\rho$. Si ha che 
 $$
-E(N_S)=\lambda E(T_S) \implies E(T_S)={E(N_S) \over \lambda}
-$$$$
-E(N_Q)=\lambda E(T_Q) \implies E(T_Q)={E(N_Q) \over \lambda}
+\begin{align}
+E(N_S)=\lambda E(T_S) &\implies E(T_S)={E(N_S) \over \lambda}
+\\
+E(N_Q)=\lambda E(T_Q) &\implies E(T_Q)={E(N_Q) \over \lambda}
+\end{align}
 $$
 #### Equazione di Khinchin-Pollaczek (KP)
 Si consideri una coda M/G/1:
@@ -104,7 +107,7 @@ Si può estrarre dall'equazione il **coefficiente di variabilità**
 $$
 C^2 = {\sigma^2(S)\over E(S)^2}
 $$
-Il coefficiente di variabilità dipende dunque dalla distribuzione in uso:
+<a name="c2"></a>Il coefficiente di variabilità dipende dunque dalla distribuzione in uso:
 - D -> $C^2 = 0$
 - E<sub>k</sub> -> $C^2 = {1 \over k}, k \geq 1$
 - M -> $C^2=1$
@@ -115,8 +118,9 @@ Il coefficiente di variabilità dipende dunque dalla distribuzione in uso:
 	- $p=0.9 \implies C^2=4.\bar{5}$
 Applicando la legge di Little, si ottiene anche il tempo medio:
 $$
-E(T_Q)=\frac{E(N_Q)}{\lambda}=\frac{\rho^2}{2\lambda(1-\rho)}\left[1+C^2\right]=\frac{\rho}{1-\rho}\frac{C^2+1}{2}E(S)
+E(T_Q)=\frac{E(N_Q)}{\lambda}=\frac{\rho^2}{2\lambda(1-\rho)}\left[1+C^2\right]=\frac{\rho}{1-\rho}\frac{C^2+1}{2}E(S)=\frac{E(S_{rem})}{1-\rho}=\frac{\frac{\lambda}{2}E(S^2)}{1-\rho}
 $$
+**Nota**: nel caso dell'esponenziale, $E(S^2)=2E^2(S)$, dunque $E(T_Q)=\frac{\rho E(S)}{1-\rho}$.
 Per riassumere, ponendo
 $$
 \begin{equation}
@@ -136,4 +140,268 @@ si hanno i seguenti risultati.
 | k-Erlang          | M/E<sub>k</sub>/1 | ${\rho^2 \over {2(1-\rho)}} \left( 1 + {1 \over k} \right)$ | ${{\rho E(S)} \over {2(1-\rho)}} \left( 1 + {1 \over k} \right)$ |
 | Iperesponenziale  | M/H<sub>2</sub>/1 |    ${\rho^2 \over {2(1-\rho)}} \left( 1 + g(p) \right)$     |    ${{\rho E(S)} \over {2(1-\rho)}} \left( 1 + g(p) \right)$     |
 L'equazione di KP vale per qualsiasi tipo di scheduling astratto. Al contrario, $\sigma^2(T_Q)$ dipende dalla disciplina in uso.
-## Analisi operazionale
+
+Per ottenere il tempo che un job qualsiasi passa nel sistema, si può applicare la seguente formula:
+$$
+E(T_S)=E(T_Q)+E(S)
+$$
+In particolare, <u>soltanto</u> per scheduling astratto (non size-based), la formula precedente si più riscrivere nei termini dell'equazione KP:
+$$
+E(T_S)=\frac{\frac{\lambda}{2}E(S^2)}{1-\rho}+E(S)
+$$
+### Scheduling con priorità
+#### Teorema di Conway-Maxwell-Miller
+Tutti gli ordini di servizio non-preemptive non fanno uso delle dimensioni del job hanno la stessa distribuzione sul numero di job nel sistema (che tramite Little si estende anche ai tempi).
+$$
+E(N_S)
+\qquad
+E(T_S)
+\qquad
+E(N_Q)
+\qquad
+E(T_Q)
+$$
+#### Slowdown
+Data $x$ la dimensione di un job, è possibile determinare il tempo di risposta medio per i job di dimensione $x$:
+$$
+E(T_S(x))=E(x + T_Q(x))=x+E(T_Q)=x+{{\lambda \over 2}E(S^2) \over 1-\rho}
+$$
+**Nota**: $E(T_Q(x))=E(T_Q)~\forall x$.
+Lo **slowdown medio** per un job di dimensione $x$ è il tempo di risposta medio osservato rispetto alla sua dimensione, vale a dire
+$$
+E(sd(x))=\frac{E(T_S(x))}{x}=1+\frac{\frac{\lambda}{2}E(S^2)}{x(1-\rho)}
+$$
+Notare che i job di piccole dimensione subiscono uno slowdown maggiore rispetto a quelli grandi.
+
+In un ambiente in cui sono presenti per lo più job di piccole dimensioni:
+- il **tempo di risposta** $E(T_S)$ tende ad essere rappresentativo delle prestazioni di solo alcuni job - quelli più grandi - dato che questi influiscono maggiormente sulla media e il loro tempo di risposta è maggiore rispetto agli altri
+- lo **slowdown** tende ad essere rappresentativo della gran parte dei job, essendo relazionato alla loro dimensione.
+#### Processor sharing
+Lo scheduling processor sharing non tiene conto della dimensione dei job, bensì assegna a tutti la stessa porzione del tempo disponibile sul server. I job non attendono in coda, bensì il loro processamento inizia appena essi arrivano. In questo modo, i job più piccoli escono automaticamente più in fretta dal sistema.
+
+Confrontando una disciplina processor sharing su un qualsiasi distribuzione con una disciplina FIFO su una distribuzione esponenziale, si ottengono gli stessi risultati:
+$$
+\begin{align}
+P(N_S=n)^{M/G/1/PS}=&\rho^n(1-\rho)=P(N_S=n)^{M/M/1/FIFO}
+\\
+E(N_S)^{M/G/1/PS}=&{\rho\over1-\rho}=E(N_S)^{M/M/1/FIFO}
+\\
+E(T_S)^{M/G/1/PS}=&{E(S)\over1-\rho}=E(T_S)^{M/M/1/FIFO}
+\end{align}
+$$
+Tuttavia, PS è migliore di FIFO quando $C^2>1$ (nel caso dell'esponenziale, $C^2=1$ ([ref](#c2))).
+
+Sia $x$ la dimensione di uno o più job:
+$$
+E(T_S(x))^{M/G/1/PS}={x \over 1-\rho},
+\qquad
+E(sd(x))^{M/G/1/PS}={1 \over 1-\rho}
+$$
+In generale, tutti gli scheduling con prelazione non size-based producono lo stesso slowdown medio per i job di qualsiasi dimensione:
+$$
+E(sd(x))^{M/G/1/preemp-non-size-based}={1 \over 1-\rho}
+$$
+### Code a serventi multipli
+Si consideri il seguente modello di coda, in cui sono present $m>1$ serventi, ognuno con tasso di servizio $\mu$. Si parla, in questo caso, di **modello multiserver omogeneo**.
+![[Pasted image 20250318151349.png]]
+
+In generale, si può definire il numero di job in un sistema con $m$ serventi come
+$$
+E(N_S)=
+\begin{cases}
+E(N_Q)+\rho & \text{se }m=1 
+\\
+E(N_Q)+m\rho & \text{se }m>1
+\end{cases}
+$$
+Infatti, se in un certo istante di tempo tutti gli $m$ serventi sono occupati, ci saranno $N_Q$ job nella coda.
+
+Anche l'utilizzazione può essere espressa in maniera simile:
+$$
+\rho =
+\begin{cases}
+{\lambda \over \mu} = \lambda E(S_i) & \text{se } m=1
+\\
+{\lambda \over m\mu} = {{\lambda E(S_i)}\over m} & \text{se } m>1
+\end{cases}
+$$
+Si può interpretare $\rho$ nel caso globale (all'equilibrio stazionario) come la percentuale di quegli $m$ serventi che sono occupati. Inoltre, si assume che ogni servente $i$ abbia lo stesso tempo di servizio $E(S_i)={1 \over \mu}$. Tuttavia, questo tempo vale se si considera lo stesso job che entra ed esce in un servente. Tuttavia, se si vuole conoscere il tempo medio in cui si libera un servente, ossia il tempo trascorso dall'entrata di un job in un servente all'uscita di un altri job da un altro servente è $E(S)={E(S_i) \over m}={1 \over m\mu}$.
+
+La probabilità di avere $n$ job all'interno del sistema è pari a
+$$
+p(n) =
+\begin{cases}
+{1 \over n|} (m\rho)^n p(0) &\text{se } n=1,\dots,m
+\\
+{m^m\over m!}\rho^n p(0) &\text{se } n>m
+\end{cases}
+$$
+dove
+$$
+p(0)=\left[ \sum_{i=0}^{m-1} {(m\rho)^i\over i!} + {(m\rho)^m\over m!(1-\rho)} \right]^{-1}
+$$
+La **formula Erlang-C** consente invece di calcolare probabilità che tutti i serventi siano occupati, ossia la probabilità che si formi coda.
+$$
+P_Q ={(\rho m)^m \over m!(1-\rho)}p(0)
+$$
+Segue dunque che
+$$
+E(N_Q) = P_Q {\rho \over 1-\rho}
+\qquad\qquad
+E(N_S) = P_Q {\rho \over 1-\rho}+m\rho
+$$
+e, per la legge di Little
+$$
+E(T_Q)=
+{E(N_Q) \over \lambda}=
+P_Q {\rho \over \lambda(1-\rho)}=
+{P_Q E(S) \over 1-\rho}
+$$
+Si può studiare anche il numero di serventi occupati $c$:
+$$
+E(c) = \sum_{n=0}^{m-1}np(n)+\sum_{n=m}^\infty mp(n)=m\rho
+$$
+Si può riscrivere $\rho$ nel seguente modo:
+$$
+\rho = \sum_{n=0}^{m-1}{n\over m}p(n)+\sum_{n=m}^\infty p(n)
+= \sum_{n=0}^{m-1}{n\over m}p(n)+P_Q
+$$
+da cui segue che $\rho \geq P_Q$. Si può dunque osservare la seguente relazione tra il tempi medi di attesa in coda nel caso del multiserver (M/M/m) e nel caso del single server (M/M/1) con abstract scheduling (FIFO, LIFO, ecc.) descritto dall'equazione KP:
+$$
+E(T_Q)_{Erlang}={P_QE(S) \over 1-\rho} \leq {\rho E(S)\over 1-\rho} = E(T_Q)_{KP}
+\implies
+E(T_Q)_{Erlang}\leq E(T_Q)_{KP}
+$$
+### Scheduling con priorità
+Parlando sempre di scheduling astratto, è possibile divide il flusso entrante in più code. Ogni classe racchiude una **classe di servizio**, ognuna delle quali ha una **priorità** diversa. Questo tipo di scheduling trova applicazione in diverse situazioni:
+- traffico multimediale
+- QoS
+Uno scheduling prioritario fatto a dovere può migliorare le prestazioni tremendamente. Non ha costo in termini di risorse fisiche, bensì il guadagno di prestazioni è gratis.
+
+Si consideri un sistema con un solo centro a cui sono collegate $r$ code con tasso di arrivo $\lambda_1,\dots,\lambda_r$. In generale, date due classi $k$ e $k'$, con $k<k'$, la classe $k$ è quella con priorità maggiore tra le due.
+
+Si può distinguere tra priorità astratta, se basata su criteri astratti (ad esempio, la sottoscrizione al servizio con una tariffa diversa) o size-based (se basata sulla dimensione dei job).
+
+Per ogni classe $k$, sia $S_k$ il tempo di servizio richiesto da un job di tale classe. Si considerano $E(S_k)=E(S)=\frac{1}{\mu}$, $\sigma^2(S_k)=\sigma^2(S)~\forall k$ e $\rho_k=\lambda_k E(S)$.
+#### Priorità astratta senza prelazione
+Il tempo di attesa in coda per un job di classe $k$ è
+$$
+E(T_{Q_k})^{NP\_priority}=\frac{{\lambda\over2} E(S^2)}{\left(1-\sum_{i=1}^k \rho_i\right)\cdot\left(1-\sum_{i=1}^{k-1} \rho_i\right)}
+$$
+Inoltre, $E(T_{Q_k})\leq E(T_{Q_{k+1}})$.
+
+Sono valide dunque le seguenti misure di prestazioni locali:
+$$
+\begin{align}
+&E(T_{S_k})=E(T_{Q_k})+E(S),\qquad E(T_{S_k})\leq E(T_{S_{k+1}})
+\\
+&E(N_{Q_k})=\lambda_k E(T_{Q_k})
+\\&
+E(N_{S_k})=\lambda_k E(T_{S_k}),\qquad E(N_{S_k})=E(N_{Q_k})+\rho_k
+\end{align}
+$$
+
+Per quanto riguarda le prestazioni globali del sistema:
+$$
+E(T_Q)^{NP\_priority}=E(E(T_{Q_k}))=\sum_{k=1}^r p_k E(T_{Q_k}),
+\qquad
+p_k=\frac{\lambda_k}{\lambda}
+$$
+E in maniera simile per le altre misure
+$$
+\begin{align}
+E(T_S)^{NP\_priority}=E(T_Q)^{NP\_priority}+E(S)
+\end{align}
+$$
+Segue inoltre che
+$$
+\begin{align}
+\lambda_k &= p_k \lambda
+\\
+\rho_k &= \lambda_k E(S)=p_k \lambda E(S)=p_k \rho
+\end{align}
+$$
+Rispetto alla scheduling astratto senza priorità, valgono le seguenti relazioni:
+- per la classe con priorità maggiore:
+$$
+E(T_{Q_1})^{NP\_priority}=\frac{{\lambda\over 2} E(S^2)}{1-\rho_1}\leq E(T_Q)^{KP}
+$$
+- per la classe con priorità minore:
+$$
+E(T_{Q_r})^{NP\_priority}=\frac{{\lambda\over 2} E(S^2)}{(1-\rho)(1-\sum_{i=1}^{r-1}\rho_i)}\geq E(T_Q)^{KP}
+$$
+- prestazioni globali:
+$$
+E(T_Q)^{NP\_priority}=E(T_Q)^{KP}
+\implies
+E(T_S)^{NP\_priority}=E(T_S)^{KP}
+$$
+#### Priorità astratta con prelazione
+Per quanto riguarda le prestazioni locali, il tempo di attesa in coda è$$
+E(T_{Q_k})^{P\_priority}=\frac{{1\over2} E(S^2)\sum_{i=1}^k\lambda_k}{\left(1-\sum_{i=1}^k \rho_i\right)\cdot\left(1-\sum_{i=1}^{k-1} \rho_i\right)}
+$$Si ha che$$
+E(T_{Q_k})^{P\_priority}\leq E(T_{Q_{k+1}})^{P\_priority}
+$$e$$E(T_{Q_k})^{P\_priority}\leq E(T_{Q_k})^{NP\_priority}=E(T_{Q_k})^{KP}$$
+Per quanto riguarda le prestazioni globali,
+$$
+\begin{align}
+E(T_Q)^{P\_priority}&=E(E(T_{Q_k}))=\sum_{k=1}^rp_k E(T_{Q_k})
+\\&\leq
+E(T_Q)^{NP\_priority} = E(T_Q)^{KP}
+\end{align}
+$$
+##### Tempo di servizio virtuale
+Nel caso con prelazione, un job può tornare in coda se si presenta un altro job con priorità maggiore. Il ritorno in coda avviene in una classe minore, corrispondente al tempo di servizio rimanente. Tuttavia, il tempo di attesa viene normalmente calcolato in base a quanto il job prende servizio la prima volta. Il restante tempo che si paga è incluso nel **tempo di servizio virtuale**:
+$$
+E(S_{virt_k})=\frac{E(S)}{1-\sum_{i=1}^{k-1}\rho_i}
+$$
+È possibile allora calcolare allora le prestazioni globali come
+$$
+E(T_S)^{P\_priority}=
+E(T_Q)^{P\_priority} + \sum_{k=1}^r p_k E(S_{virt_k})
+$$
+Solo nel caso di tempi di servizio esponenziali, vale la relazione
+$$
+E(T_S)^{P\_priority}=E(T_S)^{KP}
+$$
+#### Priorità size-based
+Si supponga di dividere i job in $r$ classi di priorità a seconda della loro dimensione: una classe $k$ racchiude tutti job con dimensione compresa in un intervallo $(x_{k-1}, x_k]$. I job di classe $k$ arrivano al sistema con un tasso $\lambda_k$ e sono processati con tassi $\mu_k$, ossia con un tempo medio $E(S_k)=\frac{1}{\mu_k}$.
+
+Sia $f(t)$ la densità del servizio e $F(x)$ la relativa funzione di sopravvivenza. Ad esempio, se il servizio è esponenziale di tasso $\mu$, $f(t)=\mu e^{-\mu t}$ e $F(x)=\int_0^x f(t)dt=1-e^{-\mu t}$.
+Si definiscono le seguenti quantità.
+- probabilità che un job sia di classe $k$:
+$$
+p_k = F(x_k)-F(x_{k-1})
+$$
+- tasso di arrivo dei job di classe $k$, dato $\lambda$ il tasso di arrivo globale:
+$$
+\lambda_k = \lambda p_k
+$$
+- tempo di servizio medio di un job di classe $k$:
+$$
+E(S_k) = \frac{1}{p_k}\int_{x_{k-1}}^{x_k}tf(t)dt
+$$
+- utilizzazione da parte dei job di classe $k$:
+$$
+\rho_k = \lambda \int_{x_{k-1}}^{x_k}tf(t)dt
+$$
+Il tempo di attesa in coda per un job di classe $k$, dipende da tre fattori:
+- il tempo di servizio rimanente del job attualmente in servizio, $E(S_{rem})=\frac{\lambda}{2}E(S^2)$
+- carico delle code con priorità maggiore o uguale a $k$, $\left(1-\sum_{i=1}^k \rho_i\right)^{-1}$
+- carico delle code con priorità maggiore di $k$, $\left(1-\sum_{i=1}^{k-1} \rho_i\right)^{-1}$
+E dunque:
+$$
+E(T_{Q_k})^{SB\_NP\_priority}=\frac{\frac{\lambda}{2}E(S^2)}{\left(1-\sum_{i=1}^k \rho_i\right)\left(1-\sum_{i=1}^{k-1} \rho_i\right)}
+$$
+In alternativa, si può scrivere
+$$
+\sum_{i=1}^k \rho_i = \sum_{i=1}^k \lambda_k \int_{x_{i-1}}^{x_i}tf(t)dt=\lambda\int_0^{x_k} tf(t)dt
+$$
+e dunque
+$$
+E(T_{Q_k})^{SB\_NP\_priority}=\frac{\frac{\lambda}{2}E(S^2)}{\left(1-\lambda\int_0^{x_k}tf(t)dt\right)\left(1-\lambda\int_0^{x_{k-1}}tf(t)dt\right)}
+$$
+Per quanto riguarda le prestazioni globali,
+$$
+E(T_Q)^{SB\_NP\_priority}=E(E(T_{Q_k}))=\sum_{k=1}^r p_k E(T_{Q_k})
+$$
