@@ -5,7 +5,7 @@
 Central configuration for simulation parameters.
 All times are in DAYS. Arrival rate is tickets per DAY.
 Distributions are SciPy-style with explicit params (shape/scale/loc) and include 'loc' if a sliding fit was selected.
-Generated automatically by simulation/generate_sim_config.py on 2025-08-19 11:35:57.
+Generated automatically by simulation/generate_sim_config.py on 2025-08-19 13:02:50.
 Repo: https://github.com/GVCUTV/BK_ASF.git
 """
 
@@ -33,11 +33,11 @@ FEEDBACK_P_TEST = 0.1500000000   # after Testing
 # Names follow SciPy; params are explicit and include 'loc' (shift), if any.
 SERVICE_TIME_PARAMS = {
     "dev_review": {
-        "dist": "norm",
-        "params": {"loc": 472.55203584177127, "scale": 4060.925414999842}
+        "dist": "weibull_min",
+        "params": {"c": NaN, "scale": NaN, "loc": NaN}
     },
     "testing": {
-        "dist": "norm",
-        "params": {"loc": 472.55203584177127, "scale": 4060.925414999842}
+        "dist": "weibull_min",
+        "params": {"c": NaN, "scale": NaN, "loc": NaN}
     }
 }

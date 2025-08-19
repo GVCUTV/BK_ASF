@@ -29,3 +29,39 @@
 2025-08-19 11:35:57,429 - INFO - Using testing    fit: norm {"loc": 472.55203584177127, "scale": 4060.925414999842}
 2025-08-19 11:35:57,430 - INFO - Configuration written: simulation/config.py
 2025-08-19 11:35:57,430 - INFO - Done. Inspect simulation/config.py and logs for details.
+2025-08-19 12:30:21,153 - INFO - Logger initialized. Logfile: output/logs/generate_sim_config.log
+2025-08-19 12:30:21,154 - INFO - CLI args: {'etl_csv': '../etl/output/csv/tickets_prs_merged.csv', 'fit_csv': '../etl/output/csv/fit_summary.csv', 'created_col': 'fields.created', 'window_start': '2024-01-01', 'window_end': '2025-01-01', 'default_p_dev': 0.2, 'default_p_test': 0.15, 'review_rounds_col': 'review_rounds', 'review_flag_col': 'review_rework_flag', 'ci_fail_fix_col': 'ci_failed_then_fix', 'sim_duration_days': 365.0, 'n_devs': 3, 'n_testers': 2, 'config_out': 'simulation/config.py'}
+2025-08-19 12:30:21,155 - INFO - Reading ETL: ../etl/output/csv/tickets_prs_merged.csv
+2025-08-19 12:33:35,546 - INFO - Logger initialized. Logfile: output/logs/generate_sim_config.log
+2025-08-19 12:33:35,548 - INFO - CLI args: {'etl_csv': '../etl/output/csv/tickets_prs_merged.csv', 'fit_csv': '../etl/output/csv/fit_summary.csv', 'created_col': 'fields.created', 'window_start': '2024-01-01', 'window_end': '2025-01-01', 'default_p_dev': 0.2, 'default_p_test': 0.15, 'review_rounds_col': 'review_rounds', 'review_flag_col': 'review_rework_flag', 'ci_fail_fix_col': 'ci_failed_then_fix', 'sim_duration_days': 365.0, 'n_devs': 3, 'n_testers': 2, 'config_out': 'simulation/config.py'}
+2025-08-19 12:33:35,548 - INFO - Reading ETL: ../etl/output/csv/tickets_prs_merged.csv
+2025-08-19 12:34:06,989 - INFO - Logger initialized. Logfile: output/logs/generate_sim_config.log
+2025-08-19 12:34:06,990 - INFO - CLI args: {'etl_csv': './etl/output/csv/tickets_prs_merged.csv', 'fit_csv': './etl/output/csv/fit_summary.csv', 'created_col': 'fields.created', 'window_start': '2024-01-01', 'window_end': '2025-01-01', 'default_p_dev': 0.2, 'default_p_test': 0.15, 'review_rounds_col': 'review_rounds', 'review_flag_col': 'review_rework_flag', 'ci_fail_fix_col': 'ci_failed_then_fix', 'sim_duration_days': 365.0, 'n_devs': 3, 'n_testers': 2, 'config_out': 'simulation/config.py'}
+2025-08-19 12:34:06,990 - INFO - Reading ETL: ./etl/output/csv/tickets_prs_merged.csv
+2025-08-19 12:34:07,079 - WARNING - No arrivals in requested window [2024-01-01, 2025-01-01). Falling back to dataset-wide window.
+2025-08-19 12:34:07,081 - INFO - Fallback window [2009-04-01, 2017-10-18): n=960, days=3122, λ=0.307495/day
+2025-08-19 12:34:07,126 - WARNING - Could not estimate FEEDBACK_P_DEV from ETL; using default=0.2000
+2025-08-19 12:34:07,126 - WARNING - Could not estimate FEEDBACK_P_TEST from ETL; using default=0.1500
+2025-08-19 12:34:07,126 - INFO - Reading fit_summary: ./etl/output/csv/fit_summary.csv
+2025-08-19 12:34:07,133 - INFO - Stage 'development' -> weibull_min {"c": NaN, "scale": NaN, "loc": NaN}
+2025-08-19 12:34:07,134 - INFO - Stage 'review' -> lognorm {"s": NaN, "scale": NaN, "loc": NaN}
+2025-08-19 12:34:07,134 - INFO - Stage 'testing' -> weibull_min {"c": NaN, "scale": NaN, "loc": NaN}
+2025-08-19 12:34:07,134 - INFO - Using dev_review fit: weibull_min {"c": NaN, "scale": NaN, "loc": NaN}
+2025-08-19 12:34:07,134 - INFO - Using testing    fit: weibull_min {"c": NaN, "scale": NaN, "loc": NaN}
+2025-08-19 12:34:07,137 - INFO - Configuration written: simulation/config.py
+2025-08-19 12:34:07,138 - INFO - Done. Inspect simulation/config.py and logs for details.
+2025-08-19 13:02:50,255 - INFO - Logger initialized. Logfile: output/logs/generate_sim_config.log
+2025-08-19 13:02:50,257 - INFO - CLI args: {'etl_csv': '/Users/og/PycharmProjects/BK_ASF/etl/output/csv/tickets_prs_merged.csv', 'fit_csv': '/Users/og/PycharmProjects/BK_ASF/etl/output/csv/fit_summary.csv', 'created_col': 'fields.created', 'window_start': '2024-01-01', 'window_end': '2025-01-01', 'default_p_dev': 0.2, 'default_p_test': 0.15, 'review_rounds_col': 'review_rounds', 'review_flag_col': 'review_rework_flag', 'ci_fail_fix_col': 'ci_failed_then_fix', 'sim_duration_days': 365.0, 'n_devs': 3, 'n_testers': 2, 'config_out': 'simulation/config.py'}
+2025-08-19 13:02:50,257 - INFO - Reading ETL: /Users/og/PycharmProjects/BK_ASF/etl/output/csv/tickets_prs_merged.csv
+2025-08-19 13:02:50,330 - WARNING - No arrivals in requested window [2024-01-01, 2025-01-01). Falling back to dataset-wide window.
+2025-08-19 13:02:50,333 - INFO - Fallback window [2009-04-01, 2017-10-18): n=960, days=3122, λ=0.307495/day
+2025-08-19 13:02:50,379 - WARNING - Could not estimate FEEDBACK_P_DEV from ETL; using default=0.2000
+2025-08-19 13:02:50,379 - WARNING - Could not estimate FEEDBACK_P_TEST from ETL; using default=0.1500
+2025-08-19 13:02:50,380 - INFO - Reading fit_summary: /Users/og/PycharmProjects/BK_ASF/etl/output/csv/fit_summary.csv
+2025-08-19 13:02:50,382 - INFO - Stage 'development' -> weibull_min {"c": NaN, "scale": NaN, "loc": NaN}
+2025-08-19 13:02:50,382 - INFO - Stage 'review' -> lognorm {"s": NaN, "scale": NaN, "loc": NaN}
+2025-08-19 13:02:50,382 - INFO - Stage 'testing' -> weibull_min {"c": NaN, "scale": NaN, "loc": NaN}
+2025-08-19 13:02:50,383 - INFO - Using dev_review fit: weibull_min {"c": NaN, "scale": NaN, "loc": NaN}
+2025-08-19 13:02:50,383 - INFO - Using testing    fit: weibull_min {"c": NaN, "scale": NaN, "loc": NaN}
+2025-08-19 13:02:50,384 - INFO - Configuration written: simulation/config.py
+2025-08-19 13:02:50,384 - INFO - Done. Inspect simulation/config.py and logs for details.
