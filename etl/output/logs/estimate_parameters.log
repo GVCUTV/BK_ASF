@@ -52,3 +52,49 @@ Story              2
 Name: count, dtype: int64
 2025-08-01 12:19:45,054 - INFO - Parametri chiave salvati in ./output/csv/parameter_estimates.csv
 2025-08-01 12:19:45,054 - INFO - === ESTRAZIONE PARAMETRI COMPLETATA ===
+2025-08-19 11:33:19,942 - INFO - === START 5_estimate_parameters.py ===
+2025-08-19 11:33:20,003 - INFO - Caricato dataset: ./output/csv/tickets_prs_merged.csv (n=960)
+2025-08-19 11:33:20,006 - INFO - Colonna 'fields.created' convertita a datetime.
+2025-08-19 11:33:20,008 - INFO - Colonna 'fields.resolutiondate' convertita a datetime.
+2025-08-19 11:33:20,013 - INFO - Tasso di arrivo stimato: 0.307249 ticket/giorno
+2025-08-19 11:33:20,014 - INFO - Resolution time globale: mean=215.73 d | median=21.15 d
+2025-08-19 11:33:21,086 - INFO - Grafico backlog nel tempo salvato in ./output/png/backlog_over_time.png
+2025-08-19 11:33:21,088 - INFO - Throughput medio mensile: 11.83 ticket/mese
+2025-08-19 11:33:21,093 - INFO - Esportate durate per fase in ./output/csv/phase_durations_wide.csv
+2025-08-19 11:33:21,101 - INFO - Statistiche per fase salvate in ./output/csv/phase_summary_stats.csv
+               phase  count  nan_share     mean_d  median_d      std_d    p25_d     p75_d    min_d       max_d
+   dev_duration_days    196   0.795833 148.359325  0.702512 378.235210 0.006111 49.737358 0.000509 2268.083160
+review_duration_days    196   0.795833  35.045957  9.241672 103.347291 1.359031 37.982266 0.012338 1342.365648
+  test_duration_days    118   0.877083  10.709216  0.000469  44.510149 0.000107  0.003484 0.000000  302.359375
+2025-08-19 11:33:21,102 - INFO - Parametri chiave salvati in ./output/csv/parameter_estimates.csv
+2025-08-19 11:33:21,102 - INFO - === END 5_estimate_parameters.py ===
+2025-08-19 12:01:23,899 - INFO - Caricato dataset: ./output/csv/tickets_prs_merged.csv (960)
+2025-08-19 12:01:23,902 - INFO - Colonna 'fields.created' convertita a datetime (naive).
+2025-08-19 12:01:23,903 - INFO - Colonna 'fields.resolutiondate' convertita a datetime (naive).
+2025-08-19 12:01:23,907 - INFO - Tasso di arrivo stimato: 0.307249 ticket/giorno
+2025-08-19 12:01:23,908 - INFO - Resolution time: mean=215.73 d | median=21.15 d
+2025-08-19 12:01:24,984 - INFO - Grafico backlog nel tempo salvato in ./output/png/backlog_over_time.png
+2025-08-19 12:01:25,008 - INFO - Throughput medio mensile: 11.83 ticket/mese
+2025-08-19 12:01:25,012 - INFO - Esportate durate per fase in ./output/csv/phase_durations_wide.csv
+2025-08-19 12:01:25,019 - INFO - Statistiche per fase salvate in ./output/csv/phase_summary_stats.csv
+               phase  count  nan_share     mean_d  median_d      std_d    p25_d     p75_d    min_d       max_d
+   dev_duration_days    196   0.795833 148.359325  0.702512 378.235210 0.006111 49.737358 0.000509 2268.083160
+review_duration_days    196   0.795833  35.045957  9.241672 103.347291 1.359031 37.982266 0.012338 1342.365648
+  test_duration_days    118   0.877083  10.709216  0.000469  44.510149 0.000107  0.003484 0.000000  302.359375
+2025-08-19 12:01:25,020 - INFO - Parametri chiave salvati in ./output/csv/parameter_estimates.csv
+2025-08-19 12:01:25,020 - INFO - === ESTRAZIONE PARAMETRI COMPLETATA ===
+2025-08-19 12:17:17,176 - INFO - Caricato dataset: ./output/csv/tickets_prs_merged.csv (960)
+2025-08-19 12:17:17,179 - INFO - Colonna 'fields.created' convertita a datetime (naive).
+2025-08-19 12:17:17,180 - INFO - Colonna 'fields.resolutiondate' convertita a datetime (naive).
+2025-08-19 12:17:17,184 - INFO - Tasso di arrivo stimato: 0.307249 ticket/giorno
+2025-08-19 12:17:17,185 - INFO - Resolution time: mean=215.73 d | median=21.15 d
+2025-08-19 12:17:18,399 - INFO - Grafico backlog nel tempo salvato in ./output/png/backlog_over_time.png
+2025-08-19 12:17:18,427 - INFO - Throughput medio mensile: 11.83 ticket/mese
+2025-08-19 12:17:18,431 - INFO - Esportate durate per fase in ./output/csv/phase_durations_wide.csv
+2025-08-19 12:17:18,440 - INFO - Statistiche per fase salvate in ./output/csv/phase_summary_stats.csv
+               phase  count  nan_share     mean_d  median_d      std_d    p25_d     p75_d    min_d       max_d
+   dev_duration_days    196   0.795833 148.359325  0.702512 378.235210 0.006111 49.737358 0.000509 2268.083160
+review_duration_days    196   0.795833  35.045957  9.241672 103.347291 1.359031 37.982266 0.012338 1342.365648
+  test_duration_days    118   0.877083  10.709216  0.000469  44.510149 0.000107  0.003484 0.000000  302.359375
+2025-08-19 12:17:18,441 - INFO - Parametri chiave salvati in ./output/csv/parameter_estimates.csv
+2025-08-19 12:17:18,441 - INFO - === ESTRAZIONE PARAMETRI COMPLETATA ===

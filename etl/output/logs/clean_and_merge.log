@@ -1,3 +1,93 @@
 2025-07-29 18:22:08,045 - INFO - Salvati 943 ticket puliti in ./output/csv/jira_issues_clean.csv
 2025-07-29 18:22:08,364 - INFO - Salvate 3329 PR pulite in ./output/csv/github_prs_clean.csv
 2025-07-29 18:22:08,408 - INFO - Salvati dati mergeati (ticket+PR) in ./output/csv/tickets_prs_merged.csv
+2025-08-19 11:26:32,073 - INFO - === START 3_clean_and_merge.py ===
+2025-08-19 11:26:32,104 - INFO - Caricati ticket raw: ./output/csv/jira_issues_raw.csv (n=1095)
+2025-08-19 11:26:32,105 - INFO - Rimossi duplicati ticket per 'key': 0
+2025-08-19 11:26:32,107 - INFO - Filtrati ticket con risoluzioni non utili: 152
+2025-08-19 11:26:32,113 - INFO - Colonna convertita a datetime: fields.created
+2025-08-19 11:26:32,115 - INFO - Colonna convertita a datetime: fields.resolutiondate
+2025-08-19 11:26:32,163 - INFO - Salvati 943 ticket puliti in ./output/csv/jira_issues_clean.csv
+2025-08-19 11:26:32,390 - INFO - Caricate PR raw: ./output/csv/github_prs_raw.csv (n=3329)
+2025-08-19 11:26:32,398 - INFO - Colonna convertita a datetime: created_at
+2025-08-19 11:26:32,402 - INFO - Colonna convertita a datetime: updated_at
+2025-08-19 11:26:32,402 - WARNING - Colonna assente, impossibile convertire: merged_at
+2025-08-19 11:26:32,406 - INFO - Colonna convertita a datetime: closed_at
+2025-08-19 11:26:32,776 - INFO - Salvate 3329 PR pulite in ./output/csv/github_prs_clean.csv
+2025-08-19 11:26:32,788 - INFO - Merge completato: righe=960. Derivo fasi...
+2025-08-19 11:26:32,788 - INFO - Calcolo aggregazioni PR per ticket (first created_at, last merged/closed)...
+2025-08-19 11:27:48,671 - INFO - === START 3_clean_and_merge.py ===
+2025-08-19 11:27:48,698 - INFO - Caricati ticket raw: ./output/csv/jira_issues_raw.csv (n=1095)
+2025-08-19 11:27:48,699 - INFO - Rimossi duplicati ticket per 'key': 0
+2025-08-19 11:27:48,700 - INFO - Filtrati ticket con risoluzioni non utili: 152
+2025-08-19 11:27:48,703 - INFO - Colonna convertita a datetime: fields.created
+2025-08-19 11:27:48,705 - INFO - Colonna convertita a datetime: fields.resolutiondate
+2025-08-19 11:27:48,756 - INFO - Salvati 943 ticket puliti in ./output/csv/jira_issues_clean.csv
+2025-08-19 11:27:48,790 - INFO - Caricate PR raw: ./output/csv/github_prs_raw.csv (n=591)
+2025-08-19 11:27:48,793 - INFO - Colonna convertita a datetime: created_at
+2025-08-19 11:27:48,795 - INFO - Colonna convertita a datetime: updated_at
+2025-08-19 11:27:48,795 - WARNING - Colonna assente, impossibile convertire: merged_at
+2025-08-19 11:27:48,796 - INFO - Colonna convertita a datetime: closed_at
+2025-08-19 11:27:48,854 - INFO - Salvate 591 PR pulite in ./output/csv/github_prs_clean.csv
+2025-08-19 11:27:48,862 - INFO - Merge completato: righe=960. Derivo fasi...
+2025-08-19 11:27:48,863 - INFO - Calcolo aggregazioni PR per ticket (first created_at, last merged/closed)...
+2025-08-19 11:33:08,927 - INFO - Caricati ticket raw: ./output/csv/jira_issues_raw.csv (1095)
+2025-08-19 11:33:08,929 - INFO - Rimossi duplicati ticket per 'key': 0
+2025-08-19 11:33:08,930 - INFO - Filtrati ticket con risoluzioni non utili: 152
+2025-08-19 11:33:08,935 - INFO - Convertita a datetime (naive): fields.created
+2025-08-19 11:33:08,937 - INFO - Convertita a datetime (naive): fields.resolutiondate
+2025-08-19 11:33:08,979 - INFO - Salvati 943 ticket puliti in ./output/csv/jira_issues_clean.csv
+2025-08-19 11:33:09,012 - INFO - Caricate PR raw: ./output/csv/github_prs_raw.csv (591)
+2025-08-19 11:33:09,016 - INFO - Convertita a datetime (naive): created_at
+2025-08-19 11:33:09,018 - INFO - Convertita a datetime (naive): updated_at
+2025-08-19 11:33:09,019 - INFO - Convertita a datetime (naive): closed_at
+2025-08-19 11:33:09,019 - INFO - Campo 'merged_at' NON presente nelle PR da /issues: useremo 'closed_at' come proxy fine-review.
+2025-08-19 11:33:09,070 - INFO - Salvate 591 PR pulite in ./output/csv/github_prs_clean.csv
+2025-08-19 11:33:09,079 - INFO - Merge completato: righe=960. Derivo fasi...
+2025-08-19 11:33:09,079 - INFO - Calcolo aggregazioni PR per ticket (first created_at, last merged/closed)...
+2025-08-19 11:33:09,086 - INFO - Calcolo durate (giorni) per ciascuna fase...
+2025-08-19 11:33:09,093 - INFO - [dev_duration_days] validi=196 | mean=148.36 | median=0.70
+2025-08-19 11:33:09,094 - INFO - [review_duration_days] validi=196 | mean=35.05 | median=9.24
+2025-08-19 11:33:09,094 - INFO - [test_duration_days] validi=118 | mean=10.71 | median=0.00
+2025-08-19 11:33:09,095 - INFO - [resolution_time_days] validi=887 | mean=215.73 | median=21.15
+2025-08-19 11:33:09,172 - INFO - Salvati dati mergeati (ticket+PR+fasi) in ./output/csv/tickets_prs_merged.csv
+2025-08-19 12:01:15,920 - INFO - Caricati ticket raw: ./output/csv/jira_issues_raw.csv (1095)
+2025-08-19 12:01:15,920 - INFO - Rimossi duplicati ticket per 'key': 0
+2025-08-19 12:01:15,921 - INFO - Filtrati ticket con risoluzioni non utili: 152
+2025-08-19 12:01:15,924 - INFO - Convertita a datetime (naive): fields.created
+2025-08-19 12:01:15,926 - INFO - Convertita a datetime (naive): fields.resolutiondate
+2025-08-19 12:01:15,954 - INFO - Salvati 943 ticket puliti in ./output/csv/jira_issues_clean.csv
+2025-08-19 12:01:15,979 - INFO - Caricate PR raw: ./output/csv/github_prs_raw.csv (591)
+2025-08-19 12:01:15,982 - INFO - Convertita a datetime (naive): created_at
+2025-08-19 12:01:15,983 - INFO - Convertita a datetime (naive): updated_at
+2025-08-19 12:01:15,984 - INFO - Convertita a datetime (naive): closed_at
+2025-08-19 12:01:15,985 - INFO - Campo 'merged_at' NON presente nelle PR da /issues: useremo 'closed_at' come proxy fine-review.
+2025-08-19 12:01:16,023 - INFO - Salvate 591 PR pulite in ./output/csv/github_prs_clean.csv
+2025-08-19 12:01:16,030 - INFO - Merge completato: righe=960. Derivo fasi...
+2025-08-19 12:01:16,030 - INFO - Calcolo aggregazioni PR per ticket (first created_at, last merged/closed)...
+2025-08-19 12:01:16,034 - INFO - Calcolo durate (giorni) per ciascuna fase...
+2025-08-19 12:01:16,039 - INFO - [dev_duration_days] validi=196 | mean=148.36 | median=0.70
+2025-08-19 12:01:16,039 - INFO - [review_duration_days] validi=196 | mean=35.05 | median=9.24
+2025-08-19 12:01:16,040 - INFO - [test_duration_days] validi=118 | mean=10.71 | median=0.00
+2025-08-19 12:01:16,040 - INFO - [resolution_time_days] validi=887 | mean=215.73 | median=21.15
+2025-08-19 12:01:16,099 - INFO - Salvati dati mergeati (ticket+PR+fasi) in ./output/csv/tickets_prs_merged.csv
+2025-08-19 12:17:10,235 - INFO - Caricati ticket raw: ./output/csv/jira_issues_raw.csv (1095)
+2025-08-19 12:17:10,236 - INFO - Rimossi duplicati ticket per 'key': 0
+2025-08-19 12:17:10,237 - INFO - Filtrati ticket con risoluzioni non utili: 152
+2025-08-19 12:17:10,241 - INFO - Convertita a datetime (naive): fields.created
+2025-08-19 12:17:10,243 - INFO - Convertita a datetime (naive): fields.resolutiondate
+2025-08-19 12:17:10,285 - INFO - Salvati 943 ticket puliti in ./output/csv/jira_issues_clean.csv
+2025-08-19 12:17:10,323 - INFO - Caricate PR raw: ./output/csv/github_prs_raw.csv (591)
+2025-08-19 12:17:10,327 - INFO - Convertita a datetime (naive): created_at
+2025-08-19 12:17:10,328 - INFO - Convertita a datetime (naive): updated_at
+2025-08-19 12:17:10,330 - INFO - Convertita a datetime (naive): closed_at
+2025-08-19 12:17:10,330 - INFO - Campo 'merged_at' NON presente: useremo 'closed_at' come proxy di fine review se necessario.
+2025-08-19 12:17:10,399 - INFO - Salvate 591 PR pulite in ./output/csv/github_prs_clean.csv
+2025-08-19 12:17:10,409 - INFO - Merge completato: righe=960. Derivo fasi...
+2025-08-19 12:17:10,409 - INFO - Calcolo aggregazioni PR per ticket (first created_at, last merged/closed)...
+2025-08-19 12:17:10,415 - INFO - Calcolo durate (giorni) per ciascuna fase...
+2025-08-19 12:17:10,422 - INFO - [dev_duration_days] validi=196 | mean=148.36 | median=0.70
+2025-08-19 12:17:10,423 - INFO - [review_duration_days] validi=196 | mean=35.05 | median=9.24
+2025-08-19 12:17:10,424 - INFO - [test_duration_days] validi=118 | mean=10.71 | median=0.00
+2025-08-19 12:17:10,424 - INFO - [resolution_time_days] validi=887 | mean=215.73 | median=21.15
+2025-08-19 12:17:10,508 - INFO - Salvati dati mergeati (ticket+PR+fasi) in ./output/csv/tickets_prs_merged.csv

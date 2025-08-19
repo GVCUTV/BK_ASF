@@ -23,3 +23,21 @@
 2025-07-29 19:36:17,886 - INFO - Ticket chiusi senza PR: 699 (72.8%)
 2025-07-29 19:36:17,990 - INFO - Grafico a torta salvato in ./output/png/distribuzione_ticket_tipo.png
 2025-07-29 19:36:17,991 - INFO - Statistiche esportate in ./output/statistiche_riassuntive.csv
+2025-08-19 11:33:16,053 - INFO - Ticket totali: 960
+2025-08-19 11:33:16,058 - INFO - Ticket riaperti: 3 (0.3%)
+2025-08-19 11:33:16,058 - INFO - In Progress: 3 (0.3%)
+2025-08-19 11:33:16,059 - INFO - Ticket chiusi senza PR: 699 (72.8%)
+2025-08-19 11:33:16,249 - INFO - Grafico a torta salvato in ./output/png/distribuzione_ticket_tipo.png
+2025-08-19 11:33:16,250 - INFO - Statistiche esportate in ./output/statistiche_riassuntive.csv
+2025-08-19 12:01:20,457 - INFO - Ticket totali: 960
+2025-08-19 12:01:20,459 - INFO - Ticket riaperti: 3 (0.3%)
+2025-08-19 12:01:20,460 - INFO - In Progress: 3 (0.3%)
+2025-08-19 12:01:20,461 - INFO - Ticket chiusi senza PR: 699 (72.8%)
+2025-08-19 12:01:20,627 - INFO - Grafico a torta salvato in ./output/png/distribuzione_ticket_tipo.png
+2025-08-19 12:01:20,629 - INFO - Statistiche esportate in ./output/statistiche_riassuntive.csv
+2025-08-19 12:17:13,931 - INFO - Ticket totali: 960
+2025-08-19 12:17:13,933 - INFO - Ticket riaperti: 3 (0.3%)
+2025-08-19 12:17:13,934 - INFO - In Progress: 3 (0.3%)
+2025-08-19 12:17:13,936 - INFO - Ticket chiusi senza PR: 699 (72.8%)
+2025-08-19 12:17:14,137 - INFO - Grafico a torta salvato in ./output/png/distribuzione_ticket_tipo.png
+2025-08-19 12:17:14,138 - INFO - Statistiche esportate in ./output/statistiche_riassuntive.csv

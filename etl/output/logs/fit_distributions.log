@@ -102,6 +102,14 @@ Distribuzione    FitType    KS_pvalue          AIC          BIC  MAE_KDE_PDF
  Esponenziale     floc=0 1.391442e-41 12705.230316 12714.564229     0.000033
  Esponenziale MLE libero 1.261499e-41 12704.924361 12714.258275     0.000033
       Normale        MLE 4.509546e-45 14009.647314 14018.981228     0.000049
+2025-08-03 15:12:16,772 - INFO - Caricato dataset: ./output/csv/tickets_prs_merged.csv (960 righe)
+2025-08-03 15:12:16,777 - INFO - Ticket validi per il fit: 786
+2025-08-03 15:12:17,130 - INFO - Grafico confronto fit (linee) salvato in ./output/png/confronto_fit_distribuzioni_linee.png
+2025-08-03 15:12:17,148 - INFO - 
+Distribuzione    FitType    KS_pvalue          AIC          BIC  MAE_KDE_PDF
+ Esponenziale     floc=0 1.391442e-41 12705.230316 12714.564229     0.000033
+ Esponenziale MLE libero 1.261499e-41 12704.924361 12714.258275     0.000033
+      Normale        MLE 4.509546e-45 14009.647314 14018.981228     0.000049
 2025-08-03 16:45:58,577 - INFO - Caricato dataset: ./output/csv/tickets_prs_merged.csv (960 righe)
 2025-08-03 16:45:58,588 - INFO - Ticket validi per il fit: 786
 2025-08-03 16:45:58,629 - WARNING - Tutti i fit per Lognormale non plausibili! (media/std troppo lontani dai dati)
@@ -247,3 +255,67 @@ Distribuzione              FitType     KS_pvalue          AIC          BIC  MAE_
 2025-08-03 18:00:55,139 - INFO - Implausible fits:
 Distribuzione              FitType   FitMean     FitStd
       Normale Best-MAE (curve_fit) 153.57661 848.902095
+2025-08-19 10:23:09,097 - INFO - Caricato dataset: ./output/csv/tickets_prs_merged.csv (960 righe)
+2025-08-19 10:23:09,107 - INFO - Ticket validi per il fit: 786
+2025-08-19 10:23:09,763 - INFO - 
+Distribuzione              FitType     KS_pvalue          AIC          BIC  MAE_KDE_PDF     FitMean      FitStd  Plausible
+   Lognormale Best-MAE (curve_fit)  1.458398e-43 13129.176036 13143.176906     0.000011 1684.524401 1634.204160       True
+ Esponenziale Best-MAE (curve_fit)  6.339954e-55 13221.360019 13230.693933     0.000014  815.923254 1214.317061       True
+      Weibull Best-MAE (curve_fit)  2.699989e-60 13305.955592 13319.956462     0.000015 1190.252331 1119.917606       True
+      Normale Best-MAE (curve_fit) 1.887797e-131 16714.638725 16723.972638     0.000025  153.576610  848.902096      False
+2025-08-19 10:23:09,764 - INFO - WINNER: Lognormale (Best-MAE (curve_fit)), MAE=0.000011, parameters=[ 8.14419823e-01 -6.96758153e+02  1.20906030e+03]
+2025-08-19 10:23:09,769 - INFO - Implausible fits:
+Distribuzione              FitType   FitMean     FitStd
+      Normale Best-MAE (curve_fit) 153.57661 848.902096
+2025-08-19 10:49:49,920 - INFO - Caricato dataset: ./output/csv/tickets_prs_merged.csv (960 righe)
+2025-08-19 10:49:49,928 - INFO - Ticket validi per il fit: 786
+2025-08-19 10:49:50,542 - INFO - 
+Distribuzione              FitType     KS_pvalue          AIC          BIC  MAE_KDE_PDF     FitMean      FitStd  Plausible
+   Lognormale Best-MAE (curve_fit)  1.458398e-43 13129.176036 13143.176906     0.000011 1684.524401 1634.204160       True
+ Esponenziale Best-MAE (curve_fit)  6.339954e-55 13221.360019 13230.693933     0.000014  815.923254 1214.317061       True
+      Weibull Best-MAE (curve_fit)  2.699989e-60 13305.955592 13319.956462     0.000015 1190.252331 1119.917606       True
+      Normale Best-MAE (curve_fit) 1.887797e-131 16714.638725 16723.972638     0.000025  153.576610  848.902096      False
+2025-08-19 10:49:50,543 - INFO - WINNER: Lognormale (Best-MAE (curve_fit)), MAE=0.000011, parameters=[ 8.14419823e-01 -6.96758153e+02  1.20906030e+03]
+2025-08-19 10:49:50,549 - INFO - Implausible fits:
+Distribuzione              FitType   FitMean     FitStd
+      Normale Best-MAE (curve_fit) 153.57661 848.902096
+2025-08-19 11:33:40,673 - INFO - === START 7_fit_distributions.py ===
+2025-08-19 11:33:40,729 - INFO - Caricato dataset: ./output/csv/tickets_prs_merged.csv (n=960)
+2025-08-19 11:33:40,731 - INFO - [dev_duration_days] Campioni validi per il fit: n=196
+2025-08-19 11:33:41,336 - INFO - [dev_duration_days] Salvato grafico: ./output/png/confronto_fit_dev_duration_days.png
+2025-08-19 11:33:41,339 - INFO - [dev_duration_days] Salvato CSV fit: ./output/csv/distribution_fit_stats_dev_duration_days.csv
+2025-08-19 11:33:41,343 - INFO - [dev_duration_days] WINNER: Weibull (Best-MAE (curve_fit)), MAE=0.000052, parameters=[   2.13046983 -279.07055412  335.38112967]
+2025-08-19 11:33:41,344 - INFO - [review_duration_days] Campioni validi per il fit: n=196
+2025-08-19 11:33:41,870 - INFO - [review_duration_days] Salvato grafico: ./output/png/confronto_fit_review_duration_days.png
+2025-08-19 11:33:41,873 - INFO - [review_duration_days] Salvato CSV fit: ./output/csv/distribution_fit_stats_review_duration_days.csv
+2025-08-19 11:33:41,876 - INFO - [review_duration_days] WINNER: Lognormale (Best-MAE (curve_fit)), MAE=0.000036, parameters=[   0.24601911 -168.41875551  186.302726  ]
+2025-08-19 11:33:41,877 - INFO - [test_duration_days] Campioni validi per il fit: n=118
+2025-08-19 11:33:42,388 - INFO - [test_duration_days] Salvato grafico: ./output/png/confronto_fit_test_duration_days.png
+2025-08-19 11:33:42,390 - INFO - [test_duration_days] Salvato CSV fit: ./output/csv/distribution_fit_stats_test_duration_days.csv
+2025-08-19 11:33:42,393 - INFO - [test_duration_days] WINNER: Weibull (Best-MAE (curve_fit)), MAE=0.000192, parameters=[  2.39611187 -37.89737437  44.1377734 ]
+2025-08-19 11:33:42,394 - INFO - [resolution_time_days] Campioni validi per il fit: n=887
+2025-08-19 11:33:42,943 - INFO - [resolution_time_days] Salvato grafico: ./output/png/confronto_fit_resolution_time_days.png
+2025-08-19 11:33:42,948 - INFO - [resolution_time_days] Salvato CSV fit: ./output/csv/distribution_fit_stats_resolution_time_days.csv
+2025-08-19 11:33:42,951 - INFO - [resolution_time_days] WINNER: Lognormale (Best-MAE (curve_fit)), MAE=0.000038, parameters=[ 1.51668493e-01 -1.04286554e+03  1.06960334e+03]
+2025-08-19 11:33:42,951 - INFO - === END 7_fit_distributions.py ===
+2025-08-19 12:01:34,674 - INFO - Logger initialized. Logfile: output/logs/fit_distributions.log
+2025-08-19 12:01:34,707 - INFO - Caricato dataset: ./output/csv/tickets_prs_merged.csv (960 righe)
+2025-08-19 12:01:34,707 - INFO - Fitting distribuzioni su 'resolution_time_days' (legacy, per file distribution_fit_stats.csv)
+2025-08-19 12:01:34,815 - INFO - Salvato: output/csv/distribution_fit_stats.csv
+2025-08-19 12:01:35,251 - INFO - WINNER [resolution_time_days]: Lognormale, MAE=0.000038, params=[ 1.51668500e-01 -1.04286549e+03  1.06960329e+03]
+2025-08-19 12:01:35,252 - INFO - Fitting distribuzioni per stage 'dev_review' (n=196).
+2025-08-19 12:01:35,734 - INFO - WINNER [dev_review]: Weibull, MAE=0.000052, params=[   2.40347976 -343.91014567  428.10737648]
+2025-08-19 12:01:35,735 - INFO - Fitting distribuzioni per stage 'testing' (n=118).
+2025-08-19 12:01:36,220 - INFO - WINNER [testing]: Weibull, MAE=0.000192, params=[  2.39611188 -37.89737452  44.13777355]
+2025-08-19 12:01:36,222 - INFO - fit_summary.csv salvato in output/csv/fit_summary.csv
+2025-08-19 12:17:26,040 - INFO - Logger initialized. Logfile: output/logs/fit_distributions.log
+2025-08-19 12:17:26,083 - INFO - Caricato dataset: ./output/csv/tickets_prs_merged.csv (960 righe)
+2025-08-19 12:17:26,083 - INFO - Fitting distribuzioni su 'resolution_time_days' (legacy)
+2025-08-19 12:17:26,726 - INFO - WINNER [resolution_time_days]: Lognormale, MAE=0.000038, params=[ 1.51668500e-01 -1.04286549e+03  1.06960329e+03]
+2025-08-19 12:17:26,727 - INFO - Fitting distribuzioni per stage 'development' (n=196).
+2025-08-19 12:17:27,234 - INFO - WINNER [development]: Weibull, MAE=0.000052, params=[   2.13046984 -279.07055606  335.38113154]
+2025-08-19 12:17:27,236 - INFO - Fitting distribuzioni per stage 'review' (n=196).
+2025-08-19 12:17:27,776 - INFO - WINNER [review]: Lognormale, MAE=0.000036, params=[   0.24601911 -168.41876183  186.30273219]
+2025-08-19 12:17:27,778 - INFO - Fitting distribuzioni per stage 'testing' (n=118).
+2025-08-19 12:17:28,324 - INFO - WINNER [testing]: Weibull, MAE=0.000192, params=[  2.39611188 -37.89737452  44.13777355]
+2025-08-19 12:17:28,326 - INFO - fit_summary.csv salvato in output/csv/fit_summary.csv

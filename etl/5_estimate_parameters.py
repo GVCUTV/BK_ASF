@@ -1,11 +1,13 @@
-# v8
+# v13
 # file: 5_estimate_parameters.py
 
 """
-Estrazione dei parametri dal file tickets_prs_merged.csv.
-Compatibile con le colonne effettivamente prodotte dagli script precedenti (no phase, no feedback count espliciti).
-Calcola tasso di arrivo, risoluzione, backlog, throughput, e segnala se certi dati non sono presenti.
-Log dettagliato in ./output/logs/estimate_parameters.log.
+Stima parametri globali E PER-FASE (Development / Review / Testing) con durate in GIORNI.
+Output:
+- ./output/csv/phase_durations_wide.csv    (key, dev_duration_days, review_duration_days, test_duration_days)
+- ./output/csv/phase_summary_stats.csv     (statistiche per fase)
+- ./output/csv/parameter_estimates.csv     (arrivals/giorno, resolution time globale, throughput mensile)
+- ./output/png/backlog_over_time.png       (serie temporale backlog)
 """
 
 import pandas as pd
@@ -14,118 +16,133 @@ import logging
 import os
 import matplotlib.pyplot as plt
 
+def summarize_phase(series, name):
+    """Statistiche robuste sulla fase (giorni)."""
+    s = pd.to_numeric(series, errors="coerce").dropna()
+    return {
+        "phase": name,
+        "count": int(s.size),
+        "nan_share": float(1.0 - (s.size / max(1, len(series)))),
+        "mean_d": float(s.mean()) if s.size else np.nan,
+        "median_d": float(s.median()) if s.size else np.nan,
+        "std_d": float(s.std()) if s.size else np.nan,
+        "p25_d": float(s.quantile(0.25)) if s.size else np.nan,
+        "p75_d": float(s.quantile(0.75)) if s.size else np.nan,
+        "min_d": float(s.min()) if s.size else np.nan,
+        "max_d": float(s.max()) if s.size else np.nan,
+    }
+
 if __name__ == "__main__":
-    # === Setup logging/output dirs ===
+    # Setup logging/output dirs
     os.makedirs('./output/logs', exist_ok=True)
     os.makedirs('./output/csv', exist_ok=True)
     os.makedirs('./output/png', exist_ok=True)
     logging.basicConfig(
         level=logging.INFO,
         format="%(asctime)s - %(levelname)s - %(message)s",
-        handlers=[
-            logging.FileHandler("./output/logs/estimate_parameters.log"),
-            logging.StreamHandler()
-        ]
+        handlers=[logging.FileHandler("./output/logs/estimate_parameters.log"), logging.StreamHandler()]
     )
 
     IN_CSV = "./output/csv/tickets_prs_merged.csv"
 
     try:
-        df = pd.read_csv(IN_CSV)
-        logging.info(f"Caricato dataset: {IN_CSV} ({len(df)} righe)")
+        df = pd.read_csv(IN_CSV, low_memory=False)
+        logging.info(f"Caricato dataset: {IN_CSV} ({len(df)})")
     except Exception as e:
         logging.error(f"Errore caricando il file CSV: {e}")
-        exit(1)
+        raise SystemExit(1)
 
-    # --- Use JIRA creation and resolution fields ---
+    # Date parsing
     for col in ['fields.created', 'fields.resolutiondate']:
         if col in df.columns:
-            df[col] = pd.to_datetime(df[col], errors='coerce')
-            logging.info(f"Colonna '{col}' convertita a datetime.")
+            df[col] = pd.to_datetime(df[col], errors='coerce', utc=True).dt.tz_convert(None)
+            logging.info(f"Colonna '{col}' convertita a datetime (naive).")
 
-    # === 1. Arrival rate (new ticket per hour) ===
+    # Arrival rate (ticket/giorno)
     if 'fields.created' in df.columns:
         df = df.sort_values('fields.created')
-        df['inter_arrival'] = df['fields.created'].diff().dt.total_seconds() / 3600  # ore
-        mean_interarrival = df['inter_arrival'].mean()
+        df['inter_arrival_days'] = df['fields.created'].diff().dt.total_seconds() / 86400.0
+        mean_interarrival = df['inter_arrival_days'].mean()
         arrival_rate = 1 / mean_interarrival if mean_interarrival and mean_interarrival > 0 else np.nan
-        logging.info(f"Tasso di arrivo stimato (ticket/ora): {arrival_rate:.5f}")
+        if not np.isnan(arrival_rate):
+            logging.info(f"Tasso di arrivo stimato: {arrival_rate:.6f} ticket/giorno")
+        else:
+            logging.info("Tasso di arrivo: n/a")
     else:
         arrival_rate = np.nan
         logging.warning("Colonna 'fields.created' mancante: impossibile stimare il tasso di arrivo.")
 
-    # === 2. Resolution time (from creation to resolution) ===
+    # Resolution time globale (giorni)
     if {'fields.created', 'fields.resolutiondate'}.issubset(df.columns):
-        df['resolution_time_hours'] = (df['fields.resolutiondate'] - df['fields.created']).dt.total_seconds() / 3600
-        mean_res = df['resolution_time_hours'].mean()
-        median_res = df['resolution_time_hours'].median()
-        logging.info(f"Resolution time media: {mean_res:.2f} h, mediana: {median_res:.2f} h")
+        df['resolution_time_days'] = (df['fields.resolutiondate'] - df['fields.created']).dt.total_seconds() / 86400.0
+        mean_res = df['resolution_time_days'].mean()
+        median_res = df['resolution_time_days'].median()
+        logging.info(f"Resolution time: mean={mean_res:.2f} d | median={median_res:.2f} d")
     else:
         mean_res = median_res = np.nan
         logging.warning("Impossibile calcolare la resolution time: colonne mancanti.")
 
-    # === 3. Backlog over time ===
-    if {'fields.created', 'fields.resolutiondate'}.issubset(df.columns):
-        date_range = pd.date_range(df['fields.created'].min(), df['fields.resolutiondate'].max(), freq='D')
+    # Backlog plot
+    if 'fields.created' in df.columns:
+        end_date = df['fields.resolutiondate'].max() if 'fields.resolutiondate' in df.columns and df['fields.resolutiondate'].notna().any() else df['fields.created'].max()
+        date_range = pd.date_range(df['fields.created'].min(), end_date, freq='D')
         backlog = []
         for day in date_range:
-            n_open = ((df['fields.created'] <= day) & ((df['fields.resolutiondate'] > day) | df['fields.resolutiondate'].isnull())).sum()
+            n_open = ((df['fields.created'] <= day) & ((df.get('fields.resolutiondate', pd.NaT) > day) | df.get('fields.resolutiondate').isnull())).sum()
             backlog.append(n_open)
         plt.figure()
         plt.plot(date_range, backlog)
         plt.title("Backlog (Ticket aperti) nel tempo")
         plt.xlabel("Data")
         plt.ylabel("Ticket aperti")
+        plt.tight_layout()
         plt.savefig('./output/png/backlog_over_time.png')
         plt.close()
-        logging.info("Grafico backlog nel tempo salvato.")
+        logging.info("Grafico backlog nel tempo salvato in ./output/png/backlog_over_time.png")
     else:
-        logging.warning("Impossibile plottare backlog: colonne data mancanti.")
+        logging.warning("Impossibile plottare backlog: mancano le date di creazione.")
 
-    # === 4. Throughput mensile (resolved per month) ===
+    # Throughput mensile
     if 'fields.resolutiondate' in df.columns:
-        df['resolution_month'] = df['fields.resolutiondate'].dt.to_period('M')
+        df['resolution_month'] = pd.to_datetime(df['fields.resolutiondate'], errors='coerce').dt.to_period('M')
         throughput_monthly = df.groupby('resolution_month').size()
-        throughput_mean = throughput_monthly.mean()
-        logging.info(f"Throughput medio mensile: {throughput_mean:.2f} ticket/mese")
+        throughput_mean = float(throughput_monthly.mean()) if throughput_monthly.size else np.nan
+        logging.info(f"Throughput medio mensile: {throughput_mean:.2f} ticket/mese" if not np.isnan(throughput_mean) else "Throughput medio mensile: n/a")
     else:
         throughput_mean = np.nan
-        logging.warning("Impossibile calcolare throughput: colonna 'fields.resolutiondate' mancante.")
+        logging.warning("Impossibile calcolare throughput: 'fields.resolutiondate' mancante.")
 
-    # === 5. Reopen rate (approximate: count "Reopened" in status history, if any) ===
-    # Your merged does not contain a reopen count, but we can approximate from status
-    if 'fields.status.name' in df.columns:
-        reopened_tickets = df['fields.status.name'].str.contains('Reopen', na=False)
-        reopen_rate = reopened_tickets.mean()
-        logging.info(f"Reopen rate stimato: {reopen_rate:.3f}")
-    else:
-        reopen_rate = np.nan
-        logging.warning("Impossibile stimare reopen rate: colonna 'fields.status.name' mancante.")
+    # Per‑fase durate (in giorni)
+    phase_cols = ["dev_duration_days", "review_duration_days", "test_duration_days"]
+    missing = [c for c in phase_cols if c not in df.columns]
+    if missing:
+        logging.warning(f"Colonne fase mancanti nel dataset: {missing}. Esegui 3_clean_and_merge.py v7 prima di questo script.")
 
-    # === 6. Issue type stats (bug/feature) ===
-    if 'fields.issuetype.name' in df.columns:
-        type_counts = df['fields.issuetype.name'].value_counts()
-        logging.info(f"Suddivisione ticket per tipo:\n{type_counts}")
-    else:
-        type_counts = None
+    # Export wide durations
+    durations_out = "./output/csv/phase_durations_wide.csv"
+    base_cols = ["key"] if "key" in df.columns else []
+    export_cols = base_cols + [c for c in phase_cols if c in df.columns]
+    df_out = df[export_cols].copy()
+    df_out.to_csv(durations_out, index=False)
+    logging.info(f"Esportate durate per fase in {durations_out}")
 
-    # === 7. Export summary ===
+    # Summaries
+    summaries = []
+    for col in phase_cols:
+        if col in df.columns:
+            summaries.append(summarize_phase(df[col], col))
+    summary_df = pd.DataFrame(summaries)
+    summary_path = "./output/csv/phase_summary_stats.csv"
+    summary_df.to_csv(summary_path, index=False)
+    logging.info(f"Statistiche per fase salvate in {summary_path}\n{summary_df.to_string(index=False)}")
+
+    # Export parametri globali
     results = {
-        "arrival_rate_per_hour": arrival_rate,
-        "mean_resolution_time_hours": mean_res,
-        "median_resolution_time_hours": median_res,
-        "reopen_rate": reopen_rate,
+        "arrival_rate_per_day": arrival_rate,
+        "mean_resolution_time_days": mean_res,
+        "median_resolution_time_days": median_res,
         "throughput_monthly_mean": throughput_mean
     }
     pd.DataFrame([results]).to_csv('./output/csv/parameter_estimates.csv', index=False)
     logging.info("Parametri chiave salvati in ./output/csv/parameter_estimates.csv")
     logging.info("=== ESTRAZIONE PARAMETRI COMPLETATA ===")
-
-"""
-Note:
-- Compatibile solo con le colonne realmente prodotte dagli script precedenti!
-- Usiamo fields.created e fields.resolutiondate come timestamp principali.
-- Nessun fit di fasi o feedback: mancano dati per farlo, va documentato nel report.
-- Output: ./output/csv/parameter_estimates.csv e ./output/png/backlog_over_time.png.
-- Tutto loggato in ./output/logs/estimate_parameters.log.
-"""

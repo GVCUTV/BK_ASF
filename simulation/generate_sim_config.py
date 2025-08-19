@@ -308,8 +308,8 @@ def main() -> None:
     _setup_logging()
 
     ap = argparse.ArgumentParser(description="Generate simulation/config.py from ETL + fit_summary.csv")
-    ap.add_argument("--etl-csv", default="./etl/output/csv/tickets_prs_merged.csv", help="ETL merged CSV path")
-    ap.add_argument("--fit-csv", default="./etl/output/csv/fit_summary.csv", help="Path to fit_summary.csv")
+    ap.add_argument("--etl-csv", default="../etl/output/csv/tickets_prs_merged.csv", help="ETL merged CSV path")
+    ap.add_argument("--fit-csv", default="../etl/output/csv/fit_summary.csv", help="Path to fit_summary.csv")
     ap.add_argument("--created-col", default="fields.created", help="Creation timestamp column in ETL")
     ap.add_argument("--window-start", default="2024-01-01", help="Arrival-rate window start (inclusive)")
     ap.add_argument("--window-end", default="2025-01-01", help="Arrival-rate window end (exclusive)")

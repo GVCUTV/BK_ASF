@@ -163,3 +163,27 @@
 2025-07-29 18:16:56,980 - INFO - Pagina 47: aggiunte 35 PR, totale finora 3329
 2025-07-29 18:16:56,980 - INFO - Ultima pagina raggiunta.
 2025-07-29 18:16:57,341 - INFO - Salvate 3329 PR in ./output/csv/github_prs_raw.csv
+2025-08-19 11:27:20,406 - WARNING - Nessun token GitHub trovato, il rate limit sarà basso (60 req/ora).
+2025-08-19 11:27:20,432 - INFO - Scarico /issues pagina 1
+2025-08-19 11:27:21,516 - INFO - Pagina 1: aggiunte 100 PR, totale finora 100
+2025-08-19 11:27:21,816 - INFO - Scarico /issues pagina 2
+2025-08-19 11:27:22,763 - INFO - Pagina 2: aggiunte 94 PR, totale finora 194
+2025-08-19 11:27:23,064 - INFO - Scarico /issues pagina 3
+2025-08-19 11:27:24,141 - INFO - Pagina 3: aggiunte 44 PR, totale finora 238
+2025-08-19 11:27:24,441 - INFO - Scarico /issues pagina 4
+2025-08-19 11:27:25,437 - INFO - Pagina 4: aggiunte 41 PR, totale finora 279
+2025-08-19 11:27:25,737 - INFO - Scarico /issues pagina 5
+2025-08-19 11:27:26,840 - INFO - Pagina 5: aggiunte 48 PR, totale finora 327
+2025-08-19 11:27:27,141 - INFO - Scarico /issues pagina 6
+2025-08-19 11:27:28,132 - INFO - Pagina 6: aggiunte 25 PR, totale finora 352
+2025-08-19 11:27:28,432 - INFO - Scarico /issues pagina 7
+2025-08-19 11:27:29,449 - INFO - Pagina 7: aggiunte 41 PR, totale finora 393
+2025-08-19 11:27:29,749 - INFO - Scarico /issues pagina 8
+2025-08-19 11:27:30,852 - INFO - Pagina 8: aggiunte 59 PR, totale finora 452
+2025-08-19 11:27:31,152 - INFO - Scarico /issues pagina 9
+2025-08-19 11:27:32,344 - INFO - Pagina 9: aggiunte 74 PR, totale finora 526
+2025-08-19 11:27:32,644 - INFO - Scarico /issues pagina 10
+2025-08-19 11:27:33,727 - INFO - Pagina 10: aggiunte 65 PR, totale finora 591
+2025-08-19 11:27:34,027 - INFO - Scarico /issues pagina 11
+2025-08-19 11:27:34,332 - ERROR - Errore 422: {"message":"Pagination with the page parameter is not supported for large datasets, please use cursor based pagination (after/before)","documentation_url":"https://docs.github.com/rest/issues/issues#list-repository-issues","status":"422"}
+2025-08-19 11:27:34,435 - INFO - Salvate 591 PR in ./output/csv/github_prs_raw.csv

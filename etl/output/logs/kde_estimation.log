@@ -1,0 +1,19 @@
+2025-08-03 16:00:42,374 - INFO - Caricato dataset: ./output/csv/tickets_prs_merged.csv (960 righe)
+2025-08-03 16:00:42,392 - INFO - Dati validi per la stima: 786
+2025-08-03 16:00:44,007 - INFO - 
+Statistiche descrittive dalla stima KDE:
+2025-08-03 16:00:44,007 - INFO - n_observations: 786.00
+2025-08-03 16:00:44,007 - INFO - mean: 1187.57
+2025-08-03 16:00:44,008 - INFO - median: 375.45
+2025-08-03 16:00:44,008 - INFO - mode_kde: 219.55
+2025-08-03 16:00:44,008 - INFO - q1: 83.87
+2025-08-03 16:00:44,008 - INFO - q3: 1586.84
+2025-08-03 16:00:44,008 - INFO - std: 1790.96
+2025-08-03 16:00:44,008 - INFO - min: 0.23
+2025-08-03 16:00:44,008 - INFO - max: 9959.43
+2025-08-03 16:00:44,009 - INFO - 
+Output salvati:
+2025-08-03 16:00:44,009 - INFO - - Grafico: ./output/png/kde_estimate.png
+2025-08-03 16:00:44,009 - INFO - - Punti stima: ./output/csv/kde_estimate.csv
+2025-08-03 16:00:44,009 - INFO - - Statistiche: ./output/csv/kde_statistics.csv
+2025-08-03 16:00:44,009 - INFO - === STIMA KDE COMPLETATA ===

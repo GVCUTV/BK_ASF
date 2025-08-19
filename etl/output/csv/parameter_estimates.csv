@@ -1,2 +1,2 @@
-arrival_rate_per_hour,mean_resolution_time_hours,median_resolution_time_hours,reopen_rate,throughput_monthly_mean
-0.01280204210889934,5177.49210603783,507.6361111111111,0.003125,11.826666666666666
+arrival_rate_per_day,mean_resolution_time_days,median_resolution_time_days,throughput_monthly_mean
+0.30724901061358406,215.72883775157626,21.15150462962963,11.826666666666666

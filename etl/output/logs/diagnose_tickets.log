@@ -47,3 +47,24 @@
 2025-08-01 12:35:18,952 - WARNING - Ticket key=BOOKKEEPER-976: INCONGRUENZA: ticket chiuso senza data risoluzione
 2025-08-01 12:35:19,369 - INFO - Grafico distribuzione tempi di risoluzione (0-10.000h) salvato in ./output/png/distribuzione_resolution_times_0_10000.png
 2025-08-01 12:35:19,369 - INFO - Analisi diagnostica completata.
+2025-08-19 11:33:25,613 - INFO - Caricato dataset: ./output/csv/tickets_prs_merged.csv (960 righe)
+2025-08-19 11:33:25,618 - INFO - Colonna 'fields.created' convertita a datetime.
+2025-08-19 11:33:25,620 - INFO - Colonna 'fields.resolutiondate' convertita a datetime.
+2025-08-19 11:33:25,621 - INFO - Inizio stampa diagnostica ticket:
+2025-08-19 11:33:25,642 - WARNING - Ticket key=BOOKKEEPER-976: INCONGRUENZA: ticket chiuso senza data risoluzione
+2025-08-19 11:33:26,316 - INFO - Grafico distribuzione tempi di risoluzione (0-10.000h) salvato in ./output/png/distribuzione_resolution_times_0_10000.png
+2025-08-19 11:33:26,316 - INFO - Analisi diagnostica completata.
+2025-08-19 12:01:29,624 - INFO - Caricato dataset: ./output/csv/tickets_prs_merged.csv (960 righe)
+2025-08-19 12:01:29,626 - INFO - Colonna 'fields.created' convertita a datetime.
+2025-08-19 12:01:29,627 - INFO - Colonna 'fields.resolutiondate' convertita a datetime.
+2025-08-19 12:01:29,629 - INFO - Inizio stampa diagnostica ticket:
+2025-08-19 12:01:29,647 - WARNING - Ticket key=BOOKKEEPER-976: INCONGRUENZA: ticket chiuso senza data risoluzione
+2025-08-19 12:01:30,332 - INFO - Grafico distribuzione tempi di risoluzione (0-10.000h) salvato in ./output/png/distribuzione_resolution_times_0_10000.png
+2025-08-19 12:01:30,332 - INFO - Analisi diagnostica completata.
+2025-08-19 12:17:21,828 - INFO - Caricato dataset: ./output/csv/tickets_prs_merged.csv (960 righe)
+2025-08-19 12:17:21,831 - INFO - Colonna 'fields.created' convertita a datetime.
+2025-08-19 12:17:21,832 - INFO - Colonna 'fields.resolutiondate' convertita a datetime.
+2025-08-19 12:17:21,833 - INFO - Inizio stampa diagnostica ticket:
+2025-08-19 12:17:21,851 - WARNING - Ticket key=BOOKKEEPER-976: INCONGRUENZA: ticket chiuso senza data risoluzione
+2025-08-19 12:17:22,626 - INFO - Grafico distribuzione tempi di risoluzione (0-10.000h) salvato in ./output/png/distribuzione_resolution_times_0_10000.png
+2025-08-19 12:17:22,626 - INFO - Analisi diagnostica completata.

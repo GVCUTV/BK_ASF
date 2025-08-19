@@ -1,0 +1,17 @@
+2025-08-19 12:17:47,001 - INFO - Logger initialized. Logfile: output/logs/export_fit_summary.log
+2025-08-19 12:17:47,002 - INFO - Reading input CSV: ./etl/output/csv/distribution_fit_stats.csv
+2025-08-19 12:17:47,002 - ERROR - Input file does not exist: ./etl/output/csv/distribution_fit_stats.csv
+2025-08-19 12:19:34,224 - INFO - Logger initialized. Logfile: output/logs/export_fit_summary.log
+2025-08-19 12:19:34,224 - INFO - Reading input CSV: ./output/csv/distribution_fit_stats.csv
+2025-08-19 12:19:34,226 - INFO - Parsing Parametri field into numeric lists …
+2025-08-19 12:19:34,230 - INFO - Winner: Lognormale (MAE=3.83073e-05) params=[0.1516685, -1042.86549, 1069.60329]
+2025-08-19 12:19:34,232 - INFO - fit_summary.csv saved: ./output/csv/fit_summary.csv
+2025-08-19 12:24:56,460 - INFO - === INIZIO EXPORT FIT SUMMARY (per-stage) ===
+2025-08-19 12:24:56,463 - INFO - Caricato ./output/csv/distribution_fit_stats_development.csv (4 righe)
+2025-08-19 12:24:56,466 - INFO - WINNER [development]: Weibull | params=None | MAE=0.000052 | KS_p=3.573e-44 | AIC=3284.051039700318 | BIC=3293.885383678009
+2025-08-19 12:24:56,467 - INFO - Caricato ./output/csv/distribution_fit_stats_review.csv (4 righe)
+2025-08-19 12:24:56,470 - INFO - WINNER [review]: Lognormale | params=None | MAE=0.000036 | KS_p=7.737e-21 | AIC=2068.291979018956 | BIC=2078.126322996647
+2025-08-19 12:24:56,471 - INFO - Caricato ./output/csv/distribution_fit_stats_testing.csv (4 righe)
+2025-08-19 12:24:56,473 - INFO - WINNER [testing]: Weibull | params=None | MAE=0.000192 | KS_p=7.439e-28 | AIC=1587.253736967646 | BIC=1595.565790841043
+2025-08-19 12:24:56,475 - INFO - Salvato fit_summary in ./output/csv/fit_summary.csv
+2025-08-19 12:24:56,479 - INFO - === EXPORT FIT SUMMARY COMPLETATO ===

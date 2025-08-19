@@ -1,0 +1,330 @@
+025-08-03 15:16:30,037 - INFO - Caricato dataset: ./output/csv/tickets_prs_merged.csv (960 righe)
+2025-08-03 15:16:30,068 - INFO - Dati validi per il fit: 786
+2025-08-03 15:16:30,126 - INFO - 
+Analisi distribuzione normale...
+2025-08-03 15:16:30,434 - INFO - 
+MLE - normale:
+2025-08-03 15:16:30,435 - INFO - Parametri: {'mu': np.float64(1187.568300819904), 'sigma': np.float64(1790.9586658460307)}
+2025-08-03 15:16:30,435 - INFO - Log-likelihood: -7002.82
+2025-08-03 15:16:30,436 - INFO - MAE vs KDE: 0.0000
+2025-08-03 15:16:30,436 - INFO - KS test p-value: 0.0000
+2025-08-03 15:16:30,436 - INFO - Intervalli confidenza 95%:
+2025-08-03 15:16:30,436 - INFO -   mu: [1066.3785, 1307.8138]
+2025-08-03 15:16:30,436 - INFO -   sigma: [1622.7257, 1945.4330]
+2025-08-03 15:16:30,436 - INFO - 
+MoM - normale:
+2025-08-03 15:16:30,436 - INFO - Parametri: {'mu': np.float64(1187.568300819904), 'sigma': np.float64(1790.9586658460307)}
+2025-08-03 15:16:30,437 - INFO - Log-likelihood: -7002.82
+2025-08-03 15:16:30,437 - INFO - MAE vs KDE: 0.0000
+2025-08-03 15:16:30,437 - INFO - KS test p-value: 0.0000
+2025-08-03 15:16:30,437 - INFO - Intervalli confidenza 95%:
+2025-08-03 15:16:30,437 - INFO -   mu: [1059.2549, 1316.1851]
+2025-08-03 15:16:30,437 - INFO -   sigma: [1619.2888, 1972.7553]
+2025-08-03 15:16:31,935 - INFO - 
+Analisi distribuzione lognormale...
+2025-08-03 15:16:34,536 - INFO - 
+MLE - lognormale:
+2025-08-03 15:16:34,536 - INFO - Parametri: {'shape': np.float64(2.061141359626929), 'scale': -0.7106570187551463}
+2025-08-03 15:16:34,536 - INFO - Log-likelihood: -6159.39
+2025-08-03 15:16:34,536 - INFO - MAE vs KDE: 0.0001
+2025-08-03 15:16:34,536 - INFO - KS test p-value: 0.0139
+2025-08-03 15:16:34,536 - INFO - Intervalli confidenza 95%:
+2025-08-03 15:16:34,536 - INFO -   shape: [1.9140, 2.2031]
+2025-08-03 15:16:34,536 - INFO -   scale: [-1.7480, -0.1162]
+2025-08-03 15:16:34,536 - INFO - 
+MoM - lognormale:
+2025-08-03 15:16:34,536 - INFO - Parametri: {'shape': np.float64(2.1317618019170497), 'scale': np.float64(287.91946583665145)}
+2025-08-03 15:16:34,536 - INFO - Log-likelihood: -inf
+2025-08-03 15:16:34,536 - INFO - MAE vs KDE: 0.0002
+2025-08-03 15:16:34,536 - INFO - KS test p-value: 0.0000
+2025-08-03 15:16:34,537 - INFO - Intervalli confidenza 95%:
+2025-08-03 15:16:34,537 - INFO -   shape: [2.0163, 2.2420]
+2025-08-03 15:16:34,537 - INFO -   scale: [246.9160, 329.4454]
+2025-08-03 15:16:35,037 - INFO - 
+Analisi distribuzione esponenziale...
+2025-08-03 15:16:35,104 - INFO - 
+MLE - esponenziale:
+2025-08-03 15:16:35,104 - INFO - Parametri: {'scale': 0.2311111111111111}
+2025-08-03 15:16:35,104 - INFO - Log-likelihood: -6350.46
+2025-08-03 15:16:35,104 - INFO - MAE vs KDE: 0.0000
+2025-08-03 15:16:35,104 - INFO - KS test p-value: 0.0000
+2025-08-03 15:16:35,104 - INFO - Intervalli confidenza 95%:
+2025-08-03 15:16:35,104 - INFO -   scale: [0.2311, 0.3592]
+2025-08-03 15:16:35,104 - INFO - 
+MoM - esponenziale:
+2025-08-03 15:16:35,104 - INFO - Parametri: {'scale': np.float64(0.000842056831013083)}
+2025-08-03 15:16:35,104 - INFO - Log-likelihood: -933428.02
+2025-08-03 15:16:35,104 - INFO - MAE vs KDE: 0.0009
+2025-08-03 15:16:35,104 - INFO - KS test p-value: 0.0000
+2025-08-03 15:16:35,104 - INFO - Intervalli confidenza 95%:
+2025-08-03 15:16:35,104 - INFO -   scale: [0.0008, 0.0009]
+2025-08-03 15:16:35,627 - INFO - 
+Risultati salvati in ./output/csv/fit_comparison_results.csv
+2025-08-03 15:18:34,911 - INFO - Caricato dataset: ./output/csv/tickets_prs_merged.csv (960 righe)
+2025-08-03 15:18:34,917 - INFO - Dati validi per il fit: 786
+2025-08-03 15:18:34,960 - INFO - 
+Analisi distribuzione normale...
+2025-08-03 15:18:35,018 - INFO - 
+MLE - normale:
+2025-08-03 15:18:35,018 - INFO - Parametri: {'mu': np.float64(1187.568300819904), 'sigma': np.float64(1790.9586658460307)}
+2025-08-03 15:18:35,018 - INFO - Log-likelihood: -7002.82
+2025-08-03 15:18:35,018 - INFO - MAE vs KDE: 0.0000
+2025-08-03 15:18:35,018 - INFO - KS test p-value: 0.0000
+2025-08-03 15:18:35,018 - INFO - Intervalli confidenza 95%:
+2025-08-03 15:18:35,018 - INFO -   mu: [1059.7964, 1322.3020]
+2025-08-03 15:18:35,018 - INFO -   sigma: [1614.9624, 1951.4879]
+2025-08-03 15:18:35,018 - INFO - 
+MoM - normale:
+2025-08-03 15:18:35,018 - INFO - Parametri: {'mu': np.float64(1187.568300819904), 'sigma': np.float64(1790.9586658460307)}
+2025-08-03 15:18:35,018 - INFO - Log-likelihood: -7002.82
+2025-08-03 15:18:35,019 - INFO - MAE vs KDE: 0.0000
+2025-08-03 15:18:35,019 - INFO - KS test p-value: 0.0000
+2025-08-03 15:18:35,019 - INFO - Intervalli confidenza 95%:
+2025-08-03 15:18:35,019 - INFO -   mu: [1071.5404, 1318.9627]
+2025-08-03 15:18:35,019 - INFO -   sigma: [1627.3759, 1951.9554]
+2025-08-03 15:18:35,342 - INFO - 
+Analisi distribuzione lognormale...
+2025-08-03 15:18:36,017 - INFO - 
+MLE - lognormale:
+2025-08-03 15:18:36,018 - INFO - Parametri: {'shape': np.float64(2.061141359626929), 'scale': -0.7106570187551463}
+2025-08-03 15:18:36,018 - INFO - Log-likelihood: -6159.39
+2025-08-03 15:18:36,018 - INFO - MAE vs KDE: 0.0001
+2025-08-03 15:18:36,018 - INFO - KS test p-value: 0.0139
+2025-08-03 15:18:36,018 - INFO - Intervalli confidenza 95%:
+2025-08-03 15:18:36,018 - INFO -   shape: [1.9217, 2.2117]
+2025-08-03 15:18:36,018 - INFO -   scale: [-1.6921, -0.1388]
+2025-08-03 15:18:36,018 - INFO - 
+MoM - lognormale:
+2025-08-03 15:18:36,018 - INFO - Parametri: {'shape': np.float64(2.1317618019170497), 'scale': np.float64(287.91946583665145)}
+2025-08-03 15:18:36,018 - INFO - Log-likelihood: -inf
+2025-08-03 15:18:36,018 - INFO - MAE vs KDE: 0.0002
+2025-08-03 15:18:36,018 - INFO - KS test p-value: 0.0000
+2025-08-03 15:18:36,018 - INFO - Intervalli confidenza 95%:
+2025-08-03 15:18:36,018 - INFO -   shape: [2.0195, 2.2421]
+2025-08-03 15:18:36,018 - INFO -   scale: [247.7340, 334.9043]
+2025-08-03 15:18:36,419 - INFO - 
+Analisi distribuzione esponenziale...
+2025-08-03 15:18:36,475 - INFO - 
+MLE - esponenziale:
+2025-08-03 15:18:36,475 - INFO - Parametri: {'scale': 0.2311111111111111}
+2025-08-03 15:18:36,475 - INFO - Log-likelihood: -6350.46
+2025-08-03 15:18:36,475 - INFO - MAE vs KDE: 0.0000
+2025-08-03 15:18:36,475 - INFO - KS test p-value: 0.0000
+2025-08-03 15:18:36,475 - INFO - Intervalli confidenza 95%:
+2025-08-03 15:18:36,475 - INFO -   scale: [0.2311, 0.3592]
+2025-08-03 15:18:36,475 - INFO - 
+MoM - esponenziale:
+2025-08-03 15:18:36,475 - INFO - Parametri: {'scale': np.float64(0.000842056831013083)}
+2025-08-03 15:18:36,475 - INFO - Log-likelihood: -933428.02
+2025-08-03 15:18:36,475 - INFO - MAE vs KDE: 0.0009
+2025-08-03 15:18:36,475 - INFO - KS test p-value: 0.0000
+2025-08-03 15:18:36,475 - INFO - Intervalli confidenza 95%:
+2025-08-03 15:18:36,475 - INFO -   scale: [0.0008, 0.0009]
+2025-08-03 15:18:37,007 - INFO - 
+Analisi distribuzione weibull...
+2025-08-03 15:19:27,807 - INFO - 
+MLE - weibull:
+2025-08-03 15:19:27,808 - INFO - Parametri: {'shape': np.float64(0.6050752694560289), 'scale': np.float64(0.23111111111111107)}
+2025-08-03 15:19:27,808 - INFO - Log-likelihood: -6184.19
+2025-08-03 15:19:27,808 - INFO - MAE vs KDE: 21.9286
+2025-08-03 15:19:27,808 - INFO - KS test p-value: 0.0000
+2025-08-03 15:19:27,808 - INFO - Intervalli confidenza 95%:
+2025-08-03 15:19:27,808 - INFO -   shape: [0.5200, 0.8608]
+2025-08-03 15:19:27,808 - INFO -   scale: [0.2311, 0.3592]
+2025-08-03 15:19:27,808 - INFO - 
+MoM - weibull:
+2025-08-03 15:19:27,808 - INFO - Parametri: {'shape': 0.6816081716633293, 'scale': np.float64(914.0035789564404)}
+2025-08-03 15:19:27,808 - INFO - Log-likelihood: -inf
+2025-08-03 15:19:27,808 - INFO - MAE vs KDE: 0.0001
+2025-08-03 15:19:27,808 - INFO - KS test p-value: 0.0000
+2025-08-03 15:19:27,808 - INFO - Intervalli confidenza 95%:
+2025-08-03 15:19:27,808 - INFO -   shape: [0.6526, 0.7181]
+2025-08-03 15:19:27,808 - INFO -   scale: [800.1168, 1043.3353]
+2025-08-03 15:19:28,340 - INFO - 
+Risultati salvati in ./output/csv/fit_comparison_results.csv
+2025-08-03 15:48:12,565 - INFO - Caricato dataset: ./output/csv/tickets_prs_merged.csv (960 righe)
+2025-08-03 15:48:12,571 - INFO - Dati validi per il fit: 786
+2025-08-03 15:48:12,579 - INFO - 
+Analisi distribuzione normale...
+2025-08-03 15:48:12,639 - INFO - 
+MLE - normale:
+2025-08-03 15:48:12,639 - INFO - Parametri: {'mu': np.float64(1187.568300819904), 'sigma': np.float64(1790.9586658460307)}
+2025-08-03 15:48:12,639 - INFO - Log-likelihood: -7002.82
+2025-08-03 15:48:12,639 - INFO - MAE vs KDE: 0.0000
+2025-08-03 15:48:12,639 - INFO - KS test p-value: 0.0000
+2025-08-03 15:48:12,639 - INFO - Intervalli confidenza 95%:
+2025-08-03 15:48:12,639 - INFO -   mu: [1064.1328, 1315.5445]
+2025-08-03 15:48:12,639 - INFO -   sigma: [1631.5503, 1956.1375]
+2025-08-03 15:48:12,639 - INFO - 
+MoM - normale:
+2025-08-03 15:48:12,639 - INFO - Parametri: {'mu': np.float64(1187.568300819904), 'sigma': np.float64(1790.9586658460307)}
+2025-08-03 15:48:12,639 - INFO - Log-likelihood: -7002.82
+2025-08-03 15:48:12,639 - INFO - MAE vs KDE: 0.0000
+2025-08-03 15:48:12,639 - INFO - KS test p-value: 0.0000
+2025-08-03 15:48:12,639 - INFO - Intervalli confidenza 95%:
+2025-08-03 15:48:12,639 - INFO -   mu: [1062.3543, 1314.6713]
+2025-08-03 15:48:12,639 - INFO -   sigma: [1611.4566, 1947.5287]
+2025-08-03 15:48:12,963 - INFO - 
+Analisi distribuzione lognormale...
+2025-08-03 15:48:13,019 - INFO - 
+MLE - lognormale:
+2025-08-03 15:48:13,020 - INFO - Parametri: {'shape': np.float64(2.1317618019170497), 'loc': 0, 'scale': np.float64(287.91946583665145)}
+2025-08-03 15:48:13,020 - INFO - Log-likelihood: -6161.11
+2025-08-03 15:48:13,020 - INFO - MAE vs KDE: 0.0001
+2025-08-03 15:48:13,020 - INFO - KS test p-value: 0.0080
+2025-08-03 15:48:13,020 - INFO - Intervalli confidenza 95%:
+2025-08-03 15:48:13,020 - INFO -   shape: [2.0153, 2.2329]
+2025-08-03 15:48:13,020 - INFO -   loc: [0.0000, 0.0000]
+2025-08-03 15:48:13,020 - INFO -   scale: [244.0872, 333.8660]
+2025-08-03 15:48:13,020 - INFO - 
+MoM - lognormale:
+2025-08-03 15:48:13,020 - INFO - Parametri: {'shape': np.float64(2.1317618019170497), 'loc': 0, 'scale': np.float64(287.91946583665145)}
+2025-08-03 15:48:13,020 - INFO - Log-likelihood: -6161.11
+2025-08-03 15:48:13,020 - INFO - MAE vs KDE: 0.0001
+2025-08-03 15:48:13,020 - INFO - KS test p-value: 0.0080
+2025-08-03 15:48:13,020 - INFO - Intervalli confidenza 95%:
+2025-08-03 15:48:13,020 - INFO -   shape: [2.0248, 2.2443]
+2025-08-03 15:48:13,020 - INFO -   loc: [0.0000, 0.0000]
+2025-08-03 15:48:13,020 - INFO -   scale: [247.0230, 329.9413]
+2025-08-03 15:48:13,305 - INFO - 
+Analisi distribuzione esponenziale...
+2025-08-03 15:48:13,341 - INFO - 
+MLE - esponenziale:
+2025-08-03 15:48:13,341 - INFO - Parametri: {'scale': 0.2311111111111111}
+2025-08-03 15:48:13,341 - INFO - Log-likelihood: -6350.46
+2025-08-03 15:48:13,341 - INFO - MAE vs KDE: 0.0000
+2025-08-03 15:48:13,341 - INFO - KS test p-value: 0.0000
+2025-08-03 15:48:13,341 - INFO - Intervalli confidenza 95%:
+2025-08-03 15:48:13,341 - INFO -   scale: [0.2311, 0.3592]
+2025-08-03 15:48:13,341 - INFO - 
+MoM - esponenziale:
+2025-08-03 15:48:13,341 - INFO - Parametri: {'scale': np.float64(0.000842056831013083)}
+2025-08-03 15:48:13,341 - INFO - Log-likelihood: -933428.02
+2025-08-03 15:48:13,341 - INFO - MAE vs KDE: 0.0009
+2025-08-03 15:48:13,341 - INFO - KS test p-value: 0.0000
+2025-08-03 15:48:13,341 - INFO - Intervalli confidenza 95%:
+2025-08-03 15:48:13,341 - INFO -   scale: [0.0008, 0.0009]
+2025-08-03 15:48:13,605 - INFO - 
+Analisi distribuzione weibull...
+2025-08-03 15:50:05,149 - INFO - Caricato dataset: ./output/csv/tickets_prs_merged.csv (960 righe)
+2025-08-03 15:50:05,155 - INFO - Dati validi per il fit: 786
+2025-08-03 15:50:05,196 - INFO - 
+Analisi distribuzione normale...
+2025-08-03 15:50:05,254 - INFO - 
+MLE - normale:
+2025-08-03 15:50:05,254 - INFO - Parametri: {'mu': np.float64(1187.568300819904), 'sigma': np.float64(1790.9586658460307)}
+2025-08-03 15:50:05,254 - INFO - Log-likelihood: -7002.82
+2025-08-03 15:50:05,254 - INFO - MAE vs KDE: 0.0000
+2025-08-03 15:50:05,254 - INFO - KS test p-value: 0.0000
+2025-08-03 15:50:05,255 - INFO - Intervalli confidenza 95%:
+2025-08-03 15:50:05,255 - INFO -   mu: [1063.4785, 1309.7425]
+2025-08-03 15:50:05,255 - INFO -   sigma: [1619.3969, 1952.3980]
+2025-08-03 15:50:05,255 - INFO - 
+MoM - normale:
+2025-08-03 15:50:05,255 - INFO - Parametri: {'mu': np.float64(1187.568300819904), 'sigma': np.float64(1790.9586658460307)}
+2025-08-03 15:50:05,255 - INFO - Log-likelihood: -7002.82
+2025-08-03 15:50:05,255 - INFO - MAE vs KDE: 0.0000
+2025-08-03 15:50:05,255 - INFO - KS test p-value: 0.0000
+2025-08-03 15:50:05,255 - INFO - Intervalli confidenza 95%:
+2025-08-03 15:50:05,255 - INFO -   mu: [1069.4022, 1314.2675]
+2025-08-03 15:50:05,255 - INFO -   sigma: [1630.3290, 1954.7657]
+2025-08-03 15:50:05,573 - INFO - 
+Analisi distribuzione lognormale...
+2025-08-03 15:50:05,626 - INFO - 
+MLE - lognormale:
+2025-08-03 15:50:05,626 - INFO - Parametri: {'shape': np.float64(2.1317618019170497), 'loc': 0, 'scale': np.float64(287.91946583665145)}
+2025-08-03 15:50:05,626 - INFO - Log-likelihood: -6161.11
+2025-08-03 15:50:05,626 - INFO - MAE vs KDE: 0.0001
+2025-08-03 15:50:05,626 - INFO - KS test p-value: 0.0080
+2025-08-03 15:50:05,626 - INFO - Intervalli confidenza 95%:
+2025-08-03 15:50:05,626 - INFO -   shape: [2.0094, 2.2328]
+2025-08-03 15:50:05,626 - INFO -   loc: [0.0000, 0.0000]
+2025-08-03 15:50:05,626 - INFO -   scale: [248.4170, 330.5709]
+2025-08-03 15:50:05,626 - INFO - 
+MoM - lognormale:
+2025-08-03 15:50:05,626 - INFO - Parametri: {'shape': np.float64(2.1317618019170497), 'loc': 0, 'scale': np.float64(287.91946583665145)}
+2025-08-03 15:50:05,626 - INFO - Log-likelihood: -6161.11
+2025-08-03 15:50:05,626 - INFO - MAE vs KDE: 0.0001
+2025-08-03 15:50:05,626 - INFO - KS test p-value: 0.0080
+2025-08-03 15:50:05,626 - INFO - Intervalli confidenza 95%:
+2025-08-03 15:50:05,626 - INFO -   shape: [2.0189, 2.2420]
+2025-08-03 15:50:05,626 - INFO -   loc: [0.0000, 0.0000]
+2025-08-03 15:50:05,626 - INFO -   scale: [245.6816, 333.4114]
+2025-08-03 15:50:05,905 - INFO - 
+Analisi distribuzione esponenziale...
+2025-08-03 15:50:05,939 - INFO - 
+MLE - esponenziale:
+2025-08-03 15:50:05,939 - INFO - Parametri: {'scale': 0.2311111111111111}
+2025-08-03 15:50:05,939 - INFO - Log-likelihood: -6350.46
+2025-08-03 15:50:05,939 - INFO - MAE vs KDE: 0.0000
+2025-08-03 15:50:05,939 - INFO - KS test p-value: 0.0000
+2025-08-03 15:50:05,939 - INFO - Intervalli confidenza 95%:
+2025-08-03 15:50:05,939 - INFO -   scale: [0.2311, 0.3592]
+2025-08-03 15:50:05,939 - INFO - 
+MoM - esponenziale:
+2025-08-03 15:50:05,939 - INFO - Parametri: {'scale': np.float64(0.000842056831013083)}
+2025-08-03 15:50:05,939 - INFO - Log-likelihood: -933428.02
+2025-08-03 15:50:05,939 - INFO - MAE vs KDE: 0.0009
+2025-08-03 15:50:05,939 - INFO - KS test p-value: 0.0000
+2025-08-03 15:50:05,940 - INFO - Intervalli confidenza 95%:
+2025-08-03 15:50:05,940 - INFO -   scale: [0.0008, 0.0009]
+2025-08-03 15:50:06,203 - INFO - 
+Risultati salvati in ./output/csv/fit_comparison_results.csv
+2025-08-03 15:54:15,624 - INFO - Caricato dataset: ./output/csv/tickets_prs_merged.csv (960 righe)
+2025-08-03 15:54:15,630 - INFO - Dati validi per il fit: 786
+2025-08-03 15:54:15,630 - INFO - 
+Analisi distribuzione normale...
+2025-08-03 15:54:15,671 - INFO - 
+MLE - normale:
+2025-08-03 15:54:15,672 - INFO - Parametri: {'mu': np.float64(1187.568300819904), 'sigma': np.float64(1790.9586658460307)}
+2025-08-03 15:54:15,672 - INFO - Log-likelihood: -7002.82
+2025-08-03 15:54:15,672 - INFO - KS test p-value: 0.0000
+2025-08-03 15:54:15,672 - INFO - Intervalli confidenza 95%:
+2025-08-03 15:54:15,672 - INFO -   mu: [1066.0179, 1311.3552]
+2025-08-03 15:54:15,672 - INFO -   sigma: [1637.2762, 1947.7435]
+2025-08-03 15:54:15,672 - INFO - 
+MoM - normale:
+2025-08-03 15:54:15,672 - INFO - Parametri: {'mu': np.float64(1187.568300819904), 'sigma': np.float64(1790.9586658460307)}
+2025-08-03 15:54:15,672 - INFO - Log-likelihood: -7002.82
+2025-08-03 15:54:15,672 - INFO - KS test p-value: 0.0000
+2025-08-03 15:54:15,672 - INFO - Intervalli confidenza 95%:
+2025-08-03 15:54:15,672 - INFO -   mu: [1072.6210, 1323.1062]
+2025-08-03 15:54:15,672 - INFO -   sigma: [1622.3656, 1970.9282]
+2025-08-03 15:54:15,986 - INFO - 
+Analisi distribuzione lognormale...
+2025-08-03 15:54:16,040 - INFO - 
+MLE - lognormale:
+2025-08-03 15:54:16,040 - INFO - Parametri: {'shape': np.float64(2.1317618019170497), 'loc': 0, 'scale': np.float64(287.91946583665145)}
+2025-08-03 15:54:16,040 - INFO - Log-likelihood: -6161.11
+2025-08-03 15:54:16,040 - INFO - KS test p-value: 0.0080
+2025-08-03 15:54:16,040 - INFO - Intervalli confidenza 95%:
+2025-08-03 15:54:16,040 - INFO -   shape: [2.0153, 2.2452]
+2025-08-03 15:54:16,040 - INFO -   loc: [0.0000, 0.0000]
+2025-08-03 15:54:16,040 - INFO -   scale: [245.7332, 333.6074]
+2025-08-03 15:54:16,040 - INFO - 
+MoM - lognormale:
+2025-08-03 15:54:16,040 - INFO - Parametri: {'shape': np.float64(2.1317618019170497), 'loc': 0, 'scale': np.float64(287.91946583665145)}
+2025-08-03 15:54:16,040 - INFO - Log-likelihood: -6161.11
+2025-08-03 15:54:16,040 - INFO - KS test p-value: 0.0080
+2025-08-03 15:54:16,040 - INFO - Intervalli confidenza 95%:
+2025-08-03 15:54:16,040 - INFO -   shape: [2.0145, 2.2392]
+2025-08-03 15:54:16,040 - INFO -   loc: [0.0000, 0.0000]
+2025-08-03 15:54:16,040 - INFO -   scale: [247.7286, 333.9680]
+2025-08-03 15:54:16,341 - INFO - 
+Analisi distribuzione esponenziale...
+2025-08-03 15:54:16,377 - INFO - 
+MLE - esponenziale:
+2025-08-03 15:54:16,377 - INFO - Parametri: {'scale': 0.2311111111111111}
+2025-08-03 15:54:16,377 - INFO - Log-likelihood: -6350.46
+2025-08-03 15:54:16,377 - INFO - KS test p-value: 0.0000
+2025-08-03 15:54:16,377 - INFO - Intervalli confidenza 95%:
+2025-08-03 15:54:16,377 - INFO -   scale: [0.2311, 0.3592]
+2025-08-03 15:54:16,377 - INFO - 
+MoM - esponenziale:
+2025-08-03 15:54:16,377 - INFO - Parametri: {'scale': np.float64(0.000842056831013083)}
+2025-08-03 15:54:16,378 - INFO - Log-likelihood: -933428.02
+2025-08-03 15:54:16,378 - INFO - KS test p-value: 0.0000
+2025-08-03 15:54:16,378 - INFO - Intervalli confidenza 95%:
+2025-08-03 15:54:16,378 - INFO -   scale: [0.0008, 0.0009]
+2025-08-03 15:54:16,674 - INFO - 
+Risultati salvati in ./output/csv/fit_comparison_results.csv
