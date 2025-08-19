@@ -1,0 +1,12 @@
+2025-08-19 15:53:09,719 - INFO - Logger ready. Logfile: output/logs/enrich_feedback.log
+2025-08-19 15:53:09,719 - INFO - Reading: /Users/og/PycharmProjects/BK_ASF/etl/output/csv/tickets_prs_merged.csv
+2025-08-19 15:53:09,812 - INFO - Rows: 960 | Cols: 192
+2025-08-19 15:53:09,812 - INFO - Input columns: 192. Sample: ['expand', 'id_ticket', 'self', 'key', 'fields.summary', 'fields.issuetype.self', 'fields.issuetype.id', 'fields.issuetype.description', 'fields.issuetype.iconUrl', 'fields.issuetype.name', 'fields.issuetype.subtask', 'fields.issuetype.avatarId', 'fields.resolutiondate', 'fields.created', 'fields.description', 'fields.assignee', 'fields.resolution', 'fields.updated', 'fields.status.self', 'fields.status.description', 'fields.status.iconUrl', 'fields.status.name', 'fields.status.id', 'fields.status.statusCategory.self', 'fields.status.statusCategory.id', 'fields.status.statusCategory.key', 'fields.status.statusCategory.colorName', 'fields.status.statusCategory.name', 'fields.assignee.self', 'fields.assignee.name', 'fields.assignee.key', 'fields.assignee.avatarUrls.48x48', 'fields.assignee.avatarUrls.24x24', 'fields.assignee.avatarUrls.16x16', 'fields.assignee.avatarUrls.32x32', 'fields.assignee.displayName', 'fields.assignee.active', 'fields.assignee.timeZone', 'fields.resolution.self', 'fields.resolution.id'] ...
+2025-08-19 15:53:09,816 - WARNING - Could not derive review_rounds from data (no candidates found).
+2025-08-19 15:53:09,816 - WARNING - Could not derive ci_failed_then_fix from data (no CI candidates found).
+2025-08-19 15:53:09,817 - INFO - dev_user sourced from: fields.assignee
+2025-08-19 15:53:09,819 - INFO - Coverage: {"review_rounds_nonnull": 0, "review_rework_flag_nonnull": 0, "ci_failed_then_fix_nonnull": 0, "dev_user_nonnull": 0, "tester_nonnull": 0}
+2025-08-19 15:53:09,819 - WARNING - Some columns could not be derived from your current data: ['review_rounds / review_rework_flag', 'ci_failed_then_fix', 'tester']
+2025-08-19 15:53:09,819 - WARNING - Consider extending ETL to include PR review states and CI status histories.
+2025-08-19 15:53:09,819 - INFO - Writing: /Users/og/PycharmProjects/BK_ASF/etl/output/csv/tickets_prs_merged.csv
+2025-08-19 15:53:09,991 - INFO - Done.

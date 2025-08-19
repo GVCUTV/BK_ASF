@@ -65,3 +65,59 @@
 2025-08-19 13:02:50,383 - INFO - Using testing    fit: weibull_min {"c": NaN, "scale": NaN, "loc": NaN}
 2025-08-19 13:02:50,384 - INFO - Configuration written: simulation/config.py
 2025-08-19 13:02:50,384 - INFO - Done. Inspect simulation/config.py and logs for details.
+2025-08-19 15:27:12,167 - INFO - Logger initialized. Logfile: output/logs/generate_sim_config.log
+2025-08-19 15:27:12,168 - INFO - CLI args: {'etl_csv': '/Users/og/PycharmProjects/BK_ASF/etl/output/csv/tickets_prs_merged.csv', 'fit_csv': '/Users/og/PycharmProjects/BK_ASF/etl/output/csv/fit_summary.csv', 'created_col': 'fields.created', 'window_start': '2024-01-01', 'window_end': '2025-01-01', 'default_p_dev': 0.2, 'default_p_test': 0.15, 'review_rounds_col': 'review_rounds', 'review_flag_col': 'review_rework_flag', 'ci_fail_fix_col': 'ci_failed_then_fix', 'sim_duration_days': 365.0, 'n_devs': 3, 'n_testers': 2, 'config_out': '/Users/og/PycharmProjects/BK_ASF/simulation/config.py'}
+2025-08-19 15:27:12,168 - INFO - Reading ETL: /Users/og/PycharmProjects/BK_ASF/etl/output/csv/tickets_prs_merged.csv
+2025-08-19 15:27:12,240 - WARNING - No arrivals in requested window [2024-01-01, 2025-01-01). Falling back to dataset-wide window.
+2025-08-19 15:27:12,242 - INFO - Fallback window [2009-04-01, 2017-10-18): n=960, days=3122, λ=0.307495/day
+2025-08-19 15:27:12,291 - WARNING - Could not estimate FEEDBACK_P_DEV; using default=0.2000
+2025-08-19 15:27:12,292 - WARNING - Could not estimate FEEDBACK_P_TEST; using default=0.1500
+2025-08-19 15:27:12,292 - INFO - Reading fit_summary: /Users/og/PycharmProjects/BK_ASF/etl/output/csv/fit_summary.csv
+2025-08-19 15:27:12,295 - INFO - Stage 'dev_review' -> lognorm {"s": 0.1516685, "loc": -1042.86549, "scale": 1069.60329}
+2025-08-19 15:27:12,295 - INFO - Stage 'testing' -> lognorm {"s": 0.1516685, "loc": -1042.86549, "scale": 1069.60329}
+2025-08-19 15:27:12,295 - INFO - Using dev_review fit: lognorm {"s": 0.1516685, "loc": -1042.86549, "scale": 1069.60329}
+2025-08-19 15:27:12,295 - INFO - Using testing    fit: lognorm {"s": 0.1516685, "loc": -1042.86549, "scale": 1069.60329}
+2025-08-19 15:27:12,296 - INFO - Configuration written: /Users/og/PycharmProjects/BK_ASF/simulation/config.py
+2025-08-19 15:27:12,296 - INFO - Done. Inspect /Users/og/PycharmProjects/BK_ASF/simulation/config.py and logs for details.
+2025-08-19 15:33:48,591 - INFO - Logger initialized. Logfile: output/logs/generate_sim_config.log
+2025-08-19 15:33:48,593 - INFO - PROJECT_ROOT from path_config: /Users/og/PycharmProjects/BK_ASF
+2025-08-19 15:33:48,594 - INFO - CLI args: {'log_level': 'INFO', 'etl_csv': '/Users/og/PycharmProjects/BK_ASF/etl/output/csv/tickets_prs_merged.csv', 'fit_csv': '/Users/og/PycharmProjects/BK_ASF/etl/output/csv/fit_summary.csv', 'created_col': 'fields.created', 'window_start': '2024-01-01', 'window_end': '2025-01-01', 'default_p_dev': 0.2, 'default_p_test': 0.15, 'review_rounds_col': 'review_rounds', 'review_flag_col': 'review_rework_flag', 'ci_fail_fix_col': 'ci_failed_then_fix', 'sim_duration_days': 365.0, 'n_devs': 3, 'n_testers': 2, 'config_out': '/Users/og/PycharmProjects/BK_ASF/simulation/config.py'}
+2025-08-19 15:33:48,594 - INFO - ---- START: Estimate arrival rate ----
+2025-08-19 15:33:48,594 - INFO - Reading ETL CSV: /Users/og/PycharmProjects/BK_ASF/etl/output/csv/tickets_prs_merged.csv
+2025-08-19 15:33:48,662 - INFO - Converted fields.created to UTC-naive. Non-null: 960 / 960
+2025-08-19 15:33:48,665 - WARNING - No arrivals in requested window [2024-01-01, 2025-01-01). Falling back to dataset-wide window.
+2025-08-19 15:33:48,666 - INFO - Fallback window [2009-04-01, 2017-10-18): n=960, days=3122, λ=0.307495/day
+2025-08-19 15:33:48,666 - INFO - ---- END: Estimate arrival rate (0.072s) ----
+2025-08-19 15:33:48,667 - INFO - ---- START: Estimate feedback probabilities ----
+2025-08-19 15:33:48,720 - INFO - Columns present: ['expand', 'id_ticket', 'self', 'key', 'fields.summary', 'fields.issuetype.self', 'fields.issuetype.id', 'fields.issuetype.description', 'fields.issuetype.iconUrl', 'fields.issuetype.name', 'fields.issuetype.subtask', 'fields.issuetype.avatarId', 'fields.resolutiondate', 'fields.created', 'fields.description', 'fields.assignee', 'fields.resolution', 'fields.updated', 'fields.status.self', 'fields.status.description', 'fields.status.iconUrl', 'fields.status.name', 'fields.status.id', 'fields.status.statusCategory.self', 'fields.status.statusCategory.id', 'fields.status.statusCategory.key', 'fields.status.statusCategory.colorName', 'fields.status.statusCategory.name', 'fields.assignee.self', 'fields.assignee.name', 'fields.assignee.key', 'fields.assignee.avatarUrls.48x48', 'fields.assignee.avatarUrls.24x24', 'fields.assignee.avatarUrls.16x16', 'fields.assignee.avatarUrls.32x32', 'fields.assignee.displayName', 'fields.assignee.active', 'fields.assignee.timeZone', 'fields.resolution.self', 'fields.resolution.id']
+2025-08-19 15:33:48,721 - WARNING - Could not estimate FEEDBACK_P_DEV; using default=0.2000
+2025-08-19 15:33:48,721 - WARNING - Could not estimate FEEDBACK_P_TEST; using default=0.1500
+2025-08-19 15:33:48,721 - INFO - ---- END: Estimate feedback probabilities (0.053s) ----
+2025-08-19 15:33:48,722 - INFO - ---- START: Read fit_summary.csv ----
+2025-08-19 15:33:48,722 - INFO - Reading: /Users/og/PycharmProjects/BK_ASF/etl/output/csv/fit_summary.csv
+2025-08-19 15:33:48,725 - INFO - Loaded fit_summary with 2 rows and columns: ['stage', 'is_winner', 'mae', 'ks_pvalue', 'aic', 'bic', 'dist', 'mu', 'sigma', 's', 'c', 'scale', 'loc']
+2025-08-19 15:33:48,726 - INFO - Stage 'dev_review' -> lognorm {"loc": -1042.86549, "s": 0.1516685, "scale": 1069.60329}
+2025-08-19 15:33:48,727 - INFO - Stage 'testing' -> lognorm {"loc": -1042.86549, "s": 0.1516685, "scale": 1069.60329}
+2025-08-19 15:33:48,727 - INFO - ---- END: Read fit_summary.csv (0.005s) ----
+2025-08-19 15:33:48,727 - INFO - Available stages in fit_summary: ['dev_review', 'testing']
+2025-08-19 15:33:48,727 - INFO - Stage selected: dev_review
+2025-08-19 15:33:48,727 - INFO - Stage selected: testing
+2025-08-19 15:33:48,727 - INFO - Using dev_review fit: lognorm {"loc": -1042.86549, "s": 0.1516685, "scale": 1069.60329}
+2025-08-19 15:33:48,727 - INFO - Using testing    fit: lognorm {"loc": -1042.86549, "s": 0.1516685, "scale": 1069.60329}
+2025-08-19 15:33:48,728 - INFO - ---- START: Write simulation/config.py ----
+2025-08-19 15:33:48,728 - INFO - Wrote /Users/og/PycharmProjects/BK_ASF/simulation/config.py (size=1709 bytes)
+2025-08-19 15:33:48,728 - INFO - Config summary: ARRIVAL_RATE=0.3074951953875721, N_DEVS=3, N_TESTERS=2
+2025-08-19 15:33:48,728 - INFO - Service dev_review: dist=lognorm params={"loc": -1042.86549, "s": 0.1516685, "scale": 1069.60329}
+2025-08-19 15:33:48,728 - INFO - Service testing  : dist=lognorm params={"loc": -1042.86549, "s": 0.1516685, "scale": 1069.60329}
+2025-08-19 15:33:48,728 - INFO - ---- END: Write simulation/config.py (0.001s) ----
+2025-08-19 15:33:48,728 - INFO - All done. Config at: /Users/og/PycharmProjects/BK_ASF/simulation/config.py | Log at: output/logs/generate_sim_config.log
+2025-08-19 15:45:16,648 - INFO - Logger initialized. Logfile: output/logs/generate_sim_config.log
+2025-08-19 15:45:16,648 - INFO - PROJECT_ROOT: /Users/og/PycharmProjects/BK_ASF
+2025-08-19 15:45:16,648 - INFO - CLI args: {'log_level': 'INFO', 'etl_csv': '/Users/og/PycharmProjects/BK_ASF/etl/output/csv/tickets_prs_merged.csv', 'fit_csv': '/Users/og/PycharmProjects/BK_ASF/etl/output/csv/fit_summary.csv', 'created_col': 'fields.created', 'window_start': '2024-01-01', 'window_end': '2025-01-01', 'config_out': '/Users/og/PycharmProjects/BK_ASF/simulation/config.py', 'sim_duration_days': 365.0}
+2025-08-19 15:45:16,710 - INFO - ETL rows: 960, columns: 192
+2025-08-19 15:45:16,720 - INFO - Normalized fields.created to UTC-naive. Non-null: 960/960
+2025-08-19 15:45:16,724 - WARNING - No arrivals in [2024-01-01, 2025-01-01). Expanding to dataset-wide window.
+2025-08-19 15:45:16,726 - INFO - Using dataset-wide window [2009-04-01, 2017-10-18): n=960, days=3122, λ=0.307495/day
+2025-08-19 15:45:16,733 - INFO - Feedback window filter: 960 rows
+2025-08-19 15:45:16,733 - INFO - Dev feedback candidate columns present: []
+2025-08-19 15:45:16,734 - ERROR - Cannot compute FEEDBACK_P_DEV from data. Expected one of columns ['review_rounds', 'review_rework_flag', 'pr_review_rounds', 'reopened_flag'] in the ETL window.

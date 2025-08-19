@@ -1,0 +1,13 @@
+2025-08-19 16:07:12,199 - INFO - Logger pronto. Logfile: /Users/og/PycharmProjects/BK_ASF/output/logs/download_jira_tickets.log
+2025-08-19 16:07:12,199 - INFO - PROJECT_ROOT: /Users/og/PycharmProjects/BK_ASF
+2025-08-19 16:07:12,199 - INFO - OUTPUT CSV   : /Users/og/PycharmProjects/BK_ASF/etl/output/csv/jira_issues_raw.csv
+2025-08-19 16:07:12,199 - INFO - Jira batch 1: startAt=0
+2025-08-19 16:07:18,959 - INFO - Jira total issues: 1095
+2025-08-19 16:07:18,960 - INFO - Jira page size: 1000
+2025-08-19 16:07:18,960 - INFO - Jira batch 2: startAt=1000
+2025-08-19 16:07:19,866 - INFO - Jira page size: 95
+2025-08-19 16:07:19,866 - INFO - Downloaded issues: 1095
+2025-08-19 16:07:19,921 - INFO - Flattened dataframe shape: (1095, 46)
+2025-08-19 16:07:19,971 - INFO - Salvate 1095 righe in /Users/og/PycharmProjects/BK_ASF/etl/output/csv/jira_issues_raw.csv
+2025-08-19 16:07:19,976 - INFO - fields.assignee.name non-null=920 distinct=44
+2025-08-19 16:07:19,978 - INFO - fields.assignee.displayName non-null=920 distinct=43

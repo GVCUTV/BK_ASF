@@ -3,3 +3,7 @@
 2025-08-19 11:32:58,186 - INFO - Parsing Parametri field into numeric lists …
 2025-08-19 11:32:58,200 - INFO - Winner: Normale (MAE=1.65964e-06) params=[472.55203584177127, 4060.925414999842]
 2025-08-19 11:32:58,203 - INFO - fit_summary.csv saved: ./etl/output/csv/fit_summary.csv
+2025-08-19 15:26:30,112 - INFO - Logger ready.
+2025-08-19 15:26:30,114 - INFO - Input: /Users/og/PycharmProjects/BK_ASF/etl/output/csv/distribution_fit_stats.csv
+2025-08-19 15:26:30,134 - INFO - Winner: Lognormale (MAE=3.83073e-05) params=[0.1516685, -1042.86549, 1069.60329]
+2025-08-19 15:26:30,139 - INFO - fit_summary.csv saved: /Users/og/PycharmProjects/BK_ASF/etl/output/csv/fit_summary.csv

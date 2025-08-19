@@ -1,0 +1,50 @@
+2025-08-19 16:07:36,571 - INFO - Logger pronto. Logfile: /Users/og/PycharmProjects/BK_ASF/output/logs/download_github_prs.log
+2025-08-19 16:07:36,571 - INFO - PROJECT_ROOT: /Users/og/PycharmProjects/BK_ASF
+2025-08-19 16:07:36,571 - INFO - OUT_CSV     : /Users/og/PycharmProjects/BK_ASF/etl/output/csv/github_prs_raw.csv
+2025-08-19 16:07:36,571 - WARNING - GITHUB_TOKEN non impostato: rate limit 60/h. Consigliato esportare GITHUB_TOKEN.
+2025-08-19 16:07:36,571 - INFO - PR page 1
+2025-08-19 16:07:38,289 - INFO - PR page 2
+2025-08-19 16:07:39,891 - INFO - PR page 3
+2025-08-19 16:07:41,466 - INFO - PR page 4
+2025-08-19 16:07:43,042 - INFO - PR page 5
+2025-08-19 16:07:45,291 - INFO - PR page 6
+2025-08-19 16:07:47,167 - INFO - PR page 7
+2025-08-19 16:07:48,814 - INFO - PR page 8
+2025-08-19 16:07:50,832 - INFO - PR page 9
+2025-08-19 16:07:52,820 - INFO - PR page 10
+2025-08-19 16:07:54,910 - INFO - PR page 11
+2025-08-19 16:07:56,672 - INFO - PR page 12
+2025-08-19 16:07:59,142 - INFO - PR page 13
+2025-08-19 16:08:00,833 - INFO - PR page 14
+2025-08-19 16:08:03,307 - INFO - PR page 15
+2025-08-19 16:08:05,104 - INFO - PR page 16
+2025-08-19 16:08:07,107 - INFO - PR page 17
+2025-08-19 16:08:09,163 - INFO - PR page 18
+2025-08-19 16:08:11,225 - INFO - PR page 19
+2025-08-19 16:08:13,338 - INFO - PR page 20
+2025-08-19 16:08:15,449 - INFO - PR page 21
+2025-08-19 16:08:17,086 - INFO - PR page 22
+2025-08-19 16:08:18,707 - INFO - PR page 23
+2025-08-19 16:08:20,546 - INFO - PR page 24
+2025-08-19 16:08:22,247 - INFO - PR page 25
+2025-08-19 16:08:24,084 - INFO - PR page 26
+2025-08-19 16:08:26,354 - INFO - PR page 27
+2025-08-19 16:08:28,030 - INFO - PR page 28
+2025-08-19 16:08:29,683 - INFO - PR page 29
+2025-08-19 16:08:31,220 - INFO - PR page 30
+2025-08-19 16:08:32,759 - INFO - PR page 31
+2025-08-19 16:08:34,255 - INFO - PR page 32
+2025-08-19 16:08:35,426 - INFO - PR page 33
+2025-08-19 16:08:36,938 - INFO - PR page 34
+2025-08-19 16:08:37,885 - INFO - Totale PR scaricate: 3336
+2025-08-19 16:08:39,499 - INFO - PR #4653 | reviews=0 changes_requested=0 head_sha=53ebbbb8623d7cdec912d34d776eda6dfdf41ac8
+2025-08-19 16:08:41,321 - INFO - PR #4652 | reviews=2 changes_requested=0 head_sha=df80f899eac548fcbbf9919e590e54ff5aa918ab
+2025-08-19 16:08:42,935 - INFO - PR #4650 | reviews=0 changes_requested=0 head_sha=42a4b1e787ed21f9e8c2c93525b8a752dc8f4819
+2025-08-19 16:08:44,657 - INFO - PR #4649 | reviews=1 changes_requested=0 head_sha=cde8df51a3c0aa80bc2574bc24d150a11e9b7df6
+2025-08-19 16:08:46,297 - INFO - PR #4648 | reviews=2 changes_requested=0 head_sha=1e074e3165b10ad0fa945220022d72d97725c2da
+2025-08-19 16:08:48,048 - INFO - PR #4646 | reviews=1 changes_requested=0 head_sha=40e60d5686a831fe492b8abe19513822576b7b8b
+2025-08-19 16:08:50,679 - INFO - PR #4645 | reviews=15 changes_requested=2 head_sha=2afadc46ed17f50ea9ef7ddf914448dd3d24bc03
+2025-08-19 16:08:52,084 - INFO - PR #4643 | reviews=2 changes_requested=0 head_sha=480d3a70b784a1e131b9f8e9216f33f764c94348
+2025-08-19 16:08:53,456 - WARNING - Rate limited. Reset at 1755616056. Sleeping 60s.
+2025-08-19 16:09:53,591 - WARNING - Rate limited. Reset at 1755616056. Sleeping 60s.
+2025-08-19 16:10:53,804 - WARNING - Rate limited. Reset at 1755616056. Sleeping 60s.
