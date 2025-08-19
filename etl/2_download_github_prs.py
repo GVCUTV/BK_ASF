@@ -1,14 +1,17 @@
-# v5
+# v6
 # file: etl/2_download_github_prs.py
 """
 GitHub PR downloader for apache/bookkeeper with:
 - Concurrent page fetching for the PR list (state=all).
+- **Concurrent per-PR detail fetching** (reviews, check-runs, combined statuses).
+- Shared HTTP session with pooled connections for lower latency.
 - Robust extraction of review signals, check-runs conclusions, and combined statuses.
-- Token read from etl/env/github_token.env as: GITHUB_TOKEN=<token_value>.
+- Token read from etl/env/github.env as: GITHUB_TOKEN=<token_value>.
 - Exhaustive logging to stdout and output/logs/download_github_prs.log.
 
 Design notes:
-- We use a small thread pool (default 10 workers) to fetch pages in parallel.
+- We use a small thread pool (default 10 workers) to fetch the PR list in parallel.
+- We use a separate, tunable pool (default 16 workers) to fetch PR details in parallel.
 - We detect the last page using the HTTP 'Link' header to avoid overfetch.
 - All API reads handle transient errors with simple retries and log details.
 - Checks/Statuses responses are normalized to lists before iteration to avoid type errors.
@@ -27,6 +30,7 @@ import requests
 import pandas as pd
 from os import path
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from requests.adapters import HTTPAdapter
 
 from path_config import PROJECT_ROOT  # CWD-independent
 
@@ -39,15 +43,20 @@ ENV_FILE = path.join(PROJECT_ROOT, "etl", "env", "github.env")
 OWNER = "apache"
 REPO = "bookkeeper"
 PER_PAGE = 100
-MAX_WORKERS = 10
+MAX_WORKERS = int(os.getenv("GITHUB_LIST_WORKERS", "10"))  # PR list pagination workers
+DETAIL_WORKERS = int(os.getenv("GITHUB_DETAIL_WORKERS", "16"))  # per-PR details workers
 RETRIES = 3
 TIMEOUT = 30
+
+# Connection pool sizes for the shared Session; keep a bit larger than workers
+POOL_CONNECTIONS = int(os.getenv("GITHUB_POOL_CONNS", str(max(32, DETAIL_WORKERS * 2))))
+POOL_MAXSIZE = int(os.getenv("GITHUB_POOL_MAXSIZE", str(max(64, DETAIL_WORKERS * 4))))
 
 # --------------------------- Logging --------------------------- #
 
 def _safe_mkdirs(d):
     try:
-        os.makedirs(d)
+        os.makedirs(d, exist_ok=True)
     except OSError:
         if not path.isdir(d):
             raise
@@ -74,7 +83,7 @@ def _setup_logging():
     return log_path
 
 
-# --------------------------- Token & Headers --------------------------- #
+# --------------------------- Token, Session & Headers --------------------------- #
 
 def _read_token_from_envfile(p=ENV_FILE):
     """Read 'GITHUB_TOKEN=<token>' from file; return empty string if missing."""
@@ -98,23 +107,32 @@ def _headers(preview=False):
     h = {
         "Accept": "application/vnd.github+json",
         "User-Agent": "BK_ASF-ETL",
+        "Connection": "keep-alive",
     }
     if GITHUB_TOKEN:
         h["Authorization"] = "Bearer " + GITHUB_TOKEN
     if preview:
+        # Antiope preview for check-runs (still commonly used)
         h["Accept"] = "application/vnd.github.antiope-preview+json"
     return h
+
+# Shared HTTP session with a tuned connection pool to reuse TCP/TLS connections
+_SESSION = requests.Session()
+_ADAPTER = HTTPAdapter(pool_connections=POOL_CONNECTIONS, pool_maxsize=POOL_MAXSIZE, max_retries=0)
+_SESSION.mount("https://", _ADAPTER)
+_SESSION.mount("http://", _ADAPTER)
 
 
 # --------------------------- HTTP helpers --------------------------- #
 
 def _req_get(url, params=None, preview=False, return_response=False):
     """
-    GET with simple retries. Returns r.json() or the raw response if return_response=True.
+    GET with simple retries using the shared Session. Returns r.json() or the raw response
+    if return_response=True. Retries on common transient errors with backoff.
     """
     for attempt in range(RETRIES + 1):
         try:
-            r = requests.get(url, headers=_headers(preview=preview), params=params, timeout=TIMEOUT)
+            r = _SESSION.get(url, headers=_headers(preview=preview), params=params, timeout=TIMEOUT)
             if r.status_code == 200:
                 return r if return_response else r.json()
             # Rate limit handling
@@ -146,7 +164,7 @@ def _discover_last_page(owner, repo, per_page=PER_PAGE):
     Discover total pages using the 'Link' header.
     If absent, fall back to 1 page (or keep fetching until empty in the concurrent loop).
     """
-    url = "https://api.github.com/repos/{}/{}/pulls".format(owner, repo)
+    url = f"https://api.github.com/repos/{owner}/{repo}/pulls"
     params = {"state": "all", "per_page": per_page, "page": 1}
     r = _req_get(url, params=params, return_response=True)
     link = r.headers.get("Link", "")
@@ -166,7 +184,7 @@ def _discover_last_page(owner, repo, per_page=PER_PAGE):
 
 def _fetch_pr_page(owner, repo, page, per_page=PER_PAGE):
     """Fetch a single page of PRs; returns (page, list)."""
-    url = "https://api.github.com/repos/{}/{}/pulls".format(owner, repo)
+    url = f"https://api.github.com/repos/{owner}/{repo}/pulls"
     params = {"state": "all", "per_page": per_page, "page": page}
     data = _req_get(url, params=params)
     if isinstance(data, list):
@@ -194,7 +212,6 @@ def _list_all_prs_concurrent(owner, repo, per_page=PER_PAGE, max_workers=MAX_WOR
 
     # If we guessed last_page and there are trailing empties, trim them
     all_pages = sorted(prs_by_page.keys())
-    # Trim trailing pages with 0 elements
     while all_pages and len(prs_by_page[all_pages[-1]]) == 0:
         logging.info("Trimming empty trailing page %d", all_pages[-1])
         all_pages.pop()
@@ -211,7 +228,7 @@ def _list_all_prs_concurrent(owner, repo, per_page=PER_PAGE, max_workers=MAX_WOR
 # --------------------------- Detail helpers --------------------------- #
 
 def _list_reviews(owner, repo, pr_number):
-    url = "https://api.github.com/repos/{}/{}/pulls/{}/reviews".format(owner, repo, pr_number)
+    url = f"https://api.github.com/repos/{owner}/{repo}/pulls/{pr_number}/reviews"
     data = _req_get(url, preview=False)
     if isinstance(data, list):
         return data
@@ -219,7 +236,7 @@ def _list_reviews(owner, repo, pr_number):
     return []
 
 def _list_check_runs(owner, repo, sha):
-    url = "https://api.github.com/repos/{}/{}/commits/{}/check-runs".format(owner, repo, sha)
+    url = f"https://api.github.com/repos/{owner}/{repo}/commits/{sha}/check-runs"
     data = _req_get(url, preview=True)
     if isinstance(data, dict):
         runs = data.get("check_runs") or []
@@ -235,7 +252,7 @@ def _list_check_runs(owner, repo, sha):
     return []
 
 def _combined_status(owner, repo, sha):
-    url = "https://api.github.com/repos/{}/{}/commits/{}/status".format(owner, repo, sha)
+    url = f"https://api.github.com/repos/{owner}/{repo}/commits/{sha}/status"
     data = _req_get(url, preview=False)
     if isinstance(data, dict):
         statuses = data.get("statuses") or []
@@ -286,16 +303,81 @@ def _derive_statuses(statuses):
     return {"combined_status_states": json.dumps(states)}
 
 
+# --------------------------- Per-PR processing (parallelizable) --------------------------- #
+
+def _process_one_pr(pr):
+    """
+    Fetch and derive details for a single PR item.
+    This function is designed to run in a worker thread (I/O bound).
+    """
+    t0 = time.time()
+    number = pr.get("number")
+    head = pr.get("head") or {}
+    head_sha = head.get("sha")
+
+    # Fetch reviews
+    reviews = _list_reviews(OWNER, REPO, number)
+    rev_sig = _derive_review_signals(reviews)
+
+    # Fetch checks (if we have a head sha)
+    chk_sig = {"check_runs_conclusions": json.dumps([])}
+    if head_sha:
+        runs = _list_check_runs(OWNER, REPO, head_sha)
+        chk_sig = _derive_checks(runs)
+
+    # Fetch combined statuses (if we have a head sha)
+    st_sig = {"combined_status_states": json.dumps([])}
+    if head_sha:
+        statuses = _combined_status(OWNER, REPO, head_sha)
+        st_sig = _derive_statuses(statuses)
+
+    base = {
+        "number": number,
+        "html_url": pr.get("html_url"),
+        "state": pr.get("state"),
+        "title": pr.get("title"),
+        "created_at": pr.get("created_at"),
+        "updated_at": pr.get("updated_at"),
+        "closed_at": pr.get("closed_at"),
+        "merged_at": pr.get("merged_at"),
+        "merge_commit_sha": pr.get("merge_commit_sha"),
+        "user.login": (pr.get("user") or {}).get("login"),
+        "assignee.login": (pr.get("assignee") or {}).get("login"),
+        "requested_reviewers": json.dumps([(u or {}).get("login") for u in (pr.get("requested_reviewers") or [])]),
+        "head.ref": head.get("ref"),
+        "head.sha": head_sha,
+        "base.ref": (pr.get("base") or {}).get("ref"),
+    }
+    base.update(rev_sig)
+    base.update(chk_sig)
+    base.update(st_sig)
+
+    # Log one line per processed PR with timing (as requested)
+    dt = time.time() - t0
+    logging.info(
+        "Processed PR #%s in %.2fs | reviews=%s, changes_requested=%s, head_sha=%s",
+        str(number),
+        dt,
+        str(base.get("reviews_count")),
+        str(base.get("requested_changes_count")),
+        head_sha if head_sha else "-"
+    )
+    return base
+
+
 # --------------------------- Main --------------------------- #
 
 def main():
     _setup_logging()
     logging.info("PROJECT_ROOT: %s", PROJECT_ROOT)
     logging.info("OUT_CSV     : %s", OUT_CSV)
+    logging.info("Workers     : list=%d, details=%d, pool_conns=%d, pool_max=%d",
+                 MAX_WORKERS, DETAIL_WORKERS, POOL_CONNECTIONS, POOL_MAXSIZE)
+
     if not GITHUB_TOKEN:
         logging.warning("GITHUB_TOKEN not found in %s. You will be limited by GitHub's anonymous rate limit.", ENV_FILE)
 
-    # 1) Fetch PR list (concurrent)
+    # 1) Fetch PR list (concurrent across pages)
     prs = _list_all_prs_concurrent(OWNER, REPO, per_page=PER_PAGE, max_workers=MAX_WORKERS)
     if not prs:
         logging.warning("No PRs found.")
@@ -304,52 +386,24 @@ def main():
         return
 
     # 2) For each PR, fetch details
+    #    PREVIOUSLY: this was a sequential for-loop, causing 2–3 HTTP calls per PR in series.
+    #    NOW: we parallelize per-PR detail fetching with a ThreadPoolExecutor.
+    #    This is safe and effective because the operations are network I/O bound.
     rows = []
-    for idx, pr in enumerate(prs, 1):
-        try:
-            number = pr.get("number")
-            head = pr.get("head") or {}
-            head_sha = head.get("sha")
-
-            reviews = _list_reviews(OWNER, REPO, number)
-            rev_sig = _derive_review_signals(reviews)
-
-            chk_sig = {"check_runs_conclusions": json.dumps([])}
-            if head_sha:
-                runs = _list_check_runs(OWNER, REPO, head_sha)
-                chk_sig = _derive_checks(runs)
-
-            st_sig = {"combined_status_states": json.dumps([])}
-            if head_sha:
-                statuses = _combined_status(OWNER, REPO, head_sha)
-                st_sig = _derive_statuses(statuses)
-
-            base = {
-                "number": number,
-                "html_url": pr.get("html_url"),
-                "state": pr.get("state"),
-                "title": pr.get("title"),
-                "created_at": pr.get("created_at"),
-                "updated_at": pr.get("updated_at"),
-                "closed_at": pr.get("closed_at"),
-                "merged_at": pr.get("merged_at"),
-                "merge_commit_sha": pr.get("merge_commit_sha"),
-                "user.login": (pr.get("user") or {}).get("login"),
-                "assignee.login": (pr.get("assignee") or {}).get("login"),
-                "requested_reviewers": json.dumps([(u or {}).get("login") for u in (pr.get("requested_reviewers") or [])]),
-                "head.ref": head.get("ref"),
-                "head.sha": head_sha,
-                "base.ref": (pr.get("base") or {}).get("ref"),
-            }
-            base.update(rev_sig)
-            base.update(chk_sig)
-            base.update(st_sig)
-            rows.append(base)
-
-            if idx % 100 == 0:
-                logging.info("Processed %d/%d PRs…", idx, len(prs))
-        except Exception as e:
-            logging.warning("Error processing PR item: %s", e)
+    t_loop0 = time.time()
+    with ThreadPoolExecutor(max_workers=DETAIL_WORKERS) as ex:
+        futures = [ex.submit(_process_one_pr, pr) for pr in prs]
+        processed = 0
+        for fut in as_completed(futures):
+            try:
+                rows.append(fut.result())
+                processed += 1
+                if processed % 100 == 0:
+                    elapsed = time.time() - t_loop0
+                    logging.info("Parallel details progress: %d/%d (%.1f%%) in %.1fs",
+                                 processed, len(prs), 100.0 * processed / max(1, len(prs)), elapsed)
+            except Exception as e:
+                logging.warning("Error processing PR item in worker: %s", e)
 
     # 3) Save CSV
     df = pd.DataFrame(rows)
