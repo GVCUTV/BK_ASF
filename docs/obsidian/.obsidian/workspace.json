@@ -1,0 +1,177 @@
+{
+  "main": {
+    "id": "793438503a816449",
+    "type": "split",
+    "children": [
+      {
+        "id": "66f04b353b89e9fe",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "e46a775ab5c220cf",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "PMCSN/Formulario PMCSN v2.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "Formulario PMCSN v2"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "339ab7c0a00412da",
+    "type": "split",
+    "children": [
+      {
+        "id": "e7d359a9f1a8a641",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "b3136cb0de91c721",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {
+                "sortOrder": "alphabetical",
+                "autoReveal": false
+              },
+              "icon": "lucide-folder-closed",
+              "title": "Files"
+            }
+          },
+          {
+            "id": "04de0ffa10b3c51c",
+            "type": "leaf",
+            "state": {
+              "type": "search",
+              "state": {
+                "query": "",
+                "matchingCase": false,
+                "explainSearch": false,
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical"
+              },
+              "icon": "lucide-search",
+              "title": "Search"
+            }
+          },
+          {
+            "id": "917f8347df60b522",
+            "type": "leaf",
+            "state": {
+              "type": "bookmarks",
+              "state": {},
+              "icon": "lucide-bookmark",
+              "title": "Bookmarks"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300
+  },
+  "right": {
+    "id": "7a2ed43fa92af475",
+    "type": "split",
+    "children": [
+      {
+        "id": "a73c6dacae9d54af",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "4380691d3e6280a9",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "file": "PMCSN/Formulario PMCSN v2.md",
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-coming-in",
+              "title": "Backlinks for Formulario PMCSN v2"
+            }
+          },
+          {
+            "id": "ecba2979400a52b6",
+            "type": "leaf",
+            "state": {
+              "type": "outgoing-link",
+              "state": {
+                "file": "PMCSN/Formulario PMCSN v2.md",
+                "linksCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-going-out",
+              "title": "Outgoing links from Formulario PMCSN v2"
+            }
+          },
+          {
+            "id": "91cc26c54d81e370",
+            "type": "leaf",
+            "state": {
+              "type": "tag",
+              "state": {
+                "sortOrder": "frequency",
+                "useHierarchy": true,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-tags",
+              "title": "Tags"
+            }
+          },
+          {
+            "id": "0162e125b4cc3365",
+            "type": "leaf",
+            "state": {
+              "type": "outline",
+              "state": {
+                "file": "PMCSN/Formulario PMCSN v2.md",
+                "followCursor": false,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-list",
+              "title": "Outline of Formulario PMCSN v2"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300,
+    "collapsed": true
+  },
+  "left-ribbon": {
+    "hiddenItems": {
+      "switcher:Open quick switcher": false,
+      "graph:Open graph view": false,
+      "canvas:Create new canvas": false,
+      "daily-notes:Open today's daily note": false,
+      "templates:Insert template": false,
+      "command-palette:Open command palette": false
+    }
+  },
+  "active": "e46a775ab5c220cf",
+  "lastOpenFiles": [
+    "PMCSN/Distribuzioni a fasi.png",
+    "PMCSN/Welcome.md",
+    "PMCSN/Formulario PMCSN v2.md"
+  ]
+}

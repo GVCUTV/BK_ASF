@@ -1,0 +1,5 @@
+2025-08-19 11:32:58,177 - INFO - Logger initialized. Logfile: output/logs/export_fit_summary.log
+2025-08-19 11:32:58,178 - INFO - Reading input CSV: ./etl/output/csv/distribution_fit_stats.csv
+2025-08-19 11:32:58,186 - INFO - Parsing Parametri field into numeric lists …
+2025-08-19 11:32:58,200 - INFO - Winner: Normale (MAE=1.65964e-06) params=[472.55203584177127, 4060.925414999842]
+2025-08-19 11:32:58,203 - INFO - fit_summary.csv saved: ./etl/output/csv/fit_summary.csv

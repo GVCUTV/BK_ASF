@@ -1,0 +1,16 @@
+2025-08-19 11:25:06,627 - INFO - Logger ready. Logfile: output/logs/fit_distributions.log
+2025-08-19 11:25:06,628 - INFO - Reading ETL: ./etl/output/csv/tickets_prs_merged.csv
+2025-08-19 11:25:06,691 - INFO - Computing resolution time from fields.created -> fields.resolutiondate
+2025-08-19 11:25:06,702 - INFO - Computed 887 valid durations (hours).
+2025-08-19 11:25:06,702 - INFO - Fitting single series from __computed_time__ (will duplicate winner across stages ['dev_review', 'testing'])
+2025-08-19 11:25:06,799 - INFO - Winner for _e2e_: Normale (MAE=1.65964e-06, params=[472.55203584177127, 4060.925414999842])
+2025-08-19 11:25:06,805 - INFO - Saved distribution_fit_stats.csv: etl/output/csv/distribution_fit_stats.csv
+2025-08-19 11:25:06,807 - INFO - Saved fit_summary.csv for generator: etl/output/csv/fit_summary.csv
+2025-08-19 11:30:30,742 - INFO - Logger ready. Logfile: output/logs/fit_distributions.log
+2025-08-19 11:30:30,743 - INFO - Reading ETL: ./etl/output/csv/tickets_prs_merged.csv
+2025-08-19 11:30:30,820 - INFO - Computing resolution time from fields.created -> fields.resolutiondate
+2025-08-19 11:30:30,838 - INFO - Computed 887 valid durations (hours).
+2025-08-19 11:30:30,838 - INFO - Fitting single series from __computed_time__ (will duplicate winner across stages ['dev_review', 'testing'])
+2025-08-19 11:30:30,933 - INFO - Winner for _e2e_: Normale (MAE=1.65964e-06, params=[472.55203584177127, 4060.925414999842])
+2025-08-19 11:30:30,938 - INFO - Saved distribution_fit_stats.csv: etl/output/csv/distribution_fit_stats.csv
+2025-08-19 11:30:30,940 - INFO - Saved fit_summary.csv for generator: etl/output/csv/fit_summary.csv

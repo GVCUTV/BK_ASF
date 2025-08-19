@@ -1,32 +1,43 @@
-# v1
+# v2
 # file: simulation/config.py
 
 """
 Central configuration for simulation parameters.
-Tune all parameters and distributions here.
+All times are in DAYS. Arrival rate is tickets per DAY.
+Distributions are SciPy-style with explicit params (shape/scale/loc) and include 'loc' if a sliding fit was selected.
+Generated automatically by simulation/generate_sim_config.py on 2025-08-19 11:35:57.
+Repo: https://github.com/GVCUTV/BK_ASF.git
 """
 
-# General
-SIM_DURATION = 5000.0  # Simulated time units (can be hours, days...)
+# ----------------------------- General ----------------------------- #
+SIM_DURATION = 365.000000  # days of simulated time
 
-# Logging
+# ----------------------------- Logging ----------------------------- #
 LOG_FILE = "logs/simulation.log"
 
-# Arrival process
-ARRIVAL_RATE = 0.15  # tickets per time unit (lambda for Poisson process)
+# --------------------------- Arrival process --------------------------- #
+# Estimated from ETL data in window [2009-04-01 .. 2017-10-18)
+ARRIVAL_RATE = 0.3074951954  # tickets/day (lambda)
 
-# Service process
-N_DEVS = 3  # parallel dev/review servers
-N_TESTERS = 2  # parallel testers
+# --------------------------- Service capacity --------------------------- #
+# Calibrated to observed capacity or tuned to keep utilizations reasonable
+N_DEVS = 3
+N_TESTERS = 2
 
-# Feedback probabilities
-FEEDBACK_P_DEV = 0.2  # feedback after dev/review (empirical estimate)
-FEEDBACK_P_TEST = 0.15  # feedback after testing
+# --------------------------- Feedback probabilities --------------------------- #
+# Estimated from ETL (review/test cycles); defaults used if columns not available
+FEEDBACK_P_DEV  = 0.2000000000   # after Dev/Review
+FEEDBACK_P_TEST = 0.1500000000   # after Testing
 
-# Service time distributions, fitted from data: {'stage': ('distribution', (params))}
-# Examples below: replace with your own fitted params!
+# --------------------------- Service time distributions --------------------------- #
+# Names follow SciPy; params are explicit and include 'loc' (shift), if any.
 SERVICE_TIME_PARAMS = {
-    'dev_review': ('lognorm', (2.0, 0.7)),  # lognormal(mu, sigma)
-    'testing':    ('weibull', (1.5, 5.0)),  # weibull(shape, scale)
+    "dev_review": {
+        "dist": "norm",
+        "params": {"loc": 472.55203584177127, "scale": 4060.925414999842}
+    },
+    "testing": {
+        "dist": "norm",
+        "params": {"loc": 472.55203584177127, "scale": 4060.925414999842}
+    }
 }
-

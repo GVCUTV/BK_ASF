@@ -1,5 +1,5 @@
 # v1
-# file: 8_exponentiality_diagnostics.py
+# file: X_exponentiality_diagnostics.py
 
 """
 Diagnostic suite for testing whether empirical data is truly exponential,

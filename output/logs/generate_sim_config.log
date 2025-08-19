@@ -1,0 +1,31 @@
+2025-08-19 10:48:02,346 - INFO - Logger inizializzato. Logfile: output/logs/generate_sim_config.log
+2025-08-19 10:48:02,349 - INFO - Parametri CLI: {'etl_csv': './output/csv/tickets_prs_merged.csv', 'fit_csv': './output/csv/fit_summary.csv', 'arrival_window_start': '2024-01-01', 'arrival_window_end': '2025-01-01', 'created_col': 'created', 'review_rounds_col': 'review_rounds', 'review_flag_col': 'review_rework_flag', 'ci_fail_fix_col': 'ci_failed_then_fix', 'default_p_dev': 0.2, 'default_p_test': 0.15, 'sim_duration_days': 365.0, 'n_devs': 3, 'n_testers': 2, 'stage_dev': 'dev_review', 'stage_test': 'testing', 'config_out': 'simulation/config.py'}
+2025-08-19 10:48:02,349 - INFO - Lettura ETL CSV: ./output/csv/tickets_prs_merged.csv
+2025-08-19 10:50:47,676 - INFO - Logger inizializzato. Logfile: output/logs/generate_sim_config.log
+2025-08-19 10:50:47,678 - INFO - Parametri CLI: {'etl_csv': './etl/output/csv/tickets_prs_merged.csv', 'fit_csv': './etl/output/csv/fit_summary.csv', 'arrival_window_start': '2024-01-01', 'arrival_window_end': '2025-01-01', 'created_col': 'created', 'review_rounds_col': 'review_rounds', 'review_flag_col': 'review_rework_flag', 'ci_fail_fix_col': 'ci_failed_then_fix', 'default_p_dev': 0.2, 'default_p_test': 0.15, 'sim_duration_days': 365.0, 'n_devs': 3, 'n_testers': 2, 'stage_dev': 'dev_review', 'stage_test': 'testing', 'config_out': 'simulation/config.py'}
+2025-08-19 10:50:47,678 - INFO - Lettura ETL CSV: ./etl/output/csv/tickets_prs_merged.csv
+2025-08-19 11:02:03,961 - INFO - Logger inizializzato. Logfile: output/logs/generate_sim_config.log
+2025-08-19 11:02:03,963 - INFO - Parametri CLI: {'etl_csv': './etl/output/csv/tickets_prs_merged.csv', 'fit_csv': './etl/output/csv/fit_summary.csv', 'arrival_window_start': '2024-01-01', 'arrival_window_end': '2025-01-01', 'created_col': 'created', 'review_rounds_col': 'review_rounds', 'review_flag_col': 'review_rework_flag', 'ci_fail_fix_col': 'ci_failed_then_fix', 'default_p_dev': 0.2, 'default_p_test': 0.15, 'sim_duration_days': 365.0, 'n_devs': 3, 'n_testers': 2, 'stage_dev': 'dev_review', 'stage_test': 'testing', 'config_out': 'simulation/config.py'}
+2025-08-19 11:02:03,963 - INFO - Lettura ETL CSV: ./etl/output/csv/tickets_prs_merged.csv
+2025-08-19 11:02:04,022 - INFO - Normalizzazione colonna 'created' a UTC naive…
+2025-08-19 11:02:04,023 - INFO - Serie datetime tz-aware rilevata (UTC) → converto a UTC naive.
+2025-08-19 11:02:04,025 - INFO - Finestra arrivi (UTC naive): start=2024-01-01 00:00:00, end=2025-01-01 00:00:00
+2025-08-19 11:02:04,026 - INFO - Arrivi nella finestra [2024-01-01, 2025-01-01): 0 su 366 giorni -> λ = 0.000000 ticket/giorno
+2025-08-19 11:02:04,027 - INFO - Stima probabilità di feedback da ETL: ./etl/output/csv/tickets_prs_merged.csv
+2025-08-19 11:02:04,066 - WARNING - Impossibile stimare FEEDBACK_P_DEV dai dati: uso default=0.2000
+2025-08-19 11:02:04,066 - WARNING - Impossibile stimare FEEDBACK_P_TEST dai dati: uso default=0.1500
+2025-08-19 11:02:04,067 - INFO - Lettura fit summary: ./etl/output/csv/fit_summary.csv
+2025-08-19 11:35:57,293 - INFO - Logger initialized. Logfile: output/logs/generate_sim_config.log
+2025-08-19 11:35:57,295 - INFO - CLI args: {'etl_csv': './etl/output/csv/tickets_prs_merged.csv', 'fit_csv': './etl/output/csv/fit_summary.csv', 'created_col': 'fields.created', 'window_start': '2024-01-01', 'window_end': '2025-01-01', 'default_p_dev': 0.2, 'default_p_test': 0.15, 'review_rounds_col': 'review_rounds', 'review_flag_col': 'review_rework_flag', 'ci_fail_fix_col': 'ci_failed_then_fix', 'sim_duration_days': 365.0, 'n_devs': 3, 'n_testers': 2, 'config_out': 'simulation/config.py'}
+2025-08-19 11:35:57,295 - INFO - Reading ETL: ./etl/output/csv/tickets_prs_merged.csv
+2025-08-19 11:35:57,377 - WARNING - No arrivals in requested window [2024-01-01, 2025-01-01). Falling back to dataset-wide window.
+2025-08-19 11:35:57,378 - INFO - Fallback window [2009-04-01, 2017-10-18): n=960, days=3122, λ=0.307495/day
+2025-08-19 11:35:57,426 - WARNING - Could not estimate FEEDBACK_P_DEV from ETL; using default=0.2000
+2025-08-19 11:35:57,426 - WARNING - Could not estimate FEEDBACK_P_TEST from ETL; using default=0.1500
+2025-08-19 11:35:57,426 - INFO - Reading fit_summary: ./etl/output/csv/fit_summary.csv
+2025-08-19 11:35:57,429 - INFO - Stage 'dev_review' -> norm {"loc": 472.55203584177127, "scale": 4060.925414999842}
+2025-08-19 11:35:57,429 - INFO - Stage 'testing' -> norm {"loc": 472.55203584177127, "scale": 4060.925414999842}
+2025-08-19 11:35:57,429 - INFO - Using dev_review fit: norm {"loc": 472.55203584177127, "scale": 4060.925414999842}
+2025-08-19 11:35:57,429 - INFO - Using testing    fit: norm {"loc": 472.55203584177127, "scale": 4060.925414999842}
+2025-08-19 11:35:57,430 - INFO - Configuration written: simulation/config.py
+2025-08-19 11:35:57,430 - INFO - Done. Inspect simulation/config.py and logs for details.
