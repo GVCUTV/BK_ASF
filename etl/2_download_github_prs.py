@@ -40,7 +40,7 @@ from path_config import PROJECT_ROOT  # CWD-independent
 
 LOG_DIR = path.join(PROJECT_ROOT, "output", "logs")
 OUT_CSV = path.join(PROJECT_ROOT, "etl", "output", "csv", "github_prs_raw.csv")
-ENV_FILE = path.join(PROJECT_ROOT, "etl", "env", "github.env")
+ENV_FILE = path.join(PROJECT_ROOT, "etl", "env", "github_tokens.env")
 CACHE_FILE = path.join(PROJECT_ROOT, "etl", "cache", "github_http_cache.json")
 
 OWNER = "apache"
