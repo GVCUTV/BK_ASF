@@ -15,6 +15,7 @@ import numpy as np
 import logging
 import os
 import matplotlib.pyplot as plt
+from path_config import PROJECT_ROOT
 
 def summarize_phase(series, name):
     """Statistiche robuste sulla fase (giorni)."""
@@ -34,16 +35,16 @@ def summarize_phase(series, name):
 
 if __name__ == "__main__":
     # Setup logging/output dirs
-    os.makedirs('./output/logs', exist_ok=True)
-    os.makedirs('./output/csv', exist_ok=True)
-    os.makedirs('./output/png', exist_ok=True)
+    os.makedirs(PROJECT_ROOT+'/etl/output/logs', exist_ok=True)
+    os.makedirs(PROJECT_ROOT+'/etl/output/csv', exist_ok=True)
+    os.makedirs(PROJECT_ROOT+'/etl/output/png', exist_ok=True)
     logging.basicConfig(
         level=logging.INFO,
         format="%(asctime)s - %(levelname)s - %(message)s",
-        handlers=[logging.FileHandler("./output/logs/estimate_parameters.log"), logging.StreamHandler()]
+        handlers=[logging.FileHandler(PROJECT_ROOT+"/etl/output/logs/estimate_parameters.log"), logging.StreamHandler()]
     )
 
-    IN_CSV = "./output/csv/tickets_prs_merged.csv"
+    IN_CSV = PROJECT_ROOT+"/etl/output/csv/tickets_prs_merged.csv"
 
     try:
         df = pd.read_csv(IN_CSV, low_memory=False)
@@ -96,7 +97,7 @@ if __name__ == "__main__":
         plt.xlabel("Data")
         plt.ylabel("Ticket aperti")
         plt.tight_layout()
-        plt.savefig('./output/png/backlog_over_time.png')
+        plt.savefig(PROJECT_ROOT+'/etl/output/png/backlog_over_time.png')
         plt.close()
         logging.info("Grafico backlog nel tempo salvato in ./output/png/backlog_over_time.png")
     else:
@@ -119,7 +120,7 @@ if __name__ == "__main__":
         logging.warning(f"Colonne fase mancanti nel dataset: {missing}. Esegui 3_clean_and_merge.py v7 prima di questo script.")
 
     # Export wide durations
-    durations_out = "./output/csv/phase_durations_wide.csv"
+    durations_out = PROJECT_ROOT+"/etl/output/csv/phase_durations_wide.csv"
     base_cols = ["key"] if "key" in df.columns else []
     export_cols = base_cols + [c for c in phase_cols if c in df.columns]
     df_out = df[export_cols].copy()
@@ -132,7 +133,7 @@ if __name__ == "__main__":
         if col in df.columns:
             summaries.append(summarize_phase(df[col], col))
     summary_df = pd.DataFrame(summaries)
-    summary_path = "./output/csv/phase_summary_stats.csv"
+    summary_path = PROJECT_ROOT+"/etl/output/csv/phase_summary_stats.csv"
     summary_df.to_csv(summary_path, index=False)
     logging.info(f"Statistiche per fase salvate in {summary_path}\n{summary_df.to_string(index=False)}")
 
@@ -143,6 +144,6 @@ if __name__ == "__main__":
         "median_resolution_time_days": median_res,
         "throughput_monthly_mean": throughput_mean
     }
-    pd.DataFrame([results]).to_csv('./output/csv/parameter_estimates.csv', index=False)
+    pd.DataFrame([results]).to_csv(PROJECT_ROOT+'/etl/output/csv/parameter_estimates.csv', index=False)
     logging.info("Parametri chiave salvati in ./output/csv/parameter_estimates.csv")
     logging.info("=== ESTRAZIONE PARAMETRI COMPLETATA ===")

@@ -15,3 +15,10 @@
 2025-08-19 12:24:56,473 - INFO - WINNER [testing]: Weibull | params=None | MAE=0.000192 | KS_p=7.439e-28 | AIC=1587.253736967646 | BIC=1595.565790841043
 2025-08-19 12:24:56,475 - INFO - Salvato fit_summary in ./output/csv/fit_summary.csv
 2025-08-19 12:24:56,479 - INFO - === EXPORT FIT SUMMARY COMPLETATO ===
+2025-08-19 19:29:02,964 - INFO - Logger ready. Logfile: /Users/og/PycharmProjects/BK_ASF/etl/output/logs/export_fit_summary.log
+2025-08-19 19:29:02,966 - INFO - Input CSV : /Users/og/PycharmProjects/BK_ASF/etl/output/csv/distribution_fit_stats.csv
+2025-08-19 19:29:02,966 - INFO - Output CSV: /Users/og/PycharmProjects/BK_ASF/etl/output/csv/fit_summary.csv
+2025-08-19 19:29:02,966 - INFO - Stages    : dev_review,testing
+2025-08-19 19:29:02,975 - INFO - Loaded distribution_fit_stats: rows=4 cols=10
+2025-08-19 19:29:02,992 - INFO - Winner: Distribuzione=Lognormale | MAE_KDE_PDF=3.83073e-05 | AIC=14400.320615835186 | BIC=14414.684150782115 | Params=[0.151668487, -1042.86559, 1069.60338]
+2025-08-19 19:29:02,997 - INFO - fit_summary.csv saved: /Users/og/PycharmProjects/BK_ASF/etl/output/csv/fit_summary.csv | rows=2

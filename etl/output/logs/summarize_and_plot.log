@@ -41,3 +41,9 @@
 2025-08-19 12:17:13,936 - INFO - Ticket chiusi senza PR: 699 (72.8%)
 2025-08-19 12:17:14,137 - INFO - Grafico a torta salvato in ./output/png/distribuzione_ticket_tipo.png
 2025-08-19 12:17:14,138 - INFO - Statistiche esportate in ./output/statistiche_riassuntive.csv
+2025-08-19 19:16:14,471 - INFO - Ticket totali: 960
+2025-08-19 19:16:14,482 - INFO - Ticket riaperti: 3 (0.3%)
+2025-08-19 19:16:14,483 - INFO - In Progress: 3 (0.3%)
+2025-08-19 19:16:14,486 - INFO - Ticket chiusi senza PR: 699 (72.8%)
+2025-08-19 19:16:14,767 - INFO - Grafico a torta salvato in ./output/png/distribuzione_ticket_tipo.png
+2025-08-19 19:16:14,770 - INFO - Statistiche esportate in ./output/statistiche_riassuntive.csv

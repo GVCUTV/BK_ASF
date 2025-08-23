@@ -68,3 +68,10 @@
 2025-08-19 12:17:21,851 - WARNING - Ticket key=BOOKKEEPER-976: INCONGRUENZA: ticket chiuso senza data risoluzione
 2025-08-19 12:17:22,626 - INFO - Grafico distribuzione tempi di risoluzione (0-10.000h) salvato in ./output/png/distribuzione_resolution_times_0_10000.png
 2025-08-19 12:17:22,626 - INFO - Analisi diagnostica completata.
+2025-08-19 19:20:46,793 - INFO - Caricato dataset: /Users/og/PycharmProjects/BK_ASF/etl/output/csv/tickets_prs_merged.csv (960 righe)
+2025-08-19 19:20:46,796 - INFO - Colonna 'fields.created' convertita a datetime.
+2025-08-19 19:20:46,797 - INFO - Colonna 'fields.resolutiondate' convertita a datetime.
+2025-08-19 19:20:46,799 - INFO - Inizio stampa diagnostica ticket:
+2025-08-19 19:20:46,942 - WARNING - Ticket key=BOOKKEEPER-976: INCONGRUENZA: ticket chiuso senza data risoluzione
+2025-08-19 19:20:47,710 - INFO - Grafico distribuzione tempi di risoluzione (0-10.000h) salvato in ./output/png/distribuzione_resolution_times_0_10000.png
+2025-08-19 19:20:47,710 - INFO - Analisi diagnostica completata.

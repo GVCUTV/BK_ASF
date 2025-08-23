@@ -91,3 +91,23 @@
 2025-08-19 12:17:10,424 - INFO - [test_duration_days] validi=118 | mean=10.71 | median=0.00
 2025-08-19 12:17:10,424 - INFO - [resolution_time_days] validi=887 | mean=215.73 | median=21.15
 2025-08-19 12:17:10,508 - INFO - Salvati dati mergeati (ticket+PR+fasi) in ./output/csv/tickets_prs_merged.csv
+2025-08-19 19:14:40,699 - INFO - Caricati ticket raw: /Users/og/PycharmProjects/BK_ASF/etl/output/csv/jira_issues_raw.csv (1095)
+2025-08-19 19:14:40,705 - INFO - Rimossi duplicati ticket per 'key': 0
+2025-08-19 19:14:40,709 - INFO - Filtrati ticket con risoluzioni non utili: 152
+2025-08-19 19:14:40,716 - INFO - Convertita a datetime (naive): fields.created
+2025-08-19 19:14:40,719 - INFO - Convertita a datetime (naive): fields.resolutiondate
+2025-08-19 19:14:40,758 - INFO - Salvati 943 ticket puliti in /Users/og/PycharmProjects/BK_ASF/etl/output/csv/jira_issues_clean.csv
+2025-08-19 19:14:40,852 - INFO - Caricate PR raw: /Users/og/PycharmProjects/BK_ASF/etl/output/csv/github_prs_raw.csv (3336)
+2025-08-19 19:14:40,864 - INFO - Convertita a datetime (naive): created_at
+2025-08-19 19:14:40,869 - INFO - Convertita a datetime (naive): updated_at
+2025-08-19 19:14:40,873 - INFO - Convertita a datetime (naive): closed_at
+2025-08-19 19:14:40,878 - INFO - Convertita a datetime (naive): merged_at
+2025-08-19 19:14:41,100 - INFO - Salvate 3336 PR pulite in /Users/og/PycharmProjects/BK_ASF/etl/output/csv/github_prs_clean.csv
+2025-08-19 19:14:41,116 - INFO - Merge completato: righe=960. Derivo fasi...
+2025-08-19 19:14:41,116 - INFO - Calcolo aggregazioni PR per ticket (first created_at, last merged/closed)...
+2025-08-19 19:14:41,126 - INFO - Calcolo durate (giorni) per ciascuna fase...
+2025-08-19 19:14:41,138 - INFO - [dev_duration_days] validi=196 | mean=148.36 | median=0.70
+2025-08-19 19:14:41,139 - INFO - [review_duration_days] validi=196 | mean=35.05 | median=9.24
+2025-08-19 19:14:41,139 - INFO - [test_duration_days] validi=118 | mean=10.71 | median=0.00
+2025-08-19 19:14:41,140 - INFO - [resolution_time_days] validi=887 | mean=215.73 | median=21.15
+2025-08-19 19:14:41,222 - INFO - Salvati dati mergeati (ticket+PR+fasi) in /Users/og/PycharmProjects/BK_ASF/etl/output/csv/tickets_prs_merged.csv

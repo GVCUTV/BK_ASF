@@ -319,3 +319,14 @@ Distribuzione              FitType   FitMean     FitStd
 2025-08-19 12:17:27,778 - INFO - Fitting distribuzioni per stage 'testing' (n=118).
 2025-08-19 12:17:28,324 - INFO - WINNER [testing]: Weibull, MAE=0.000192, params=[  2.39611188 -37.89737452  44.13777355]
 2025-08-19 12:17:28,326 - INFO - fit_summary.csv salvato in output/csv/fit_summary.csv
+2025-08-19 19:23:23,791 - INFO - Logger initialized. Logfile: /Users/og/PycharmProjects/BK_ASF/etl/output/logs/fit_distributions.log
+2025-08-19 19:23:23,844 - INFO - Caricato dataset: /Users/og/PycharmProjects/BK_ASF/etl/output/csv/tickets_prs_merged.csv (960 righe)
+2025-08-19 19:23:23,846 - INFO - Fitting distribuzioni su 'resolution_time_days' (legacy)
+2025-08-19 19:23:24,597 - INFO - WINNER [resolution_time_days]: Lognormale, MAE=0.000038, params=[ 1.51668487e-01 -1.04286559e+03  1.06960338e+03]
+2025-08-19 19:23:24,598 - INFO - Fitting distribuzioni per stage 'development' (n=196).
+2025-08-19 19:23:25,205 - INFO - WINNER [development]: Weibull, MAE=0.000052, params=[   2.13046983 -279.07055329  335.38112886]
+2025-08-19 19:23:25,206 - INFO - Fitting distribuzioni per stage 'review' (n=196).
+2025-08-19 19:23:25,815 - INFO - WINNER [review]: Lognormale, MAE=0.000036, params=[   0.24601912 -168.41875397  186.30272449]
+2025-08-19 19:23:25,816 - INFO - Fitting distribuzioni per stage 'testing' (n=118).
+2025-08-19 19:23:26,439 - INFO - WINNER [testing]: Weibull, MAE=0.000192, params=[  2.39611186 -37.89737413  44.13777317]
+2025-08-19 19:23:26,441 - INFO - fit_summary.csv salvato in /Users/og/PycharmProjects/BK_ASF/etl/output/csv/fit_summary.csv

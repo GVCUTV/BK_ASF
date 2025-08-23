@@ -121,3 +121,18 @@
 2025-08-19 15:45:16,733 - INFO - Feedback window filter: 960 rows
 2025-08-19 15:45:16,733 - INFO - Dev feedback candidate columns present: []
 2025-08-19 15:45:16,734 - ERROR - Cannot compute FEEDBACK_P_DEV from data. Expected one of columns ['review_rounds', 'review_rework_flag', 'pr_review_rounds', 'reopened_flag'] in the ETL window.
+2025-08-19 19:38:32,004 - INFO - Logger initialized. Logfile: output/logs/generate_sim_config.log
+2025-08-19 19:38:32,006 - INFO - PROJECT_ROOT: /Users/og/PycharmProjects/BK_ASF
+2025-08-19 19:38:32,006 - INFO - CLI args: {'log_level': 'INFO', 'etl_csv': '/Users/og/PycharmProjects/BK_ASF/etl/output/csv/tickets_prs_merged.csv', 'fit_csv': '/Users/og/PycharmProjects/BK_ASF/etl/output/csv/fit_summary.csv', 'created_col': 'fields.created', 'window_start': '2024-01-01', 'window_end': '2025-01-01', 'config_out': '/Users/og/PycharmProjects/BK_ASF/simulation/config.py', 'sim_duration_days': 365.0}
+2025-08-19 19:38:32,051 - INFO - ETL shape: (960, 179)
+2025-08-19 19:38:32,072 - INFO - Using dataset-wide window [2009-04-01, 2017-10-18): n=960 days=3122 λ=0.307495/day
+2025-08-19 19:38:32,077 - INFO - Feedback window slice size: 960
+2025-08-19 19:38:32,078 - INFO - p_dev via numeric review_rounds: 0.000000
+2025-08-19 19:38:32,079 - INFO - p_dev via numeric requested_changes_count: 0.000000
+2025-08-19 19:38:32,080 - INFO - p_dev via numeric reviews_count: 0.000000
+2025-08-19 19:38:32,087 - INFO - p_dev via flag review_rework_flag: 0.000000
+2025-08-19 19:38:32,088 - INFO - p_test via bool ci_failed_then_fix: 0.000000
+2025-08-19 19:38:32,095 - INFO - DEV id column dev_user             -> distinct: 44
+2025-08-19 19:38:32,097 - INFO - DEV id column assignee             -> distinct: 0
+2025-08-19 19:38:32,097 - ERROR - Cannot infer N_TESTERS: add one of ['tester', 'ci_runner', 'ci_agent', 'jenkins_node', 'build_agent', 'runner_name', 'runner_id', 'qa_user', 'testing_user'] to ETL (e.g., via 8_enrich_feedback_cols.py).
+2025-08-19 19:38:32,097 - ERROR - Available columns (first 50): ['key', 'fields.summary', 'fields.issuetype.name', 'fields.issuetype.id', 'fields.status.name', 'fields.status.id', 'fields.resolution.name', 'fields.resolutiondate', 'fields.created', 'fields.updated', 'fields.assignee.name', 'fields.assignee.displayName', 'fields.assignee.key', 'fields.description', 'created', 'resolved', 'url', 'repository_url', 'labels_url', 'comments_url', 'events_url', 'html_url', 'id', 'node_id', 'number', 'title', 'labels', 'state', 'locked', 'assignee', 'assignees', 'milestone', 'comments', 'created_at', 'updated_at', 'closed_at', 'author_association', 'type', 'active_lock_reason', 'draft', 'body', 'timeline_url', 'performed_via_github_app', 'state_reason', 'user.login', 'user.id', 'user.node_id', 'user.avatar_url', 'user.gravatar_id', 'user.url']

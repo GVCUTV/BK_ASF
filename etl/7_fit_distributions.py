@@ -30,10 +30,11 @@ import logging
 import os
 from pathlib import Path
 from math import exp, log, sqrt
+from path_config import PROJECT_ROOT
 
 # ---------------- Config ---------------- #
-INPUT_CSV = "./output/csv/tickets_prs_merged.csv"
-OUT_BASE = Path("./output")
+INPUT_CSV = PROJECT_ROOT+"/etl/output/csv/tickets_prs_merged.csv"
+OUT_BASE = Path(PROJECT_ROOT+"/etl/output")
 PNG_DIR = OUT_BASE / "png"
 CSV_DIR = OUT_BASE / "csv"
 LOG_PATH = OUT_BASE / "logs" / "fit_distributions.log"

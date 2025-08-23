@@ -20,22 +20,23 @@ import pandas as pd
 import logging
 import re
 import os
+from path_config import PROJECT_ROOT
 
 # === Logging setup ===
-os.makedirs("./output/logs", exist_ok=True)
-os.makedirs("./output/csv", exist_ok=True)
+os.makedirs(PROJECT_ROOT+"/etl/output/logs", exist_ok=True)
+os.makedirs(PROJECT_ROOT+"/etl/output/csv", exist_ok=True)
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s - %(levelname)s - %(message)s",
-    handlers=[logging.FileHandler("./output/logs/clean_and_merge.log"), logging.StreamHandler()]
+    handlers=[logging.FileHandler(PROJECT_ROOT+"/etl/output/logs/clean_and_merge.log"), logging.StreamHandler()]
 )
 
 # === Path I/O ===
-JIRA_CSV = "./output/csv/jira_issues_raw.csv"
-PRS_CSV = "./output/csv/github_prs_raw.csv"
-OUT_TICKET_CSV = "./output/csv/jira_issues_clean.csv"
-OUT_PR_CSV = "./output/csv/github_prs_clean.csv"
-OUT_MERGE_CSV = "./output/csv/tickets_prs_merged.csv"  # con colonne di fase
+JIRA_CSV = PROJECT_ROOT+"/etl/output/csv/jira_issues_raw.csv"
+PRS_CSV = PROJECT_ROOT+"/etl/output/csv/github_prs_raw.csv"
+OUT_TICKET_CSV = PROJECT_ROOT+"/etl/output/csv/jira_issues_clean.csv"
+OUT_PR_CSV = PROJECT_ROOT+"/etl/output/csv/github_prs_clean.csv"
+OUT_MERGE_CSV = PROJECT_ROOT+"/etl/output/csv/tickets_prs_merged.csv"  # con colonne di fase
 
 # === Utility ===
 def extract_jira_key(text):

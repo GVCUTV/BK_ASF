@@ -11,21 +11,22 @@ import pandas as pd
 import logging
 import os
 import matplotlib.pyplot as plt
+from path_config import PROJECT_ROOT
 
 if __name__ == "__main__":
     # === Setup logging/output dirs ===
-    os.makedirs('./output/logs', exist_ok=True)
-    os.makedirs('./output/png', exist_ok=True)
+    os.makedirs(PROJECT_ROOT+'/etl/output/logs', exist_ok=True)
+    os.makedirs(PROJECT_ROOT+'/etl/output/png', exist_ok=True)
     logging.basicConfig(
         level=logging.INFO,
         format="%(asctime)s - %(levelname)s - %(message)s",
         handlers=[
-            logging.FileHandler("./output/logs/diagnose_tickets.log"),
+            logging.FileHandler(PROJECT_ROOT+"/etl/output/logs/diagnose_tickets.log"),
             logging.StreamHandler()
         ]
     )
 
-    IN_CSV = "./output/csv/tickets_prs_merged.csv"
+    IN_CSV = PROJECT_ROOT+"/etl/output/csv/tickets_prs_merged.csv"
     try:
         df = pd.read_csv(IN_CSV)
         logging.info(f"Caricato dataset: {IN_CSV} ({len(df)} righe)")
@@ -111,7 +112,7 @@ if __name__ == "__main__":
             plt.xlim(0, 10000)
             plt.grid(axis='y', alpha=0.3)
             plt.tight_layout()
-            plt.savefig('./output/png/distribuzione_resolution_times_0_10000.png', dpi=200)
+            plt.savefig(PROJECT_ROOT+'/etl/output/png/distribuzione_resolution_times_0_10000.png', dpi=200)
             plt.close()
             logging.info(
                 "Grafico distribuzione tempi di risoluzione (0-10.000h) salvato in ./output/png/distribuzione_resolution_times_0_10000.png")

@@ -10,3 +10,24 @@
 2025-08-19 15:53:09,819 - WARNING - Consider extending ETL to include PR review states and CI status histories.
 2025-08-19 15:53:09,819 - INFO - Writing: /Users/og/PycharmProjects/BK_ASF/etl/output/csv/tickets_prs_merged.csv
 2025-08-19 15:53:09,991 - INFO - Done.
+2025-08-19 19:31:05,350 - INFO - Logger ready. Logfile: output/logs/enrich_feedback.log
+2025-08-19 19:31:05,351 - INFO - Reading: /Users/og/PycharmProjects/BK_ASF/etl/output/csv/tickets_prs_merged.csv
+2025-08-19 19:31:05,403 - INFO - Rows: 960 | Cols: 175
+2025-08-19 19:31:05,403 - INFO - Input columns: 175. Sample: ['key', 'fields.summary', 'fields.issuetype.name', 'fields.issuetype.id', 'fields.status.name', 'fields.status.id', 'fields.resolution.name', 'fields.resolutiondate', 'fields.created', 'fields.updated', 'fields.assignee.name', 'fields.assignee.displayName', 'fields.assignee.key', 'fields.description', 'created', 'resolved', 'url', 'repository_url', 'labels_url', 'comments_url', 'events_url', 'html_url', 'id', 'node_id', 'number', 'title', 'labels', 'state', 'locked', 'assignee', 'assignees', 'milestone', 'comments', 'created_at', 'updated_at', 'closed_at', 'author_association', 'type', 'active_lock_reason', 'draft'] ...
+2025-08-19 19:31:05,409 - INFO - Considered numeric review signal: requested_changes_count (non-null=960)
+2025-08-19 19:31:05,410 - INFO - Considered numeric review signal: reviews_count (non-null=960)
+2025-08-19 19:37:56,665 - INFO - Logger ready. Logfile: output/logs/enrich_feedback.log
+2025-08-19 19:37:56,666 - INFO - Reading: /Users/og/PycharmProjects/BK_ASF/etl/output/csv/tickets_prs_merged.csv
+2025-08-19 19:37:56,719 - INFO - Rows: 960 | Cols: 175
+2025-08-19 19:37:56,719 - INFO - Input columns: 175. Sample: ['key', 'fields.summary', 'fields.issuetype.name', 'fields.issuetype.id', 'fields.status.name', 'fields.status.id', 'fields.resolution.name', 'fields.resolutiondate', 'fields.created', 'fields.updated', 'fields.assignee.name', 'fields.assignee.displayName', 'fields.assignee.key', 'fields.description', 'created', 'resolved', 'url', 'repository_url', 'labels_url', 'comments_url', 'events_url', 'html_url', 'id', 'node_id', 'number', 'title', 'labels', 'state', 'locked', 'assignee', 'assignees', 'milestone', 'comments', 'created_at', 'updated_at', 'closed_at', 'author_association', 'type', 'active_lock_reason', 'draft'] ...
+2025-08-19 19:37:56,727 - INFO - Considered numeric review signal: requested_changes_count (non-null=2)
+2025-08-19 19:37:56,727 - INFO - Considered numeric review signal: reviews_count (non-null=2)
+2025-08-19 19:37:56,728 - INFO - Derived review_rounds from numeric candidates.
+2025-08-19 19:37:56,732 - INFO - Considered CI signal: check_runs_conclusions
+2025-08-19 19:37:56,734 - INFO - Considered CI signal: combined_status_states
+2025-08-19 19:37:56,735 - INFO - dev_user sourced from: fields.assignee.name
+2025-08-19 19:37:56,736 - INFO - Coverage: {"review_rounds_nonnull": 960, "review_rework_flag_nonnull": 960, "ci_failed_then_fix_nonnull": 960, "dev_user_nonnull": 883, "tester_nonnull": 0}
+2025-08-19 19:37:56,736 - WARNING - Some columns could not be derived from your current data: ['tester']
+2025-08-19 19:37:56,736 - WARNING - Consider extending ETL to include PR review states and CI status histories.
+2025-08-19 19:37:56,736 - INFO - Writing: /Users/og/PycharmProjects/BK_ASF/etl/output/csv/tickets_prs_merged.csv
+2025-08-19 19:37:56,819 - INFO - Done.

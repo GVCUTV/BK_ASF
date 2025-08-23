@@ -1,29 +1,31 @@
-# v1
+# v2
 # file: etl/9_enrich_feedback_cols.py
 """
-Enrich tickets_prs_merged.csv with feedback & capacity signals derived from data:
+Enrich tickets_prs_merged.csv with feedback & capacity signals derived from data.
 
 Outputs (new columns written back to CSV):
 - review_rounds        : int >= 1  (1 = no rework; >1 = at least one rework cycle)
-- review_rework_flag   : bool      (True if any changes requested)
+- review_rework_flag   : bool      (True if any changes requested / extra review round)
 - ci_failed_then_fix   : bool      (True if any CI/build/test failure before a later success)
 - dev_user             : string    (best-effort developer identity from ETL)
 - tester               : string    (best-effort CI/QA runner identity from ETL)
 
-Heuristics (all data-driven; never use constants):
+Heuristics (all data-driven; no manual constants):
 - Review rework:
     • Prefer numeric counters like 'requested_changes_count', 'pr_review_rounds', 'reviews_count'
-      → review_rounds = max(counter-derived, 1)
-    • Else look for string/state lists like 'pull_request_review_states' containing 'CHANGES_REQUESTED'
-      → rounds = 2 (minimum indication of rework)
+      → review_rounds = row-wise max(counter-derived), clipped to minimum 1
+    • Else look for string/state lists (e.g., 'pull_request_review_states') containing 'CHANGES_REQUESTED'
+      → review_rounds = 2 if any 'CHANGES_REQUESTED' appears, else 1
 - CI fail→fix:
-    • Look for text/arrays columns with history or last conclusions:
-      ['check_runs_conclusions','ci_status_history','combined_statuses',
-       'workflow_conclusions','build_state_history','statuses']
-      → True if a failure-like token appears AND a later success-like token appears
+    • Look for history/conclusion arrays:
+      ['check_runs_conclusions','combined_status_states','ci_status_history',
+       'combined_statuses','workflow_conclusions','build_state_history','statuses']
+      → True if a failure-like token appears before a later success-like token
+    • Also merge with boolean-ish columns if they exist: ['ci_failed_then_fix','ci_failed','build_failed','qa_failed_flag']
 - dev_user/tester:
     • dev_user from first present among:
-      ['author_login','pr_author_login','fields.assignee','assignee','dev_user','developer']
+      ['fields.assignee.name','fields.assignee.displayName','assignee.login','user.login',
+       'author_login','pr_author_login','dev_user','developer','fields.assignee']
     • tester from first present among (CI/runner-ish):
       ['ci_runner','ci_agent','jenkins_node','build_agent','runner_name','runner_id','qa_user','testing_user']
 
@@ -38,11 +40,13 @@ import json
 import logging
 import os
 from os import path
-from path_config import PROJECT_ROOT
 
 import numpy as np
 import pandas as pd
+from path_config import PROJECT_ROOT
 
+
+# ----------------------------- logging utils ----------------------------- #
 
 def _safe_mkdirs(d):
     try:
@@ -50,7 +54,6 @@ def _safe_mkdirs(d):
     except OSError:
         if not path.isdir(d):
             raise
-
 
 def _setup_logging():
     logs_dir = path.join("output", "logs")
@@ -63,19 +66,18 @@ def _setup_logging():
 
     fmt = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
     fh = logging.FileHandler(log_path)
-    fh.setFormatter(fmt)
+    fh.setFormatter(fmt); fh.setLevel(logging.INFO)
     sh = logging.StreamHandler()
-    sh.setFormatter(fmt)
-    root.addHandler(fh)
-    root.addHandler(sh)
+    sh.setFormatter(fmt); sh.setLevel(logging.INFO)
+    root.addHandler(fh); root.addHandler(sh)
 
     logging.info("Logger ready. Logfile: %s", log_path)
 
 
 # ----------------------------- helpers ----------------------------- #
 
-FAIL_TOKENS   = {"fail", "failure", "failed", "error", "timed_out", "timeout", "cancelled", "canceled", "aborted", "broken"}
-SUCCESS_TOKENS= {"success", "succeeded", "passed", "ok", "green", "completed_success"}
+FAIL_TOKENS    = {"fail", "failure", "failed", "error", "timed_out", "timeout", "cancelled", "canceled", "aborted", "broken"}
+SUCCESS_TOKENS = {"success", "succeeded", "passed", "ok", "green", "completed_success"}
 
 def _to_listish(val):
     """Turn cells like '["SUCCESS","FAILURE"]' or 'SUCCESS;FAILURE' into a list of tokens."""
@@ -93,12 +95,11 @@ def _to_listish(val):
                 return [str(x).strip() for x in obj]
         except Exception:
             pass
-    # CSV/semicolon/pipe or space-separated strings
+    # CSV/semicolon/pipe/space-separated fallbacks
     for sep in [";", ",", "|", " "]:
         if sep in s:
             return [t.strip() for t in s.split(sep) if t.strip()]
     return [s]
-
 
 def _has_fail_then_success(tokens):
     """True if we see any failure-like token and later a success-like token."""
@@ -109,13 +110,13 @@ def _has_fail_then_success(tokens):
             seen_fail = True
         if seen_fail and any(k in t for k in SUCCESS_TOKENS):
             return True
-    # Also handle single-string columns like 'conclusion' with one token
     return False
-
 
 def _truthy_series(s):
     return s.astype(str).str.strip().str.lower().isin({"true","1","yes","y","t"})
 
+
+# ----------------------------- core enrichment ----------------------------- #
 
 def enrich(df):
     """Return df with added columns; logs how each was computed."""
@@ -128,41 +129,34 @@ def enrich(df):
 
     numeric_candidates = [
         "requested_changes_count", "pr_review_rounds", "reviews_count",
-        "review_rounds"  # if already present, keep it
+        "review_rounds"  # if already present, keep it in the max
     ]
     strlist_candidates = [
         "pull_request_review_states", "review_states", "pr_review_states",
         "review_decisions", "requested_changes_states"
     ]
 
-    for c in numeric_candidates:
-        if c in df.columns:
-            v = pd.to_numeric(df[c], errors="coerce").fillna(0).astype(int)
-            if rounds is None:
-                rounds = v.copy()
-            else:
-                rounds = np.maximum(rounds.values, v.values)
-            logging.info("Considered numeric review signal: %s (non-null=%d)", c, v.notna().sum())
-
-    if rounds is not None:
-        # Ensure minimum 1 round
-        rounds = rounds.clip(lower=1)
+    present_num = [c for c in numeric_candidates if c in df.columns]
+    if present_num:
+        # Build a numeric DataFrame and take row-wise max (keeps pandas Series -> .clip(lower=1) works)
+        num_df = pd.concat([pd.to_numeric(df[c], errors="coerce") for c in present_num], axis=1)
+        rounds = num_df.max(axis=1).fillna(0).astype(int)
+        rounds = rounds.clip(lower=1)  # <-- pandas Series clip (fix for your error)
         rework = (rounds > 1)
+        for c in present_num:
+            logging.info("Considered numeric review signal: %s (non-null=%d)", c, int(pd.to_numeric(df[c], errors="coerce").notna().sum()))
         logging.info("Derived review_rounds from numeric candidates.")
     else:
-        # Try string/state columns → if any 'CHANGES_REQUESTED' appears → set rounds=2
+        # Try string/state columns → if any 'CHANGES_REQUESTED' appears → rework True
         for c in strlist_candidates:
             if c in df.columns:
                 flags = df[c].apply(_to_listish).apply(
                     lambda lst: any("changes_requested" in str(x).lower() for x in lst)
                 )
-                if rework is None:
-                    rework = flags
-                else:
-                    rework = rework | flags
+                rework = flags if rework is None else (rework | flags)
                 logging.info("Derived review_rework_flag from string list: %s", c)
         if rework is not None:
-            rounds = (rework.astype(int) * 1 + 1)  # 2 if rework True, else 1
+            rounds = (rework.astype(int) + 1)  # 2 if rework True, else 1
 
     if rounds is None:
         logging.warning("Could not derive review_rounds from data (no candidates found).")
@@ -177,8 +171,9 @@ def enrich(df):
     # ---------- ci_failed_then_fix ----------
     ci = None
     ci_candidates = [
-        "check_runs_conclusions", "ci_status_history", "combined_statuses",
-        "workflow_conclusions", "build_state_history", "statuses",
+        "check_runs_conclusions", "combined_status_states",  # typical from our GH fetcher
+        "ci_status_history", "combined_statuses", "workflow_conclusions",
+        "build_state_history", "statuses",
         "ci_conclusion", "check_suite_conclusion", "build_conclusion"
     ]
     for c in ci_candidates:
@@ -202,30 +197,47 @@ def enrich(df):
         logging.warning("Could not derive ci_failed_then_fix from data (no CI candidates found).")
 
     # ---------- dev_user / tester ----------
-    dev_candidates = ["author_login", "pr_author_login", "fields.assignee", "assignee", "dev_user", "developer"]
-    test_candidates= ["ci_runner", "ci_agent", "jenkins_node", "build_agent", "runner_name", "runner_id", "qa_user", "testing_user"]
+    # Prefer real Jira/GitHub identity columns you actually have
+    dev_candidates = [
+        "fields.assignee.name", "fields.assignee.displayName",
+        "assignee.login", "user.login",
+        "author_login", "pr_author_login",
+        "dev_user", "developer",
+        "fields.assignee"  # raw object (rarely useful), last resort
+    ]
+    test_candidates = ["ci_runner", "ci_agent", "jenkins_node", "build_agent", "runner_name", "runner_id", "qa_user", "testing_user"]
 
-    if "dev_user" not in df.columns:
+    if "dev_user" not in df.columns or df["dev_user"].notna().sum() == 0:
+        picked = None
         for c in dev_candidates:
-            if c in df.columns:
+            if c in df.columns and df[c].notna().sum() > 0:
                 df["dev_user"] = df[c]
-                logging.info("dev_user sourced from: %s", c)
+                picked = c
                 break
+        if picked:
+            logging.info("dev_user sourced from: %s", picked)
+        else:
+            logging.warning("Could not populate dev_user (no suitable columns with values found).")
 
-    if "tester" not in df.columns:
+    if "tester" not in df.columns or df["tester"].notna().sum() == 0:
+        picked = None
         for c in test_candidates:
-            if c in df.columns:
+            if c in df.columns and df[c].notna().sum() > 0:
                 df["tester"] = df[c]
-                logging.info("tester sourced from: %s", c)
+                picked = c
                 break
+        if picked:
+            logging.info("tester sourced from: %s", picked)
 
     return df
 
 
+# ----------------------------- CLI ----------------------------- #
+
 def main():
     parser = argparse.ArgumentParser(description="Enrich ETL with feedback & capacity columns (data-only).")
-    parser.add_argument("--in-csv",  default=PROJECT_ROOT+"/etl/output/csv/tickets_prs_merged.csv")
-    parser.add_argument("--out-csv", default=PROJECT_ROOT+"/etl/output/csv/tickets_prs_merged.csv",
+    parser.add_argument("--in-csv",  default=PROJECT_ROOT + "/etl/output/csv/tickets_prs_merged.csv")
+    parser.add_argument("--out-csv", default=PROJECT_ROOT + "/etl/output/csv/tickets_prs_merged.csv",
                         help="Where to write enriched CSV (can overwrite input).")
     args = parser.parse_args()
 
@@ -236,17 +248,18 @@ def main():
 
     df2 = enrich(df)
 
-    # Basic coverage stats
+    # Coverage stats
+    def nn(col): return int(df2[col].notna().sum()) if col in df2.columns else 0
     cov = {
-        "review_rounds_nonnull": int(df2["review_rounds"].notna().sum()) if "review_rounds" in df2.columns else 0,
-        "review_rework_flag_nonnull": int(df2["review_rework_flag"].notna().sum()) if "review_rework_flag" in df2.columns else 0,
-        "ci_failed_then_fix_nonnull": int(df2["ci_failed_then_fix"].notna().sum()) if "ci_failed_then_fix" in df2.columns else 0,
-        "dev_user_nonnull": int(df2["dev_user"].notna().sum()) if "dev_user" in df2.columns else 0,
-        "tester_nonnull": int(df2["tester"].notna().sum()) if "tester" in df2.columns else 0,
+        "review_rounds_nonnull": nn("review_rounds"),
+        "review_rework_flag_nonnull": nn("review_rework_flag"),
+        "ci_failed_then_fix_nonnull": nn("ci_failed_then_fix"),
+        "dev_user_nonnull": nn("dev_user"),
+        "tester_nonnull": nn("tester"),
     }
     logging.info("Coverage: %s", json.dumps(cov))
 
-    # Final sanity: at least one of review_* and ci_* must exist; else tell the user what to add upstream
+    # Final sanity: at least one of review_* and ci_* should exist
     missing = []
     if "review_rounds" not in df2.columns and "review_rework_flag" not in df2.columns:
         missing.append("review_rounds / review_rework_flag")
@@ -256,7 +269,6 @@ def main():
         missing.append("dev_user")
     if "tester" not in df2.columns:
         missing.append("tester")
-
     if missing:
         logging.warning("Some columns could not be derived from your current data: %s", missing)
         logging.warning("Consider extending ETL to include PR review states and CI status histories.")

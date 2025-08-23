@@ -98,3 +98,18 @@ review_duration_days    196   0.795833  35.045957  9.241672 103.347291 1.359031 
   test_duration_days    118   0.877083  10.709216  0.000469  44.510149 0.000107  0.003484 0.000000  302.359375
 2025-08-19 12:17:18,441 - INFO - Parametri chiave salvati in ./output/csv/parameter_estimates.csv
 2025-08-19 12:17:18,441 - INFO - === ESTRAZIONE PARAMETRI COMPLETATA ===
+2025-08-19 19:19:14,562 - INFO - Caricato dataset: /Users/og/PycharmProjects/BK_ASF/etl/output/csv/tickets_prs_merged.csv (960)
+2025-08-19 19:19:14,580 - INFO - Colonna 'fields.created' convertita a datetime (naive).
+2025-08-19 19:19:14,582 - INFO - Colonna 'fields.resolutiondate' convertita a datetime (naive).
+2025-08-19 19:19:14,590 - INFO - Tasso di arrivo stimato: 0.307249 ticket/giorno
+2025-08-19 19:19:14,593 - INFO - Resolution time: mean=215.73 d | median=21.15 d
+2025-08-19 19:19:15,811 - INFO - Grafico backlog nel tempo salvato in ./output/png/backlog_over_time.png
+2025-08-19 19:19:15,818 - INFO - Throughput medio mensile: 11.83 ticket/mese
+2025-08-19 19:19:15,825 - INFO - Esportate durate per fase in /Users/og/PycharmProjects/BK_ASF/etl/output/csv/phase_durations_wide.csv
+2025-08-19 19:19:15,839 - INFO - Statistiche per fase salvate in /Users/og/PycharmProjects/BK_ASF/etl/output/csv/phase_summary_stats.csv
+               phase  count  nan_share     mean_d  median_d      std_d    p25_d     p75_d    min_d       max_d
+   dev_duration_days    196   0.795833 148.359325  0.702512 378.235210 0.006111 49.737358 0.000509 2268.083160
+review_duration_days    196   0.795833  35.045957  9.241672 103.347291 1.359031 37.982266 0.012338 1342.365648
+  test_duration_days    118   0.877083  10.709216  0.000469  44.510149 0.000107  0.003484 0.000000  302.359375
+2025-08-19 19:19:15,840 - INFO - Parametri chiave salvati in ./output/csv/parameter_estimates.csv
+2025-08-19 19:19:15,840 - INFO - === ESTRAZIONE PARAMETRI COMPLETATA ===

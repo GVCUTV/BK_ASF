@@ -11,6 +11,7 @@ import pandas as pd
 import logging
 import matplotlib.pyplot as plt
 import os
+from path_config import PROJECT_ROOT
 
 matplotlib.use("Agg")
 
@@ -18,12 +19,12 @@ logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s - %(levelname)s - %(message)s",
     handlers=[
-        logging.FileHandler("./output/logs/summarize_and_plot.log"),
+        logging.FileHandler(PROJECT_ROOT+"/etl/output/logs/summarize_and_plot.log"),
         logging.StreamHandler()
     ]
 )
 
-IN_CSV = "./output/csv/tickets_prs_merged.csv"
+IN_CSV = PROJECT_ROOT+"/etl/output/csv/tickets_prs_merged.csv"
 
 if __name__ == "__main__":
     # Carica i dati dal CSV
@@ -61,7 +62,7 @@ if __name__ == "__main__":
     print("\nTabella riassuntiva:\n", summary.to_string(index=False))
 
     # -- Grafico a torta con legenda (NO etichette sovrapposte) --
-    os.makedirs("./output/png", exist_ok=True)
+    os.makedirs(PROJECT_ROOT+"/etl/output/png", exist_ok=True)
     plt.figure(figsize=(8, 8))
     wedges, texts = plt.pie(
         type_counts,
@@ -83,12 +84,12 @@ if __name__ == "__main__":
     )
     plt.title("Distribuzione Ticket per Tipo")
     plt.tight_layout(rect=[0, 0, 0.85, 1])  # Lascio spazio a destra per la legenda
-    plt.savefig("./output/png/distribuzione_ticket_tipo.png")
+    plt.savefig(PROJECT_ROOT+"/etl/output/png/distribuzione_ticket_tipo.png")
     logging.info("Grafico a torta salvato in ./output/png/distribuzione_ticket_tipo.png")
     # plt.show()  # Non necessario/headless
 
     # Export summary
-    summary.to_csv("./output/csv/statistiche_riassuntive.csv", index=False)
+    summary.to_csv(PROJECT_ROOT+"/etl/output/csv/statistiche_riassuntive.csv", index=False)
     logging.info("Statistiche esportate in ./output/statistiche_riassuntive.csv")
 
 """
