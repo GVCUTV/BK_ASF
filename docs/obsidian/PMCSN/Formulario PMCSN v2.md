@@ -405,3 +405,186 @@ Per quanto riguarda le prestazioni globali,
 $$
 E(T_Q)^{SB\_NP\_priority}=E(E(T_{Q_k}))=\sum_{k=1}^r p_k E(T_{Q_k})
 $$
+##### Confronto tra priorità astratta e size-based
+Per quanto riguarda le prestazioni locali, si ha
+$$
+E(T_{Q_k})^{SB\_NP}\leq E(T_{Q_k})^{abstract\_NP}
+$$
+mentre non c'è una relazione certa tra $E(T_{S_k})^{SB\_NP}$ e $E(T_{S_k})^{abstract\_NP}$.
+D'altra parte, per le prestazioni globali,
+$$
+E(T_Q)^{SB\_NP}\leq E(T_Q)^{abstract\_NP}
+\implies
+E(T_S)^{SB\_NP}\leq E(T_S)^{abstract\_NP}
+$$
+dato che
+$$
+E(S)^{SB\_NP}=E(S)^{abstract\_NP}=E(S)
+$$
+##### Shortest job first
+La policy **shortest job first** è un caso particolare della policy size-based, in cui li numero della classi viene fatto tendere all'infinito. Quando il server è libero, sceglie dalla coda il job di dimensione minore. Si ha che
+$$
+E(T_Q)^{SJF}=\frac{\lambda}{2}E(S^2)\int_0^{\infty}\frac{dF(X)}{\left(1-\lambda\int_0^x tf(t)dt\right)^2}
+$$
+##### Size-based con prelazione
+In una policy size-based, la prelazione viene applicata solo se il tempo rimanente al job in esecuzione (di classe $h$, cioè $E(S_{h_rem})$) è minore del tempo richiesto da un qualsiasi job di classe $k<h$. Se la prelazione avviene, il job viene interrotto e posto in una classe considerando solo il tempo rimanente.
+
+Si ha che
+$$
+E(T_{Q_k})^{SB\_P}=\frac{\frac{\lambda}{2}\left[\int_0^{x_k}t^2dF(t)+(1-F(X_k))x_k^2\right]}{\left(1-\sum_{i=1}^k\rho_i\right)\left(1-\sum_{i=1}^{k-1}\rho_i\right)}
+$$
+da cui $E(T_{Q_k})\leq E(T_{Q_{k+1}})$ e $E(T_{Q_k})^{SB\_P}\leq E(T_{Q_k})^{SB\_NP}$. Si ha inoltre che$$
+E(T_{S_k})=E(T_{Q_k})+E(S_{virt\_k}),
+\qquad
+E(S_{virt\_k})=\frac{E(S_k)}{1-\sum_{i=1}^{k-1}\rho_i}
+$$Per quanto riguarda le prestazioni globali,
+$$
+E(T_Q)^{SB\_P}=E\left(E(T_{Q_k})^{SB\_P}\right)=\sum_{k=1}^r p_kE(T_{Q_k})^{SB\_P}
+$$
+dove $p_k=\frac{\lambda_k}{\lambda}=F(x_k)-F(x_{k-1})$ è la probabilità che un job sia di classe $k$.
+##### Shortest remaining job first
+Si può considerare il caso di scheduling size-based con prelazione similmente a come fatto per lo scheduling SJF. Ciò significa considerare un numero infinito di classi, avendo dunque
+$$
+E(T_Q)^{SRJF}=\frac{\lambda}{2}\int_0^\infty\frac{\left[\int_0^x t^2dF(t)+(1-F(x))x^2\right]}{\left(1-\lambda\int_0^x tf(t)dt\right)^2}dF(x)
+$$
+Una variante è **shortest remaining processing time**, che è condizionato dalla size:
+$$
+E(T_Q(x))=\frac{\frac{\lambda}{2}\int_0^tt^2f(t)dt+\frac{\lambda}{2}x^2(1-F(x))}{(1-\rho_x)^2},
+\qquad
+E(T_S(x))=E(T_Q(x))+\int_0^x\frac{dt}{1-\rho_t}
+$$
+con $rho_x=\lambda\int_0^xtf(t)dt$.
+## Reti di code
+Si consideri la seguente rete composta da due centri concatenati.
+![[Pasted image 20250823161548.png]]
+Gli arrivi sono definiti da un processo di Poisson e i centri hanno tempi di servizio esponenziali con scheduling FIFO. Si vuole conoscere il numero di job nel sistema:
+$$
+E=\left\{(n_1,n_2)~|~n_i \geq 0\right\}
+$$
+Questo valore dipende dal numero di job nei singoli centri, rispettivamente $n_1$ e $n_2$. Si può modellare il numero di job nel sistema come una catena di Markov nel seguente modo:
+![[Pasted image 20250823162026.png]]
+
+Ricordando che, per un centro a servente singolo,
+$$
+\Pr\{N_S=n\}^{M/M/1/FIFO}=\rho^n(1-\rho)
+$$
+con $\rho$ l'utilizzazione del centro, se $\rho_1={\lambda\over\mu_1}<1$, allora
+$$
+\Pr\{n_1=k\}=\rho_1^k(1-\rho_1), \qquad k\geq0
+$$
+Il calcolo dello stesso valore nel secondo centro non è immediato.
+
+Si consideri il **teorema di Burke**:
+> Dato un sistema M/M/1 stabile con processo di arrivo di Poisson di parametro $\lambda$, il processo di partenza è anch'esso un processo di Poisson di parametro $\lambda$.
+
+Se vale il teorema di Burke, il calcola diventa identico al precedente: se $\rho_2=\frac{\lambda}{\mu_2} < 1$, allora
+$$
+\Pr\{n_2=k\}=\rho_2^k(1-\rho_2),\qquad k\geq 0
+$$
+Per la proprietà di indipendenza, si può calcolare la probabilità di avere $i$ job nel primo sistema e $j$ job nel secondo:
+$$
+\pi(i,j)=\Pr\{n_1=i\}\Pr\{n_2=j\}\qquad \forall(i,j)\in E
+$$
+
+Si consideri ora quest'altro caso, in cui è presente un feedback:
+![[Pasted image 20250823165705.png]]
+In questo caso, cade l'ipotesi di indipendenza, non valendo più il teorema di Burke. Si ragiona separatamente per i due sistemi. Se $\rho_i<1$, $i=1,2$, si ha sempre che
+$$
+\begin{align}
+&\pi(i,j)=\Pr\{n_1=i\}\Pr\{n_2=j\}, &\forall(i,j)\in E
+\\
+&\Pr\{n_i=k\}=\rho_i^k(1-\rho_i),  &i=1,2
+\end{align}
+$$
+ma ora $\rho_i$ dipende anche dai job che tornano indietro tramite feedback, ossia
+$$
+\rho_i=\frac{\lambda}{p\mu_i}
+$$
+E dunque si ottiene il sistema:
+$$
+\begin{cases}
+\lambda_1=\lambda+(1-p)\lambda_2
+\\
+\lambda_2=\lambda_1
+\end{cases}
+,
+\qquad
+\lambda_1=\frac{\lambda}{p}
+$$
+Inoltre, il tasso di visita è 
+$$
+v_1=v_2={1\over p}
+$$
+Una **rete di Jackson** è una rete in cui vale il teorema di Burke.
+## Analisi operazionale
+L'analisi operazionale è un'evoluzione dell'applicazione della teoria delle code di Markov. Essa si basa su tre principi:
+- tutte le quantità devono poter essere misurabili precisamente e tutte le assunzioni devono poter essere direttamente testabili
+- il flusso deve essere bilanciato
+- i dispositivi (o centri) devono essere omogenei, ossia il routing deve essere indipendente dal carico delle code, ergo il tempo di servizio medio di un certo dispositivi.
+
+Un'ipotesi di dice **testabile operazionalmente** se la sua veridicità può essere stabilita senza alcun dubbio tramite misurazioni. L'**analisi operazionale** fornisce un approccio matematico rigoroso per studiare le prestazioni dei sistemi di calcolo basandosi soltanto su ipotesi testabili operazionalmente.
+
+Le componenti principali sono:
+- un sistema (reale o ipotetico)
+- un periodo di tempo finito, detto **periodo di osservazione**
+
+Le quantità di base che vengono considerate sono:
+- $T$, la lunghezza del periodo di osservazione
+- $A$, il numero di arrivi durante il periodo di osservazione
+- $B$, il tempo totale per cui il sistema è occupato durante il periodo di osservazione  ($B\leq T$)
+- $C$, il numero di completamenti durante il periodo di osservazione
+
+In una rete di code, aperta o chiusa che sia, le stesse quantità possono essere misurate per ogni dispositivo $i=1,\dots,k$ durante il periodo di osservazione $T$:
+- $A_i$, il numero di arrivi al dispositivo $i$
+- $B_i$, il tempo totale per cui il dispositivo $i$, ossia in cui $n_i>0$
+- $C_{ij}$, il numero di richieste terminate dal dispositivo $i$ che passano direttamente al dispositivo $j$; in caso di feedback, è possibile che $C_{ii}>0$
+
+Tutto ciò che è esterno al sistema è considerato il dispositivo $0$:
+- $A_{0j}$, il numero di job che vengono processati per la prima volta dal dispositivo $j$
+- $C_{i0}$, numero di job il cui ultimo processamento è stato dal dispositivo $i$
+### Equazioni operazionali
+**Equazioni del bilanciamento del flusso**, o **job flow balance equations**:
+$$
+X_j=\sum_{i=0}^k X_i p_{ij}
+$$
+dove $X_i$ è il throughput del dispositivo $i$ e $p_{ij}$ è la probabilità che un job completato dal dispositivo $i$ passi al dispositivo $j$. $X_0$ è considerato il throughput dell'intero sistema.
+
+**Equazioni del tasso di visite**, o **visit ratio equations**:
+$$
+\begin{cases}
+V_0=1
+\\
+V_j=p_{0j}+\sum_{i=1}^k V_i p_{ij}
+\end{cases}
+$$
+dove $V_i$ è il tasso di visite al dispositivo $i$, ossia il numero di volte in cui un job - in media - visita il dispositivo.
+
+**Legge dell'utilizzazione**:
+$$
+U_i = X_i S_i
+$$
+dove $U_i$ è l'utilizzazione del dispositivo $i$ (analogo di $\rho_i$ nei modelli analitici) e $S_i$ è il tempo di servizio medio del dispositivo.
+
+**Legge di Little**:
+$$
+\bar{n}_i=X_i R_i
+$$
+dove $\bar{n}_i$ è il numero medio di visite al centro $i$ e $R_i$ è il tempo di risposta medio del centro.
+
+**Legge del flusso di output**, o **output flow law**:
+$$
+X_0 = \sum_{i=0}^k X_i p_{i0}
+$$
+che consente di calcolare il throughput del sistema.
+
+**Legge generale del tempo di risposta**:
+$$
+R = \sum_{i=1}^k V_i R_i
+$$
+dove $R$ è il tempo di risposta dell'intero sistema.
+
+**Formula del tempo di risposta interattivo**, assumendo bilanciamento del flusso:
+$$
+R = \frac{M}{X_0}-Z
+$$
+Questa formula è applicata nei **sistemi terminal-driven**, ossia sistemi di tipo time-sharing in cui l'utente (job) si alterna tra un periodo di *thinking* e un periodo di *waiting*. $Z$ è la durata media del periodo di thinking e $R$ la durata media del periodo di waiting. $Z$ è indipendente da $M$, mentre $R$ dipende da $M$: infatti, i job si ritardano a vicenda mentre si contendono le risorse.
