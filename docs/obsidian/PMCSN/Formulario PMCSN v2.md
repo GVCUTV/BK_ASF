@@ -273,7 +273,7 @@ E(T_Q)_{Erlang}={P_QE(S) \over 1-\rho} \leq {\rho E(S)\over 1-\rho} = E(T_Q)_{KP
 E(T_Q)_{Erlang}\leq E(T_Q)_{KP}
 $$
 ### Scheduling con priorità
-Parlando sempre di scheduling astratto, è possibile divide il flusso entrante in più code. Ogni classe racchiude una **classe di servizio**, ognuna delle quali ha una **priorità** diversa. Questo tipo di scheduling trova applicazione in diverse situazioni:
+Parlando sempre di scheduling astratto, è possibile dividere il flusso entrante in più code. Ogni classe racchiude una **classe di servizio**, ognuna delle quali ha una **priorità** diversa. Questo tipo di scheduling trova applicazione in diverse situazioni:
 - traffico multimediale
 - QoS
 Uno scheduling prioritario fatto a dovere può migliorare le prestazioni tremendamente. Non ha costo in termini di risorse fisiche, bensì il guadagno di prestazioni è gratis.
@@ -338,7 +338,7 @@ E(T_S)^{NP\_priority}=E(T_S)^{KP}
 $$
 #### Priorità astratta con prelazione
 Per quanto riguarda le prestazioni locali, il tempo di attesa in coda è$$
-E(T_{Q_k})^{P\_priority}=\frac{{1\over2} E(S^2)\sum_{i=1}^k\lambda_k}{\left(1-\sum_{i=1}^k \rho_i\right)\cdot\left(1-\sum_{i=1}^{k-1} \rho_i\right)}
+E(T_{Q_k})^{P\_priority}=\frac{{1\over2} E(S^2)\sum_{i=1}^k\lambda_i}{\left(1-\sum_{i=1}^k \rho_i\right)\cdot\left(1-\sum_{i=1}^{k-1} \rho_i\right)}
 $$Si ha che$$
 E(T_{Q_k})^{P\_priority}\leq E(T_{Q_{k+1}})^{P\_priority}
 $$e$$E(T_{Q_k})^{P\_priority}\leq E(T_{Q_k})^{NP\_priority}=E(T_{Q_k})^{KP}$$
@@ -425,6 +425,14 @@ $$
 La policy **shortest job first** è un caso particolare della policy size-based, in cui li numero della classi viene fatto tendere all'infinito. Quando il server è libero, sceglie dalla coda il job di dimensione minore. Si ha che
 $$
 E(T_Q)^{SJF}=\frac{\lambda}{2}E(S^2)\int_0^{\infty}\frac{dF(X)}{\left(1-\lambda\int_0^x tf(t)dt\right)^2}
+$$
+Per un job di una specifica size $x$, si può scrivere, senza calcolare l'integrale
+$$
+E(T_Q(x))^{SJF}=\frac{\lambda}{2}E(S^2)\frac{1}{(1-\rho_x)^2}
+$$
+dove
+$$
+\rho_x=\lambda\int_o^xtf(t)dt=\lambda F(x)\int_0^xt\frac{f(t)}{F(t)}dt
 $$
 ##### Size-based con prelazione
 In una policy size-based, la prelazione viene applicata solo se il tempo rimanente al job in esecuzione (di classe $h$, cioè $E(S_{h_rem})$) è minore del tempo richiesto da un qualsiasi job di classe $k<h$. Se la prelazione avviene, il job viene interrotto e posto in una classe considerando solo il tempo rimanente.
