@@ -203,7 +203,6 @@ E(sd(x))^{M/G/1/preemp-non-size-based}={1 \over 1-\rho}
 $$
 ### Code a serventi multipli
 Si consideri il seguente modello di coda, in cui sono present $m>1$ serventi, ognuno con tasso di servizio $\mu$. Si parla, in questo caso, di **modello multiserver omogeneo**.
-![[Pasted image 20250318151349.png]]
 
 In generale, si può definire il numero di job in un sistema con $m$ serventi come
 $$
@@ -272,6 +271,31 @@ E(T_Q)_{Erlang}={P_QE(S) \over 1-\rho} \leq {\rho E(S)\over 1-\rho} = E(T_Q)_{KP
 \implies
 E(T_Q)_{Erlang}\leq E(T_Q)_{KP}
 $$
+#### Organizzazione dei server
+In caso di serventi multipli, si possono organizzare i server in maniera diversa.
+##### Frequency division multiplexing
+I server sono organizzati in $m$ centri indipendenti, ognuno con lo stesso tasso di servizio $\mu$ e tasso di arrivi $\lambda\over m$.
+![[Code a serventi multipli.png]]
+In questo caso, si ha che
+$$
+E(T_S)^{FDM}=\frac{1}{\mu-\frac{\lambda}{m}}=\frac{m}{m\mu-\lambda}
+$$
+##### Statistical multiplexing
+Il server è unico, ma il suo tasso di servizio è moltiplicato per $m$. Il flusso entrante è unico:
+![[Statistical multiplexing.png]]
+Si ha che
+$$
+E(T_S)^{FM}=\frac{1}{m\mu-\lambda}
+$$
+##### Confronto
+1. Dal punto di vista del QoS, il FDM garantisce il QoS ad ogni stream, garantendo uno specifico tasso di servizio; d'altra parte, lo statistical multiplexing non offre garanzie di QoS.
+2. se gli $m$ flussi del FDM fossero molto regolari, ossia molto meno variabili rispetto a un processo di Poisson, la loro unione nello statistical multiplexing comporterebbe l'apporto di molta variabilità nel flusso di arrivo. Questo può portare dei problemi, ad esempio se l'applicazione richiede un ritardo basso, come nel caso di voce o video.
+##### Modellazione di un sistema
+Si considerino due modellazioni di un sistema, entrambi con un'unica coda di arrivo. un sistema ha $m$ serventi con tasso di servizio unitario, mentre l'altro ha un singolo servente con tasso di servizio $m$. Ad esempio, nel caso in cui $m=4$:
+![[Due modelli di servente.png]]
+Assumendo i job non prelazionabili e ponendo come obiettivo la minimizzazione del tempo di risposta, si possono distinguere due casi:
+- alta variabilità del traffico: è preferibile il modello (B), poiché nel modello (A) i job di grandi dimensioni bloccherebbero quelli più piccoli
+- bassa variabilità del traffico: è preferibile il modello (A), dato che tutti i job occuperebbero il servente per circa lo stesso tempo, ma il servente è più veloce.
 ### Scheduling con priorità
 Parlando sempre di scheduling astratto, è possibile dividere il flusso entrante in più code. Ogni classe racchiude una **classe di servizio**, ognuna delle quali ha una **priorità** diversa. Questo tipo di scheduling trova applicazione in diverse situazioni:
 - traffico multimediale
@@ -341,8 +365,7 @@ Per quanto riguarda le prestazioni locali, il tempo di attesa in coda è$$
 E(T_{Q_k})^{P\_priority}=\frac{{1\over2} E(S^2)\sum_{i=1}^k\lambda_i}{\left(1-\sum_{i=1}^k \rho_i\right)\cdot\left(1-\sum_{i=1}^{k-1} \rho_i\right)}
 $$Si ha che$$
 E(T_{Q_k})^{P\_priority}\leq E(T_{Q_{k+1}})^{P\_priority}
-$$e$$E(T_{Q_k})^{P\_priority}\leq E(T_{Q_k})^{NP\_priority}=E(T_{Q_k})^{KP}$$
-Per quanto riguarda le prestazioni globali,
+$$e$$E(T_{Q_k})^{P\_priority}\leq E(T_{Q_k})^{NP\_priority}=E(T_{Q_k})^{KP}$$Per quanto riguarda le prestazioni globali,
 $$
 \begin{align}
 E(T_Q)^{P\_priority}&=E(E(T_{Q_k}))=\sum_{k=1}^rp_k E(T_{Q_k})
@@ -434,6 +457,9 @@ dove
 $$
 \rho_x=\lambda\int_o^xtf(t)dt=\lambda F(x)\int_0^xt\frac{f(t)}{F(t)}dt
 $$
+rappresenta il carico composto dai job di dimensione fino a $x$. La seconda formulazione esprime meglio il concetto, essendo il prodotto di:
+- $\lambda F(x)$, il tasso di arrivo dei job di dimensione non maggiore di $x$
+- $\int_0^xt\frac{f(t)}{F(t)}dt$, la dimensione media dei job di dimensione non maggiore di $x$.
 ##### Size-based con prelazione
 In una policy size-based, la prelazione viene applicata solo se il tempo rimanente al job in esecuzione (di classe $h$, cioè $E(S_{h_rem})$) è minore del tempo richiesto da un qualsiasi job di classe $k<h$. Se la prelazione avviene, il job viene interrotto e posto in una classe considerando solo il tempo rimanente.
 
@@ -461,7 +487,7 @@ E(T_Q(x))=\frac{\frac{\lambda}{2}\int_0^tt^2f(t)dt+\frac{\lambda}{2}x^2(1-F(x))}
 \qquad
 E(T_S(x))=E(T_Q(x))+\int_0^x\frac{dt}{1-\rho_t}
 $$
-con $rho_x=\lambda\int_0^xtf(t)dt$.
+con $\rho_x=\lambda\int_0^xtf(t)dt$.
 ## Reti di code
 Si consideri la seguente rete composta da due centri concatenati.
 ![[Pasted image 20250823161548.png]]
@@ -471,7 +497,6 @@ E=\left\{(n_1,n_2)~|~n_i \geq 0\right\}
 $$
 Questo valore dipende dal numero di job nei singoli centri, rispettivamente $n_1$ e $n_2$. Si può modellare il numero di job nel sistema come una catena di Markov nel seguente modo:
 ![[Pasted image 20250823162026.png]]
-
 Ricordando che, per un centro a servente singolo,
 $$
 \Pr\{N_S=n\}^{M/M/1/FIFO}=\rho^n(1-\rho)
@@ -596,3 +621,167 @@ $$
 R = \frac{M}{X_0}-Z
 $$
 Questa formula è applicata nei **sistemi terminal-driven**, ossia sistemi di tipo time-sharing in cui l'utente (job) si alterna tra un periodo di *thinking* e un periodo di *waiting*. $Z$ è la durata media del periodo di thinking e $R$ la durata media del periodo di waiting. $Z$ è indipendente da $M$, mentre $R$ dipende da $M$: infatti, i job si ritardano a vicenda mentre si contendono le risorse.
+## Dimostrazioni varie
+### Priorità astratta senza prelazione
+Si vuole dimostrare che classi con priorità minore attendono meno tempo in coda, ossia
+$$
+E(T_{Q_k})\leq E(T_{Q_{k+1}})
+$$
+Si ha che
+$$
+\begin{align}
+\frac{\frac{\lambda}{2}E(S^2)}{\left(1-\sum_{i=1}^k\rho_i\right)\left(1-\sum_{i=1}^{k-1}\rho_i\right)}
+&\leq
+\frac{\frac{\lambda}{2}E(S^2)}{\left(1-\sum_{i=1}^{k+1}\rho_i\right)\left(1-\sum_{i=1}^k\rho_i\right)}
+\\\\
+\frac{1}{\left(1-\sum_{i=1}^k\rho_i\right)\left(1-\sum_{i=1}^{k-1}\rho_i\right)}
+&\leq
+\frac{1}{\left(1-\sum_{i=1}^{k+1}\rho_i\right)\left(1-\sum_{i=1}^k\rho_i\right)}
+\\\\
+\left(1-\sum_{i=1}^k\rho_i\right)\left(1-\sum_{i=1}^{k-1}\rho_i\right)
+&\geq
+\left(1-\sum_{i=1}^{k+1}\rho_i\right)\left(1-\sum_{i=1}^k\rho_i\right)
+\\\\
+\left(1-\sum_{i=1}^{k-1}\rho_i\right)
+&\geq
+\left(1-\sum_{i=1}^{k+1}\rho_i\right)
+\\\\
+\sum_{i=1}^{k-1}\rho_i
+&\leq
+\sum_{i=1}^{k+1}\rho_i
+\\\\
+\rho_k+\rho_{k+1}&\geq0
+\end{align}
+$$
+Vero essendo $\rho_k\geq0~\forall k$.
+Da questa relazione segue anche che
+$$
+E(T_{S_k})\leq E(T_{S_{k+1}})
+$$
+essendo $E(S_k)=E(S_{k+1})=E(S)$.
+### Confronto tra priorità e non priorità
+Si vuole dimostrare che, in media, il tempo di attesa non cambia con l'introduzione della priorità, ossia che
+$$
+E(T_Q)^{NP\_priority}=E(T_Q)^{KP}
+$$
+Per semplicità, si considerino solo due classi di priorità, ossia $r=2$. Si ha che
+$$
+\begin{align}
+E(T_Q)^{NP\_priority}
+&=
+p_1E(T_{Q_1})+p_2E(T_{Q_2})
+\\&=
+p_1\frac{\frac{\lambda}{2}E(S^2)}{1-\rho_1}+p_2\frac{\frac{\lambda}{2}E(S^2)}{(1-\rho)(1-\rho_1)}
+\\&=
+\frac{\lambda}{2}E(S^2)\left[\frac{p_1}{1-\rho_1} + \frac{p_2}{(1-\rho)(1-\rho_1)}\right]
+\\&=
+\frac{\lambda}{2}E(S^2)\frac{p_1(1-\rho)+p_2}{(1-\rho)(1-\rho_1)}
+\\&=
+\frac{\frac{\lambda}{2}E(S^2)}{1-\rho}
+\\&=
+E(T_Q)^{KP}
+\end{align}
+$$
+### Priorità astratta con prelazione
+#### Prestazioni locali
+Si vuole dimostrare che, anche in presenza di prelazione, il tempo di attesa in coda è ridotto per le classi con priorità maggiore, ossia che
+$$
+E(T_{Q_k})\leq E(T_{Q_{k+1}})
+$$
+Si ha che
+$$
+\begin{align}
+\frac{\frac{1}{2}E(S^2)\sum_{i=1}^k\lambda_i}{\left(1-\sum_{i=1}^k\rho_i\right)\left(1-\sum_{i=1}^{k-1}\rho_i\right)}
+&\leq
+\frac{\frac{1}{2}E(S^2)\sum_{i=1}^{k+1}\lambda_i}{\left(1-\sum_{i=1}^{k+1}\rho_i\right)\left(1-\sum_{i=1}^k\rho_i\right)}
+\\\\
+\frac{\sum_{i=1}^k\lambda_i}{\left(1-\sum_{i=1}^k\rho_i\right)\left(1-\sum_{i=1}^{k-1}\rho_i\right)}
+&\leq
+\frac{\sum_{i=1}^{k+1}\lambda_i}{\left(1-\sum_{i=1}^{k+1}\rho_i\right)\left(1-\sum_{i=1}^k\rho_i\right)}
+\end{align}
+$$
+- numeratori:
+$$
+\begin{align}
+\sum_{i=1}^k\lambda_i&\leq\sum_{i=1}^{k+1}\lambda_i
+\\\\
+\lambda_{k+1}&\geq0
+\end{align}
+$$
+	dato che $\lambda_k\geq0~\forall k$. 
+- denominatori (stessa dimostrazione della priorità astratta senza prelazione):
+$$
+\begin{align}
+\frac{1}{\left(1-\sum_{i=1}^k\rho_i\right)\left(1-\sum_{i=1}^{k-1}\rho_i\right)}
+&\leq
+\frac{1}{\left(1-\sum_{i=1}^{k+1}\rho_i\right)\left(1-\sum_{i=1}^k\rho_i\right)}
+\\\\
+\left(1-\sum_{i=1}^k\rho_i\right)\left(1-\sum_{i=1}^{k-1}\rho_i\right)
+&\geq
+\left(1-\sum_{i=1}^{k+1}\rho_i\right)\left(1-\sum_{i=1}^k\rho_i\right)
+\\\\
+\left(1-\sum_{i=1}^{k-1}\rho_i\right)
+&\geq
+\left(1-\sum_{i=1}^{k+1}\rho_i\right)
+\\\\
+\sum_{i=1}^{k-1}\rho_i
+&\leq
+\sum_{i=1}^{k+1}\rho_i
+\\\\
+\rho_k+\rho_{k+1}&\geq0
+\end{align}
+$$
+#### Prestazioni globali
+Per definizione,
+$$
+E(T_{Q_k})^{NP\_priority}\leq E(T_{Q_k})^{P\_priority}\qquad\forall k
+$$
+Dato che
+$$
+E(T_Q)^{X\_priority}=\sum_{k=1}^r p_kE(T_{Q_k})
+$$
+allora
+$$
+E(T_Q)^{NP\_priority}\leq E(T_Q)^{P\_priority}=E(T_Q)^{NP}
+$$
+Non si può tuttavia stabilire una relazione tra i tempi di risposta. Infatti,
+$$
+\begin{align}
+E(T_S)^{P\_priority}&=E(T_Q)^{P\_priority}+\sum_{k=1}^r p_kE(S_{virt\_k})
+\\\\
+E(T_S)^{NP\_priority}&=E(T_Q)^{NP\_priority}+E(S)=E(T_S)^{KP}
+\end{align}
+$$
+Tuttavia,
+$$
+E(T_Q)^{P\_priority}\leq E(T_Q)^{NP\_priority}
+$$
+mentre
+$$
+\sum_{k=1}^r p_kE(S_{virt\_k})\geq E(S)
+$$
+impedendo di stabilire una relazione generale tra $E(T_S)^{P\_priority}$ e $E(T_S)^{KP}$.
+Solo nel caso di distribuzione esponenziale si ottiene l'uguaglianza. Infatti, considerando sempre due classi per semplicità:
+$$
+\begin{align}
+E(T_S)^{P\_priority}
+&=
+p_1E(T_{S_1})+p_2E(T_{S_2})
+\\&=
+p_1\left[\frac{\frac{\lambda}{2}E(S^2)}{1-\rho_1}+E(S)\right]+p_2\left[\frac{\frac{\lambda}{2}E(S^2)}{(1-\rho)(1-\rho_1)}+\frac{E(S)}{1-\rho_1}\right]
+\\&=
+p_1\left[\frac{\rho_1E(S)}{1-\rho_1}+E(S)\right]+p_2\left[\frac{\rho E(S)}{(1-\rho)(1-\rho_1)}+\frac{E(S)}{1-\rho_1}\right]
+\\&=
+E(S)\left\{p_1\left[\frac{\rho_1+1-\rho_1}{1-\rho_1}\right]+p_2\left[\frac{\rho+1-\rho}{(1-\rho)(1-\rho_1)}\right]\right\}
+\\&=
+E(S)\left[\frac{p_1}{1-\rho_1}+\frac{p_2}{(1-\rho)(1-\rho_1)}\right]
+\\&=
+E(S)\frac{p_1(1-\rho)+p_2}{(1-\rho)(1-\rho_1)}
+\\&=
+E(S)\frac{p_1+p_2-p_1\rho}{(1-\rho)(1-\rho_1)}
+\\&=
+E(S)\frac{1-\rho_1}{(1-\rho)(1-\rho_1)}
+\\&=
+\frac{E(S)}{1-\rho}=E(T_S)^{KP}
+\end{align}
+$$
