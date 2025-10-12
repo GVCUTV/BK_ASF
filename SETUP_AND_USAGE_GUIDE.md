@@ -111,53 +111,58 @@ import logging
 
 os.makedirs("simulation/logs", exist_ok=True)
 logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s - %(levelname)s - %(message)s",
-    handlers=[
-        logging.FileHandler("simulation/logs/etl.log", mode='w'),
-        logging.StreamHandler()
-    ]
+  level=logging.INFO,
+  format="%(asctime)s - %(levelname)s - %(message)s",
+  handlers=[
+    logging.FileHandler("simulation/logs/etl.log", mode='w'),
+    logging.StreamHandler()
+  ]
 )
 
+
 def clean_jira(jira_path):
-    df = pd.read_csv(jira_path)
-    # Drop rows not representing tickets of interest
-    df = df[df['fields.issuetype.name'].isin(['Bug', 'New Feature', 'Improvement'])]
-    df = df[~df['fields.status.name'].isin(['Infra', 'Duplicate', "Won't Fix"])]
-    return df
+  df = pd.read_csv(jira_path)
+  # Drop rows not representing tickets of interest
+  df = df[df['fields.issuetype.name'].isin(['Bug', 'New Feature', 'Improvement'])]
+  df = df[~df['fields.status.name'].isin(['Infra', 'Duplicate', "Won't Fix"])]
+  return df
+
 
 def clean_github(github_path):
-    df = pd.read_csv(github_path)
-    # Example: Filter only PRs linked to Jira issues
-    df = df[df['pr_linked_to_jira'].notna()]
-    return df
+  df = pd.read_csv(github_path)
+  # Example: Filter only PRs linked to Jira issues
+  df = df[df['pr_linked_to_jira'].notna()]
+  return df
+
 
 def merge_jira_github(jira_df, github_df):
-    merged = pd.merge(jira_df, github_df, left_on='key', right_on='pr_linked_to_jira', how='left')
-    return merged
+  merged = pd.merge(jira_df, github_df, left_on='key', right_on='pr_linked_to_jira', how='left')
+  return merged
+
 
 def compute_lifetimes(df):
-    # Compute resolution times, feedback cycles, etc.
-    df['created'] = pd.to_datetime(df['fields.created'])
-    df['resolved'] = pd.to_datetime(df['fields.resolutiondate'])
-    df['resolution_time'] = (df['resolved'] - df['created']).dt.total_seconds() / 3600.0
-    df['feedback_cycles'] = df['fields.customfield_feedback_count'].fillna(0).astype(int)
-    return df
+  # Compute resolution times, feedback cycles, etc.
+  df['created'] = pd.to_datetime(df['fields.created'])
+  df['resolved'] = pd.to_datetime(df['fields.resolutiondate'])
+  df['resolution_time'] = (df['resolved'] - df['created']).dt.total_seconds() / 3600.0
+  df['feedback_cycles'] = df['fields.customfield_feedback_count'].fillna(0).astype(int)
+  return df
+
 
 if __name__ == "__main__":
-    jira_path = "simulation/input/raw_jira.csv"
-    github_path = "simulation/input/raw_github.csv"
-    os.makedirs("simulation/input", exist_ok=True)
+  jira_path = "simulation/input/raw_jira.csv"
+  github_path = "simulation/input/raw_github.csv"
+  os.makedirs("simulation/input", exist_ok=True)
 
-    jira_df = clean_jira(jira_path)
-    logging.info(f"Loaded and cleaned Jira: {len(jira_df)} tickets.")
-    github_df = clean_github(github_path)
-    logging.info(f"Loaded and cleaned GitHub: {len(github_df)} PRs.")
-    merged_df = merge_jira_github(jira_df, github_df)
-    logging.info(f"Merged dataset: {len(merged_df)} rows.")
-    full_df = compute_lifetimes(merged_df)
-    full_df.to_csv("simulation/output/tickets_prs_merged.csv", index=False)
-    logging.info("Saved cleaned/merged dataset for fitting and simulation input.")
+  jira_df = clean_jira(jira_path)
+  logging.info(f"Loaded and cleaned Jira: {len(jira_df)} tickets.")
+  github_df = clean_github(github_path)
+  logging.info(f"Loaded and cleaned GitHub: {len(github_df)} PRs.")
+  merged_df = merge_jira_github(jira_df, github_df)
+  logging.info(f"Merged dataset: {len(merged_df)} rows.")
+  full_df = compute_lifetimes(merged_df)
+  full_df.to_csv("simulation/output/tickets_prs_merged.csv", index=False)
+  logging.info("Saved cleaned/merged dataset for fitting and simulation input.")
 ```
 
 * Edit field names as needed to match your real exports.
