@@ -83,7 +83,7 @@ GPT must:
 
 ## 5) Documentation Synchronization
 
-- Treat `docs/project_documentation.md` as the **single source of truth**.
+- Treat `docs/project_documentation.md` and `docs/PROJECT_REQUIREMENTS.md` as the **single source of truth**.
 - Cite relevant sections when generating tasks.
 - If user instructions diverge from docs, pause and request confirmation.
 
