@@ -1,108 +1,80 @@
-# // v1.2-Intro-Overview-Refresh
+# // v1.3-Intro-Overview-Refresh
 ### PMCSN ASF — Intro / Overview Update  
-*(Compliant with `GPT_INSTRUCTIONS.md` and incorporating final semi-Markov, routing, and validation structure)*  
+*(Compliant with `GPT_INSTRUCTIONS.md`; aligned with semi-Markov developer policy & queueing interpretation)*
 
 ---
 
 ## 1 ▪ Updated Overview
 
-The **PMCSN ASF** project models the internal workflow of a software foundation team as a **semi-Markov queueing system**.  
-It combines real-world data (JIRA + Git) with simulation and analytical modeling to reproduce how a development team autonomously manages coding, review, and testing activities.
+The **PMCSN ASF** project models the software‑foundation lifecycle as a **semi‑Markov queueing system** grounded in real data (JIRA + Git).  
+Developers are autonomous agents whose activities (OFF, DEV, REV, TEST) evolve stochastically:
+- **Transitions** follow an empirical **Markov matrix** \( P \).
+- **Focus duration** in a state follows an empirical **stint PMF** \( f_i(\ell) \).
+- **Service times** per stage follow fitted **log‑normal** laws \( T_s \).
 
-Each team member operates as a **semi-Markov agent**:
-- The current working mode (OFF, DEV, REV, TEST) evolves probabilistically through a transition matrix \( P \).  
-- The duration of continuous work in each state follows an empirical stint-length PMF \( f_i(ℓ) \).  
-- Each queue stage (DEV, REV, TEST) represents a service center with log-normal service-time distributions \( T_s \).  
-
-This paradigm provides a realistic and data-grounded model of developer autonomy, feedback loops, and workflow variability, replacing the deterministic patterns used in earlier phases.
+This free‑choice paradigm replaces earlier deterministic or fixed rotations, yielding more realistic dynamics of throughput, WIP, and utilization.
 
 ---
 
-## 2 ▪ Refined Objectives
+## 2 ▪ Objectives (Refreshed)
 
-1. **Model Developer Free-Choice Behavior**  
-   - Implement and calibrate the semi-Markov decision logic from empirical data.  
-   - Quantify how individual autonomy impacts global throughput and utilization.  
-
-2. **Represent ASF as a Dynamic Queue Network**  
-   - Treat each productive state as a service center with variable capacity (number of developers).  
-
-3. **Enable Analytical Derivation and Simulation Alignment**  
-   - Ensure that equations from 3.2 A (transition matrix P, stint PMFs, service laws) directly feed the simulation layer (4.x).  
-
-4. **Support Validation and Experimentation**  
-   - Reproduce historical workloads and evaluate deviations in state frequencies, throughput, and latency.  
-
-5. **Maintain Transparency and Reproducibility**  
-   - All derivations, parameters, and simulations are versioned and reproducible through deterministic ETL → Analytics → Simulation → Validation → Reporting stages.  
+1. **Autonomy Modeling** — Capture self‑directed developer choices via \( P \) and \( f_i(\ell) \).  
+2. **Queueing Representation** — Treat DEV/REV/TEST as service centers whose server pool equals the # developers in that state.  
+3. **Analytics ↔ Simulation Alignment** — Ensure 3.2A artifacts (\( P, f_i, T_s \)) parameterize the 4.x DES.  
+4. **Validation** — Compare state occupation, throughput, and latency to empirical traces; report deviations.  
+5. **Reproducibility** — Deterministic ETL → Analytics → Simulation → Validation pipeline; versioned artifacts.
 
 ---
 
-## 3 ▪ ASF System Architecture
+## 3 ▪ System Layers
 
 | Layer | Function | Key Outputs / Files |
-|-------|-----------|---------------------|
-| **ETL / Data Preparation** | Extract developer timelines, ticket histories, and churn metrics. | `data/etl_outputs/*.csv` |
-| **Analytics (3.x)** | Estimate transition matrix P, stint PMFs, and service-time parameters. | `simulation/state_equations.py`, `data/state_parameters/` |
-| **Simulation Core (4.x)** | Execute discrete-event simulation using semi-Markov developer agents. | `simulation/des_core.py`, output logs & CSVs |
-| **Validation (5.x–6.x)** | Compare simulated vs. empirical throughput and state occupation. | `docs/validation.md`, plots under `results/` |
-| **Reporting (7–8)** | Assemble analysis, experiments, and presentation. | `docs/project_documentation.md`, `slides/` |
+|---|---|---|
+| **ETL / Data Prep** | Extract developer sequences & effort metrics | `data/etl_outputs/*.csv` |
+| **Analytics (3.x)** | Derive \( P \), \( f_i(\ell) \), fit \( T_s \) | `data/state_parameters/*`, notes in `docs/` |
+| **Simulation (4.x)** | DES with semi‑Markov agents & dynamic servers | `simulation/des_core.py` |
+| **Validation (5–6)** | Compare empirical vs simulated metrics | `docs/validation.md`, `results/` |
+| **Reporting (7–8)** | Synthesize findings, prepare slides | `docs/project_documentation.md`, `slides/` |
 
 ---
 
-## 4 ▪ Glossary (v1.2, Finalized)
+## 4 ▪ Glossary (v1.3)
 
 | Term | Definition |
-|------|-------------|
-| **Developer state** | One of four operational modes: OFF, DEV, REV, TEST. |
-| **Semi-Markov policy** | Behavioral model where developers probabilistically transition between states, staying ℓ tasks in each (ℓ ∼ fᵢ(ℓ)). |
-| **Transition matrix P** | Empirical probabilities \( P_{ij} \) of moving from i to j after stint completion. |
-| **Stint PMF fᵢ(ℓ)** | Probability mass function of consecutive tickets handled in state i. |
-| **Service-time law Tₛ** | Log-normal distribution of task durations for queue stage s ∈ {DEV, REV, TEST}. |
-| **Queueing interpretation** | ASF represented as a 3-queue open network with dynamic server pools driven by developer states. |
-| **Feedback loop** | Routing of tasks from TEST → DEV when validation fails, closing the system dynamics. |
-| **Free-choice** | Autonomy property: next activity chosen by developer via P, not centrally assigned. |
+|---|---|
+| **Semi‑Markov policy** | Developer transitions via \( P \); stint length \( \ell \sim f_i(\ell) \). |
+| **Transition matrix \( P \)** | Prob. of moving i → j after stint exhaustion. |
+| **Stint PMF \( f_i(\ell) \)** | Distribution of consecutive tickets handled in state i. |
+| **Service‑time law \( T_s \)** | Log‑normal duration for stage s ∈ {DEV, REV, TEST}. |
+| **Queueing interpretation** | DEV/REV/TEST as queues with dynamic server pools (developers in that state). |
+| **Feedback loop** | TEST → DEV rework routing when validation fails. |
+| **Free‑choice** | Next activity chosen probabilistically, not centrally assigned. |
 
 ---
 
-## 5 ▪ Figure Captions (for Future Diagrams)
+## 5 ▪ Figure Briefs (No Graphics)
 
-*(No diagrams included; these captions serve for future creation.)*
-
-1. **Figure 1 — ASF Queueing Network (Dynamic Server Model)**  
-   *Depicts DEV, REV, TEST queues connected sequentially with feedback paths and variable developer pools per state.*
-
-2. **Figure 2 — Developer Semi-Markov Process**  
-   *Shows developer state transitions governed by P and stint counter decrements from fᵢ(ℓ).*
-
-3. **Figure 3 — Data-to-Simulation Flow**  
-   *Represents the pipeline ETL → Analytics → Simulation → Validation → Reporting.*
-
-4. **Figure 4 — Validation and Feedback Loop**  
-   *Illustrates comparison between real and simulated metrics and how results feed improvements.*
+1. **ASF Queueing Network** — DEV, REV, TEST queues with feedback; dynamic servers = developers per state.  
+2. **Developer Semi‑Markov Process** — States, stint counter decrements, and transitions \( P_{ij} \).  
+3. **Data→Sim Pipeline** — ETL → Analytics (\( P, f_i, T_s \)) → DES → Validation → Reporting.  
+4. **Validation View** — Overlay of empirical vs simulated state occupancy and throughput.
 
 ---
 
-## 6 ▪ Integration Instructions
+## 6 ▪ Integration
 
-- Replace the old introduction section in `docs/project_documentation.md` with this version (v1.2).  
-- Maintain cross-references to:  
-  - `docs/ASF_BK_overview.md` → general context.  
-  - `docs/CONCEPTUAL_WORKFLOW_MODEL.md` → formal state/queue structure.  
-- Reuse figure captions when drawing diagrams in Draw.io or Mermaid.  
-- Keep the version header `// v1.2-Intro-Overview-Refresh` in all derived copies for traceability.  
+- Replace older intro in `docs/project_documentation.md` with this v1.3 reference.  
+- Cross‑link to `docs/CONCEPTUAL_WORKFLOW_MODEL_v1.2.md` and `docs/DERIVATIONS_3.2A.md`.  
+- Keep version header in derived copies.
 
 ---
 
-## 7 ▪ Definition of Done (DoD)
+## 7 ▪ DoD
 
-1. Document header version updated to v1.2 and ASF compliance noted.  
-2. Overview, objectives, and glossary reflect finalized semi-Markov queueing paradigm.  
-3. Figure captions harmonized with conceptual model v1.2.  
-4. Cross-references and integration paths verified.  
-5. Document passes Markdown linting and internal link checks.  
+- v1.3 header present & ASF compliance noted.  
+- Objectives, glossary, and captions reflect semi‑Markov & queueing paradigm.  
+- Cross‑refs verified; Markdown lint OK.
 
 ---
 
-**End of Document — Intro / Overview Refresh (v1.2)**  
-_Compliant with PMCSN ASF project conventions and `GPT_INSTRUCTIONS.md`._
+**End — Intro / Overview Refresh (v1.3)**
