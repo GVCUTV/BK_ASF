@@ -1,0 +1,25 @@
+// v3.2A-001
+// file: data/state_parameters/service_params.json
+{
+  "parameters": {
+    "DEV": {
+      "distribution": "lognormal",
+      "mu": -0.5838221154638829,
+      "n": 192,
+      "sigma": 4.742488311894271
+    },
+    "REV": {
+      "distribution": "lognormal",
+      "mu": 1.786792957779059,
+      "n": 192,
+      "sigma": 2.3343591432874167
+    },
+    "TEST": {
+      "distribution": "lognormal",
+      "mu": -5.9266976827399,
+      "n": 109,
+      "sigma": 4.536985240600843
+    }
+  },
+  "version": "v3.2A-001"
+}
