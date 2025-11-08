@@ -1,99 +1,78 @@
-[comment]: # "v1"
-## **Project Schedule**
+# Repository Progress Audit — Based on `schedule.md`
+
+This document summarizes what has been **done**, **partially done**, or **missing** in the repository as of the latest uploaded ZIP (`BK_ASF-main.zip`).
 
 ---
 
-### **Meeting 1 [12/7/2025] – Kickoff & System Familiarization**
+## Meeting 1 — Kickoff & Familiarization
+| Task | Status | Notes |
+|------|---------|-------|
+| 1.1 Docs / ASF / BK overview | ✅ Done | `README.md`, `AGENTS.md`, `GPT_INSTRUCTIONS.md`, `docs/PROJECT_REQUIREMENTS.md` |
+| 1.2 Conceptual workflow model | ✅ Done | Draw.io and image diagrams present |
+| 1.3 A (intro & objectives) | ⚠️ Partial | In `docs/project_documentation.md`, needs expansion |
+| 1.3 B (first diagrams) | ✅ Done | Multiple diagrams exported |
+| 1.3 C (data list + JIRA/GitHub exploration) | ✅ Done | ETL stack and CSV/plot outputs complete |
 
-* **1.1** (All): Lettura rapida e discussione della documentazione ASF (“The Apache Way”), linee guida BookKeeper, overview Jira/GitHub.
-* **1.2** (All): Costruzione condivisa del modello concettuale del workflow BookKeeper: stati principali, transizioni, ipotesi chiave.
-* **1.3** (Split):
+## Meeting 2 — Conceptual Model & Data Mapping
+| Task | Status | Notes |
+|------|---------|-------|
+| 2.1 Finalize conceptual model & flows | ⚠️ Partial | Diagram mature but not explicitly finalized |
+| 2.2 A (mapping Jira ↔ real workflow) | ⚠️ Partial | Mapping narrative missing |
+| 2.2 B (flow charts for report) | ✅ Done | Present in diagrams |
+| 2.2 C (prelim data collection & stats) | ✅ Done | ETL runs and CSV outputs validated |
 
-  * A: Inizio stesura dell’introduzione e degli obiettivi della relazione.
-  * B: Prima bozza di diagrammi del sistema (whiteboard/Miro/draw.io).
-  * C: Elenco dei dati necessari, esplorazione delle issue recenti BookKeeper e struttura dati JIRA/GitHub.
-* **End:** 15 min wrap-up, condivisione risultati, eventuale aggiustamento dei compiti e del piano.
+## Meeting 3 — Data Analysis & Analytical Model
+| Task | Status | Notes |
+|------|---------|-------|
+| 3.1 Analytical model & assumptions | ⚠️ Partial | Needs a markdown with explicit model description |
+| 3.2 A (equations, state matrix, routing params) | ❌ Missing/Partial | Not found; ETL has params only |
+| 3.2 B (parameter estimation) | ✅ Done | Scripts and output confirm it |
+| 3.2 C (key metrics list) | ⚠️ Partial | Metrics implicit, not consolidated |
 
----
+## Meeting 4 — Simulation Architecture & Coding
+| Task | Status | Notes |
+|------|---------|-------|
+| 4.1 Simulation architecture (events/states) | ✅ Done | Simulation modules complete |
+| 4.2 A (setup repo/code + input base) | ✅ Done | Simulation folder + logs |
+| 4.2 B (arrivals, transitions, feedback loop) | ✅ Done | Implemented in logic files |
+| 4.2 C (service logic, stats, output) | ✅ Done | Stats and output modules verified |
 
-### **Meeting 2 [29/7/2025] – Conceptual Model & Data Mapping**
+## Meeting 5 — Verification & Debug
+| Task | Status | Notes |
+|------|---------|-------|
+| 5.1 E2E integrated run | ✅ Done | Logs confirm end-to-end run |
+| 5.2 A (Little’s Law, utilization checks) | ⚠️ Partial | Data exists; validation doc missing |
+| 5.2 B (parameter sweeps) | ⚠️ Partial | Config generator exists, few sweeps found |
+| 5.2 C (debug/validation write-up) | ⚠️ Partial | Logs exist; narrative missing |
 
-* **2.1** (All): Finalizzazione del modello concettuale e dei flussi principali (issue, review, test, feedback loop).
-* **2.2** (Split):
+## Meeting 6 — Experiments & Results
+| Task | Status | Notes |
+|------|---------|-------|
+| 6.1 Scenarios & variables plan | ⚠️ Partial | Not centralized in a single doc |
+| 6.2 A (transient/steady-state runs) | ⚠️ Partial | Simulation supports it; outputs unlabeled |
+| 6.2 B (graphs & tables) | ⚠️ Partial | ETL rich; simulation visuals sparse |
+| 6.2 C (experiments write-up) | ❌ Missing | No markdown narrative found |
 
-  * A: Scrittura della sezione sul modello concettuale e mappatura stati Jira ↔ workflow reale.
-  * B: Sviluppo dei primi diagrammi/flow chart per la relazione.
-  * C: Raccolta e pulizia dati preliminare, estrazione ticket/PR, condivisione prime statistiche di base.
-* **All:** Review incrociato delle bozze, sincronizzazione, discussione dubbi.
+## Meeting 7 — Improvements & Optimization
+| Task | Status | Notes |
+|------|---------|-------|
+| 7.1 Select improvement | ❌ Missing | No document naming chosen improvement |
+| 7.2 Implement improvement & compare | ❌ Missing | No baseline/optimized comparison present |
+| 7.x Interpretation & prep for final | ⚠️ Partial | No synthesis found |
 
----
-
-### **Meeting 3 [1/8/2025] – Analisi Dati & Costruzione Modello Analitico**
-
-* **3.1** (All): Costruzione condivisa del modello a code analitico e delle ipotesi formali.
-* **3.2** (Split):
-
-  * A: Scrittura di equazioni analitiche, matrice degli stati/transizioni e parametri di routing.
-  * B: Stima preliminare dei parametri da Jira/GitHub (rate arrivo, tempi medi di servizio, tasso reopening).
-  * C: Bozza delle metriche chiave (utilizzo, tempo medio in coda, throughput ecc.).
-* **All:** Revisione incrociata, verifica coerenza dei dati stimati.
-
----
-
-### **Meeting 4 [3/8/2025] – Architettura Simulazione & Avvio Coding**
-
-* **4.1** (All): Definizione architettura della simulazione, flusso eventi/stati, strumenti (pseudo-codice o whiteboard).
-* **4.2** (Split):
-
-  * A: Setup repo/codice simulazione e base dati di input.
-  * B: Implementazione logica di arrivo ticket, gestione transizioni e ciclo feedback.
-  * C: Sviluppo logica di servizio, registrazione statistiche e output.
-* **All:** Mini code review tra pari, aggiornamento documentazione di progetto.
-
----
-
-### **Meeting 5 [19/8/2025] – Verifica, Debug e Prime Simulazioni**
-
-* **5.1** (All): Test integrato, esecuzione prima simulazione end-to-end, verifica funzionamento globale.
-* **5.2** (Split):
-
-  * A: Documentazione e verifica delle consistenze (Legge di Little, utilizzo, tempi medi).
-  * B: Run di sweep parametrici su casi semplici, raccolta output.
-  * C: Debug, ottimizzazione codice simulazione e note per sezioni “Validazione”/“Verifica modello”.
-* **All:** Discussione anomalie, rifinitura collettiva della logica.
-
----
-
-### **Meeting 6 [31/8/2025] – Esperimenti & Analisi Risultati**
-
-* **6.1** (All): Definizione scenari sperimentali, variabili da esplorare e output da raccogliere.
-* **6.2** (Split):
-
-  * A: Esecuzione simulazioni in transitorio e regime, raccolta dati.
-  * B: Produzione e raffinamento di grafici e tabelle.
-  * C: Inizio stesura delle sezioni “Esperimenti” e “Analisi dei colli di bottiglia”.
-* **All:** Review incrociata dei risultati, scelta delle migliori visualizzazioni.
+## Meeting 8 — Final Deliverables
+| Task | Status | Notes |
+|------|---------|-------|
+| 8.1 Assemble final report | ⚠️ Partial | `docs/project_documentation.md` incomplete |
+| 8.2 Slides | ❌ Missing | No presentation files present |
+| 8.3 Rehearsal / Q&A / final polish | ❌ Missing | Not evidenced |
 
 ---
 
-### **Meeting 7 [2/9/2025] – Miglioramento & Modello Ottimizzato**
-
-* **7.1** (All): Brainstorming e scelta di possibili miglioramenti (automatizzazione test, nuovi pattern review, ecc.).
-* **7.2** (All):
-
-  * Implementazione del miglioramento scelto nella simulazione.
-  * Run comparativa tra scenario base e ottimizzato, raccolta risultati.
-  * Bozza del nuovo modello e aggiornamento sezione confronto nel report.
-* **All:** Interpretazione collettiva dei risultati, preparazione agli ultimi step.
-
----
-
-### **Meeting 8 [7/9/2025] – Report Finale & Presentazione**
-
-* **8.1** (All): Assemblaggio finale della relazione, editing collaborativo, referenze.
-* **8.2** (Split):
-
-  * A: Slide su introduzione/modello e motivazioni.
-  * B: Slide su esperimenti, simulazioni e risultati.
-  * C: Slide su miglioramenti, conclusioni e raccomandazioni.
-* **All:** Prova presentazione (ognuno simula la propria parte), Q&A tra colleghi, finalizzazione di codice e materiali.
+## Next Actions Summary
+1. **Add analytical model markdown (M3.2A).**
+2. **Create validation write-up (M5).**
+3. **Design and document scenarios (M6).**
+4. **Run labeled sweeps (M6).**
+5. **Implement one optimization (M7).**
+6. **Finalize report and slides (M8).**
