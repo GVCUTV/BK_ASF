@@ -10,3 +10,4 @@ scipy>=1.7
 # Optional: for interactive work, API, or notebooks
 jupyter
 requests
+PyGithub

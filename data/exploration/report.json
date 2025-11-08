@@ -1,0 +1,12 @@
+// v1.3C-Data-List
+// file: data/exploration/report.json
+// DoD: cross-source validation metrics for exploration outputs.
+{
+  "commits_with_multiple_issues": 0,
+  "issues_with_commits": 0,
+  "issues_without_assignee": 0,
+  "issues_without_commits": 0,
+  "total_commits": 0,
+  "total_developers": 0,
+  "total_issues": 0
+}
