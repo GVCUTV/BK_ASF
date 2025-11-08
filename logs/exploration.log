@@ -1,0 +1,39 @@
+// v1.3C-Data-List
+// file: exploration.log
+// DoD: capture exploration ETL activity.
+2025-11-08 17:46:57,842 - INFO - Starting exploration export
+2025-11-08 17:46:57,844 - WARNING - JIRA credentials missing; returning cached data if available.
+2025-11-08 17:46:57,846 - INFO - Writing JIRA exploration CSV: /workspace/BK_ASF/data/exploration/jira_issues.csv
+2025-11-08 17:46:57,848 - WARNING - PyGithub not available; skipping live commit fetch.
+2025-11-08 17:46:57,850 - INFO - Writing GitHub exploration CSV: /workspace/BK_ASF/data/exploration/github_commits.csv
+2025-11-08 17:46:57,852 - INFO - Wrote developer dictionary: /workspace/BK_ASF/data/exploration/developers.csv
+2025-11-08 17:46:57,852 - INFO - Wrote exploration report: /workspace/BK_ASF/data/exploration/report.json
+2025-11-08 17:46:57,852 - INFO - Updated exploration documentation: /workspace/BK_ASF/docs/DATA_LIST_1.3C.md
+2025-11-08 17:46:57,852 - INFO - Exploration export completed
+2025-11-08 17:47:33,789 - INFO - Starting exploration export
+2025-11-08 17:47:33,791 - WARNING - JIRA credentials missing; returning cached data if available.
+2025-11-08 17:47:33,794 - INFO - Writing JIRA exploration CSV: /workspace/BK_ASF/data/exploration/jira_issues.csv
+2025-11-08 17:47:33,796 - WARNING - PyGithub not available; skipping live commit fetch.
+2025-11-08 17:47:33,797 - INFO - Writing GitHub exploration CSV: /workspace/BK_ASF/data/exploration/github_commits.csv
+2025-11-08 17:47:33,799 - INFO - Wrote developer dictionary: /workspace/BK_ASF/data/exploration/developers.csv
+2025-11-08 17:47:33,799 - INFO - Wrote exploration report: /workspace/BK_ASF/data/exploration/report.json
+2025-11-08 17:47:33,800 - INFO - Updated exploration documentation: /workspace/BK_ASF/docs/DATA_LIST_1.3C.md
+2025-11-08 17:47:33,800 - INFO - Exploration export completed
+2025-11-08 17:47:47,866 - INFO - Starting exploration export
+2025-11-08 17:47:47,869 - WARNING - JIRA credentials missing; returning cached data if available.
+2025-11-08 17:47:47,871 - INFO - Writing JIRA exploration CSV: /workspace/BK_ASF/data/exploration/jira_issues.csv
+2025-11-08 17:47:47,873 - WARNING - PyGithub not available; skipping live commit fetch.
+2025-11-08 17:47:47,874 - INFO - Writing GitHub exploration CSV: /workspace/BK_ASF/data/exploration/github_commits.csv
+2025-11-08 17:47:47,876 - INFO - Wrote developer dictionary: /workspace/BK_ASF/data/exploration/developers.csv
+2025-11-08 17:47:47,876 - INFO - Wrote exploration report: /workspace/BK_ASF/data/exploration/report.json
+2025-11-08 17:47:47,877 - INFO - Updated exploration documentation: /workspace/BK_ASF/docs/DATA_LIST_1.3C.md
+2025-11-08 17:47:47,877 - INFO - Exploration export completed
+2025-11-08 17:49:58,584 - INFO - Starting exploration export
+2025-11-08 17:49:58,586 - WARNING - JIRA credentials missing; returning cached data if available.
+2025-11-08 17:49:58,588 - INFO - Writing JIRA exploration CSV: /workspace/BK_ASF/data/exploration/jira_issues.csv
+2025-11-08 17:49:58,590 - WARNING - PyGithub not available; skipping live commit fetch.
+2025-11-08 17:49:58,591 - INFO - Writing GitHub exploration CSV: /workspace/BK_ASF/data/exploration/github_commits.csv
+2025-11-08 17:49:58,593 - INFO - Wrote developer dictionary: /workspace/BK_ASF/data/exploration/developers.csv
+2025-11-08 17:49:58,594 - INFO - Wrote exploration report: /workspace/BK_ASF/data/exploration/report.json
+2025-11-08 17:49:58,595 - INFO - Updated exploration documentation: /workspace/BK_ASF/docs/DATA_LIST_1.3C.md
+2025-11-08 17:49:58,595 - INFO - Exploration export completed

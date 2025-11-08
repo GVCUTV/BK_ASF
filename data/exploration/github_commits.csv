@@ -1,0 +1,4 @@
+// v1.3C-Data-List
+// file: data/exploration/github_commits.csv
+// DoD: normalized commit metadata linked to issues.
+issue_key,commit_sha,author,commit_date,additions,deletions,files

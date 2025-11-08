@@ -1,0 +1,4 @@
+// v1.3C-Data-List
+// file: data/exploration/developers.csv
+// DoD: merged developer identities across sources.
+developer_id,jira_user,github_user,first_activity,last_activity,issue_count,commit_count
