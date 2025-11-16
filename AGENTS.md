@@ -59,6 +59,7 @@ Build must succeed as-is.
 
 - Use **standard libraries only** unless prompt allows otherwise.  
 - If a non-stdlib lib is needed, pause and request approval.
+- When generating code for simulation, use RVG Python library for random values generation. 
 
 ---
 
