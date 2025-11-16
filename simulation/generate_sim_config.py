@@ -1,4 +1,4 @@
-# v6
+# v7
 # file: simulation/generate_sim_config.py
 """
 Data-only config generator with exhaustive logging.
@@ -20,15 +20,29 @@ Usage:
 from __future__ import print_function
 
 import argparse
+import glob
 import json
 import logging
 import os
-from os import path
+import sys
 from datetime import timedelta, datetime
+from os import path
 
 import numpy as np
 import pandas as pd
-from path_config import PROJECT_ROOT
+
+SCRIPT_DIR = path.dirname(path.abspath(__file__))
+PROJECT_ROOT = path.abspath(path.join(SCRIPT_DIR, ".."))
+if PROJECT_ROOT not in sys.path:
+    sys.path.insert(0, PROJECT_ROOT)
+
+try:
+    from path_config import PROJECT_ROOT as _PROJECT_ROOT
+    PROJECT_ROOT = _PROJECT_ROOT
+except Exception:
+    logging.getLogger(__name__).warning(
+        "Falling back to inferred PROJECT_ROOT=%s; unable to import path_config", PROJECT_ROOT
+    )
 
 
 # --------------------------- logging --------------------------- #
@@ -82,6 +96,52 @@ def _fail(msg, df=None):
         cols = list(df.columns)
         logging.error("Available columns (first 50): %s", cols[:50])
     raise SystemExit(1)
+
+
+# --------------------------- state parameter inputs --------------------------- #
+
+STATE_PARAMETER_DIR = path.join(PROJECT_ROOT, "data", "state_parameters")
+
+
+def _require_file(abs_path, description):
+    if not path.isfile(abs_path):
+        _fail(f"Missing {description}: {abs_path}")
+    logging.info("Validated %s: %s", description, abs_path)
+    return abs_path
+
+
+def collect_state_parameter_paths():
+    if not path.isdir(STATE_PARAMETER_DIR):
+        _fail(f"Missing state parameter directory: {STATE_PARAMETER_DIR}")
+
+    matrix_path = _require_file(path.join(STATE_PARAMETER_DIR, "matrix_P.csv"), "matrix transition file")
+    service_params_path = _require_file(path.join(STATE_PARAMETER_DIR, "service_params.json"), "service parameter json")
+
+    stint_glob = sorted(glob.glob(path.join(STATE_PARAMETER_DIR, "stint_PMF_*.csv")))
+    if not stint_glob:
+        _fail("No stint_PMF_*.csv files found in state parameter directory.")
+    for fpath in stint_glob:
+        _require_file(fpath, f"stint PMF {path.basename(fpath)}")
+
+    rel = lambda p: path.relpath(p, PROJECT_ROOT).replace("\\", "/")
+    state_paths = {
+        "matrix_P": rel(matrix_path),
+        "service_params": rel(service_params_path),
+        "stint_pmfs": [rel(p) for p in stint_glob],
+    }
+    logging.info("Collected state parameter paths: %s", state_paths)
+    return state_paths
+
+
+# --------------------------- reproducibility --------------------------- #
+
+SEED_OVERRIDE_ENV_VAR = "SIMULATION_RANDOM_SEED"
+DEFAULT_RANDOM_SEEDS = {
+    "global": 22015001,
+    "arrivals": 22015002,
+    "service": 22015003,
+    "state": 22015004,
+}
 
 
 # --------------------------- arrivals --------------------------- #
@@ -217,6 +277,7 @@ def estimate_feedback(df, created_col, start_str, end_str):
 
 DEV_ID_CANDS  = ["dev_user","author_login","pr_author_login","fields.assignee","assignee","developer"]
 TEST_ID_CANDS = ["tester","ci_runner","ci_agent","jenkins_node","build_agent","runner_name","runner_id","qa_user","testing_user"]
+TESTER_HEURISTIC_RATIO = 0.5
 
 def _count_distinct(series):
     s = series.dropna().astype(str).str.strip()
@@ -246,7 +307,15 @@ def infer_capacity(df, created_col, start_str, end_str):
             cnt = _count_distinct(wdf[c]); test_counts.append((c, cnt))
             logging.info("TEST id column %-20s -> distinct: %d", c, cnt)
     if not test_counts:
-        _fail("Cannot infer N_TESTERS: add one of %s to ETL (e.g., via 8_enrich_feedback_cols.py)." % TEST_ID_CANDS, wdf)
+        n_testers = max(1, int(round(max(1.0, n_devs * TESTER_HEURISTIC_RATIO))))
+        logging.warning(
+            "Cannot infer N_TESTERS from ETL columns %s; defaulting to heuristic ratio %.2f -> %d testers.",
+            TEST_ID_CANDS,
+            TESTER_HEURISTIC_RATIO,
+            n_testers,
+        )
+        logging.info("Selected DEV column='%s' -> N_DEVS=%d | TEST column='%s' -> N_TESTERS=%d", dev_col, n_devs, "heuristic_ratio", n_testers)
+        return n_devs, n_testers, dev_col, "heuristic_ratio"
     test_counts.sort(key=lambda x: x[1], reverse=True)
     test_col, n_testers = test_counts[0]
     if n_testers <= 0:
@@ -304,7 +373,7 @@ def pick_stage(fits, candidates):
 
 # --------------------------- template --------------------------- #
 
-CONFIG_TEMPLATE = """# v2
+CONFIG_TEMPLATE = """# v3
 # file: simulation/config.py
 
 \"\"\"
@@ -347,6 +416,16 @@ SERVICE_TIME_PARAMS = {{
         "params": {test_params}
     }}
 }}
+
+# --------------------------- State parameter inputs --------------------------- #
+STATE_PARAMETER_PATHS = {state_paths}
+
+# --------------------------- Random seeds --------------------------- #
+GLOBAL_RANDOM_SEED = {global_seed}
+SEED_OVERRIDE_ENV_VAR = "{seed_env_var}"
+ARRIVAL_STREAM_SEED = {arrival_seed}
+SERVICE_TIME_STREAM_SEED = {service_seed}
+STATE_TRANSITION_STREAM_SEED = {state_seed}
 """
 
 
@@ -384,6 +463,7 @@ def main():
     fits = read_fit_summary(args.fit_csv)
     dev_fit = pick_stage(fits, ["dev_review","development","review","dev"])
     test_fit = pick_stage(fits, ["testing","qa","ci","test"])
+    state_paths = collect_state_parameter_paths()
 
     # 5) render
     out_dir = path.dirname(args.config_out)
@@ -398,6 +478,12 @@ def main():
         p_dev=p_dev, p_test=p_test,
         dev_dist=dev_fit[0], dev_params=json.dumps(dev_fit[1]),
         test_dist=test_fit[0], test_params=json.dumps(test_fit[1]),
+        state_paths=json.dumps(state_paths, indent=4, sort_keys=True),
+        global_seed=DEFAULT_RANDOM_SEEDS["global"],
+        seed_env_var=SEED_OVERRIDE_ENV_VAR,
+        arrival_seed=DEFAULT_RANDOM_SEEDS["arrivals"],
+        service_seed=DEFAULT_RANDOM_SEEDS["service"],
+        state_seed=DEFAULT_RANDOM_SEEDS["state"],
     )
     with open(args.config_out, "w") as f:
         f.write(content)
