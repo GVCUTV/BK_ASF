@@ -1,4 +1,4 @@
-// v2
+// v3
 // project_documentation.md
 # ASF Project
 
@@ -65,7 +65,7 @@ Ogni ingresso in stato attivo prevede l’estrazione di una durata (stint) che d
 
 ### 4.2 Code operative (BACKLOG / DEV / REV / TEST / DONE)
 
-Le issue approvate entrano nella **BACKLOG queue**, dove attendono di essere prese da un volontario. Quando un agente passa a **DEV**, estrae il prossimo ticket dalla relativa coda e lo lavora fino alla consegna; il completamento sposta il ticket in **REV** per la peer review. Dopo l’approvazione, il lavoro passa in **TEST** per le verifiche di integrazione. Se i test hanno esito negativo, il ticket ritorna a **DEV** con feedback esplicito; se positivi, l’item esce dal sistema nella coda **DONE**, che rappresenta i rilasci effettivi.
+Le issue approvate entrano nella **BACKLOG queue**, dove attendono di essere prese da un volontario. Quando un agente passa a **DEV**, estrae il prossimo ticket dalla relativa coda e lo lavora fino alla consegna; il completamento sposta il ticket in **REV** per la peer review. Dopo l’approvazione, il lavoro passa in **TEST** per le verifiche di integrazione. Se i test hanno esito negativo, il ticket ritorna a **DEV** con feedback esplicito; se positivi, l’item esce dal sistema nella coda **DONE**, che rappresenta i rilasci effettivi. La corrispondenza puntuale tra stati Jira, code operative e stati semi-Markov degli sviluppatori è documentata in [`docs/JIRA_WORKFLOW_MAPPING_2.2A.md`](JIRA_WORKFLOW_MAPPING_2.2A.md) e garantisce che tutte le pipeline (ETL, simulazione, note analitiche) adottino la stessa tassonomia.
 
 ### 4.3 Diagramma di riferimento
 
