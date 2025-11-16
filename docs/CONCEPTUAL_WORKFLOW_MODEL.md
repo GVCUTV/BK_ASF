@@ -1,4 +1,4 @@
-// v1.3
+// v1.4
 // CONCEPTUAL_WORKFLOW_MODEL.md
 # PMCSN ASF — Conceptual Workflow Model
 *(Aligned with the semi-Markov free-choice developer policy and `GPT_INSTRUCTIONS.md` conventions)*
@@ -44,6 +44,14 @@ $$
 
 This policy allows agents to **self-select** work focus periods, reflecting realistic autonomy in collaborative teams.
 
+#### 2.2.1 Developer state semantics, stints, and overlap logic
+- **OFF** — volunteer not logged in or between sessions; OFF absorbs calendar gaps so that the effective daily contribution caps at the agreed **≈7.5 net hours of distinct effort** highlighted in [`docs/schedule.md`](schedule.md).
+- **DEV** — implementation focus performing code additions or modifications; ticket service times follow \(T_{DEV}\) and each stint contributes at most the net-availability budget once, regardless of how many developers pair-program.
+- **REV** — code-review focus handling peer validation and comment resolution.
+- **TEST** — integration and regression validation before DONE.
+
+Stint distributions \(f_i(ℓ)\) match the empirical exports described in [`docs/DERIVATIONS_3.2A.md`](DERIVATIONS_3.2A.md) and persisted alongside \(P\) in `data/state_parameters/matrix_P.csv`. The overlap-weighting logic referenced in [`docs/schedule.md`](schedule.md) and reiterated in [`docs/Schedule_Prompts.md`](Schedule_Prompts.md) ensures concurrent contributions to a single ticket are churn-weighted so that total net availability never exceeds the ≈7.5-hour planning envelope. This same assumption feeds the analytical capacity checks in [`docs/analytical_model.md`](analytical_model.md) and the metric definitions in [`docs/key_metrics_3.2C.md`](key_metrics_3.2C.md), keeping the developer policy consistent across documents.
+
 ---
 
 ### 2.3 Queueing Interpretation
@@ -78,6 +86,12 @@ Each stage’s throughput and utilization depend dynamically on the number of ac
    - Tasks may return to previous queues (e.g., DEV after failed TEST) or exit through DONE.
 6. **Metrics Update**
    - WIP, throughput, and utilization recorded at each event.
+
+### 3.1 Documentation Cross-References
+- [`docs/DERIVATIONS_3.2A.md`](DERIVATIONS_3.2A.md) — proves the empirical extraction of \(P\), stint pmfs, and service distributions referenced above.
+- [`docs/analytical_equations_3.2A.md`](analytical_equations_3.2A.md) — centralizes the algebraic balance relations that consume this conceptual layout.
+- [`docs/analytical_model.md`](analytical_model.md) — applies the conceptual queues and developer policy to the broader analytical pipeline before simulation.
+- [`docs/key_metrics_3.2C.md`](key_metrics_3.2C.md) — lists the throughput, utilization, and availability indicators whose symbols map back to this workflow model.
 
 This logic underlies both the **analytical formulation (Section 3.2)** and the **simulation implementation (Section 4)**.
 
@@ -125,7 +139,7 @@ This logic underlies both the **analytical formulation (Section 3.2)** and the *
 
 ## 7 ▪ Definition of Done (DoD)
 
-1. Document versioned (`// v1.3`).
+1. Document versioned (`// v1.4`).
 2. Describes all four developer states and the BACKLOG → DEV → REV → TEST → DONE queue structure.
 3. Explicitly includes semi-Markov policy and stochastic stint concept.
 4. Figure briefs ready for later diagram generation.
@@ -134,5 +148,5 @@ This logic underlies both the **analytical formulation (Section 3.2)** and the *
 
 ---
 
-**End of Document — Conceptual Workflow Model (v1.3)**
+**End of Document — Conceptual Workflow Model (v1.4)**
 _Compliant with PMCSN ASF project conventions and `GPT_INSTRUCTIONS.md`._

@@ -1,9 +1,17 @@
-// v3.2A-001
+// v3.2A-002
 // file: docs/analytical_equations_3.2A.md
 # Meeting 3.2A — Unified Analytical Equations
 
 ## 1 ▪ Introduction
 This document centralizes every equation and parameter required by the semi-Markov developer submodel and the associated queueing network. All numerical inputs are sourced from the ETL artifacts already produced for stage 3.2A (`data/state_parameters/matrix_P.csv` and `data/state_parameters/service_params.json`) and the descriptive notes in [`docs/DERIVATIONS_3.2A.md`](DERIVATIONS_3.2A.md). No new data are generated here; the goal is to expose the existing matrices, routing rules, and derived quantities in a single, human-readable reference.
+
+### 1.1 Developer states, stint distributions, and overlap logic
+The developer-state semantics mirror the conceptual workflow in [`docs/CONCEPTUAL_WORKFLOW_MODEL.md`](CONCEPTUAL_WORKFLOW_MODEL.md):
+
+- **OFF** — slack time between focus periods so that each volunteer’s **≈7.5 net productive hours** per planning window (documented in [`docs/schedule.md`](schedule.md)) are not double-counted.
+- **DEV / REV / TEST** — active queues whose service laws \(T_s\) are documented in `data/state_parameters/service_params.json` and whose stint pmfs \(f_i(\ell)\) originate from the ETL exports summarized in [`docs/DERIVATIONS_3.2A.md`](DERIVATIONS_3.2A.md).
+
+Overlap logic follows the churn-weighted accounting described in [`docs/Schedule_Prompts.md`](Schedule_Prompts.md), meaning simultaneous work on a single ticket contributes only one unit of net availability. This constraint ensures the \(c_s\) terms derived from \(\pi\) and \(f_i(\ell)\) tie directly to the capacity assumptions later enforced in [`docs/analytical_model.md`](analytical_model.md) and the availability metrics in [`docs/key_metrics_3.2C.md`](key_metrics_3.2C.md).
 
 ## 2 ▪ Symbols & Notation
 - \(\mathcal{S} = \{\text{OFF}, \text{DEV}, \text{REV}, \text{TEST}\}\): developer states.
@@ -133,3 +141,6 @@ and the overall mean cycle length is \(\sum_{i \in \mathcal{S}} \tau_i\). These 
 - `data/state_parameters/service_params.json` — canonical source for \(\mu^{LN}_s, \sigma^{LN}_s\) and sample counts.
 - `simulation/state_equations.py` — code that generates the stint pmfs and validates the inputs summarized here.
 - [`docs/DERIVATIONS_3.2A.md`](DERIVATIONS_3.2A.md) — provenance details for the smoothing, fitting, and validation steps used to construct these parameters.
+- [`docs/CONCEPTUAL_WORKFLOW_MODEL.md`](CONCEPTUAL_WORKFLOW_MODEL.md) — defines the workflow semantics, queue order, and developer-state intent that these equations formalize.
+- [`docs/analytical_model.md`](analytical_model.md) — embeds the equations into the broader analytical pipeline before simulation.
+- [`docs/key_metrics_3.2C.md`](key_metrics_3.2C.md) — lists the reporting indicators computed from \(\lambda, \mu, P, \pi\), and \(c_s\).
