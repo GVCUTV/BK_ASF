@@ -1,9 +1,9 @@
-// v3.1-001
+// v3.1-002
 // file: docs/analytical_model.md
 # PMCSN ASF — Analytical Model (Stage 3.1)
 
 ## 1 ▪ Introduction
-This note defines the analytical representation that bridges the conceptual workflow in [`docs/CONCEPTUAL_WORKFLOW_MODEL.md`](CONCEPTUAL_WORKFLOW_MODEL.md) and the formal derivations slated for [`docs/DERIVATIONS_3.2A.md`](DERIVATIONS_3.2A.md). It states the queueing network, developer-state submodel, and high-level balance equations that must stay consistent with the Jira alignment in [`docs/JIRA_WORKFLOW_MAPPING_2.2A.md`](JIRA_WORKFLOW_MAPPING_2.2A.md) and the dataset expectations listed in [`docs/DATA_LIST_1.3C.md`](DATA_LIST_1.3C.md). No derivations are provided here; Section 3.2A remains the canonical source for algebraic proofs and parameter estimation.
+This note defines the analytical representation that bridges the conceptual workflow in [`docs/CONCEPTUAL_WORKFLOW_MODEL.md`](CONCEPTUAL_WORKFLOW_MODEL.md) and the unified equation set recorded in [`docs/analytical_equations_3.2A.md`](analytical_equations_3.2A.md). It states the queueing network, developer-state submodel, and high-level balance equations that must stay consistent with the Jira alignment in [`docs/JIRA_WORKFLOW_MAPPING_2.2A.md`](JIRA_WORKFLOW_MAPPING_2.2A.md) and the dataset expectations listed in [`docs/DATA_LIST_1.3C.md`](DATA_LIST_1.3C.md). No derivations are provided here; Section 3.2A remains the canonical source for algebraic proofs and parameter estimation via the aforementioned equation compendium.
 
 ## 2 ▪ Queueing Network Description
 - **Topology:** Serial-feedback network `BACKLOG → DEV → REV → TEST → DONE` with a feedback arc from REV and TEST to DEV for rework, mirroring the Jira transitions (`Reopened`, `Patch Available → In Progress`) documented in the workflow mapping.
@@ -18,7 +18,7 @@ This note defines the analytical representation that bridges the conceptual work
 
 ## 3 ▪ Developer Process Overview
 - **States:** \(\mathcal{S} = \{\text{OFF}, \text{DEV}, \text{REV}, \text{TEST}\}\) exactly as in the conceptual model.
-- **Policy:** Developers follow a semi-Markov process. Upon entering state \(i\), the developer samples a stint length \(L_i\) from the empirical pmf \(f_i(\ell)\) (fitted per `DERIVATIONS_3.2A`).
+- **Policy:** Developers follow a semi-Markov process. Upon entering state \(i\), the developer samples a stint length \(L_i\) from the empirical pmf \(f_i(\ell)\) cataloged in [`docs/analytical_equations_3.2A.md`](analytical_equations_3.2A.md).
 - **Service coupling:** During a stint, the developer repeatedly pulls tickets from the queue matching their state until the stint counter hits zero or the queue empties.
 - **Transitions:** When the stint completes, the next state \(j\) is drawn according to transition matrix \(P_{ij}\). OFF serves as the recovery/idle state that enables future arrivals to be absorbed without overloading the active queues.
 
@@ -29,7 +29,7 @@ This note defines the analytical representation that bridges the conceptual work
 3. **Independence from service:** Arrivals are independent of current queue lengths and developer states.
 
 ### 4.2 Service Processes
-1. **State-conditioned service times:** Each active queue \(s \in \{\text{DEV}, \text{REV}, \text{TEST}\}\) has service rate \(\mu_s\) derived from the log-normal fits summarized in `DERIVATIONS_3.2A`.
+1. **State-conditioned service times:** Each active queue \(s \in \{\text{DEV}, \text{REV}, \text{TEST}\}\) has service rate \(\mu_s\) derived from the log-normal fits summarized in [`docs/analytical_equations_3.2A.md`](analytical_equations_3.2A.md).
 2. **Developer homogeneity inside a state:** All developers in the same state share the same \(\mu_s\) in the analytical layer (simulation may introduce heterogeneity later).
 3. **Single-ticket focus:** A developer services one ticket at a time; multitasking is ignored.
 
@@ -50,9 +50,9 @@ This note defines the analytical representation that bridges the conceptual work
 | Symbol | Meaning | Source | Notes |
 | --- | --- | --- | --- |
 | \(\lambda_{ext}\) | Average external arrival rate into BACKLOG | Jira creation timestamps | May be segmented by release window. |
-| \(\mu_{DEV}, \mu_{REV}, \mu_{TEST}\) | Service rates per active queue | Service fits in `DERIVATIONS_3.2A` | Reciprocal of mean service time. |
-| \(P_{ij}\) | Semi-Markov transition matrix between developer states | `DERIVATIONS_3.2A` | Rows follow state order OFF, DEV, REV, TEST. |
-| \(f_i(\ell)\) | Stint-length pmf for state \(i\) | `DERIVATIONS_3.2A` exports | Supports \(\ell \in \mathbb{R}^+\). |
+| \(\mu_{DEV}, \mu_{REV}, \mu_{TEST}\) | Service rates per active queue | [`docs/analytical_equations_3.2A.md`](analytical_equations_3.2A.md) | Reciprocal of mean service time. |
+| \(P_{ij}\) | Semi-Markov transition matrix between developer states | [`docs/analytical_equations_3.2A.md`](analytical_equations_3.2A.md) | Rows follow state order OFF, DEV, REV, TEST. |
+| \(f_i(\ell)\) | Stint-length pmf for state \(i\) | [`docs/analytical_equations_3.2A.md`](analytical_equations_3.2A.md) exports | Supports \(\ell \in \mathbb{R}^+\). |
 | \(\pi\) | Steady-state distribution over developer states | Computed via \(\pi P = \pi\) | Provides expected active servers per queue. |
 | \(Q_s\) | Queue length at stage \(s\) | Analytical state vector | Aligns with `BACKLOG, DEV, REV, TEST`. |
 | \(\rho_s\) | Utilization of queue \(s\) | \(\rho_s = \lambda_s / (\mu_s \, c_s)\) | \(c_s\) = number of developers in state \(s\). |
@@ -67,7 +67,7 @@ This note defines the analytical representation that bridges the conceptual work
 ## 7 ▪ Consistency Notes
 - State labels and queue names mirror `JIRA_WORKFLOW_MAPPING_2.2A.md`, so future ETL refreshes can plug in without schema changes.
 - All parameters referenced here correspond to the artifacts listed in `DATA_LIST_1.3C.md`, guaranteeing reproducibility.
-- Derivations of \(P\), \(f_i\), \(\mu_s\), and steady-state solutions will be supplied in `DERIVATIONS_3.2A.md`; this document only states the structure and assumptions required to set up those derivations.
+- Derivations of \(P\), \(f_i\), \(\mu_s\), and steady-state solutions are consolidated in [`docs/analytical_equations_3.2A.md`](analytical_equations_3.2A.md); this document only states the structure and assumptions required to set up those derivations.
 
 ---
 **End of Document — Analytical Model 3.1**
