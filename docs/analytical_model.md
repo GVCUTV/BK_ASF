@@ -1,9 +1,9 @@
-// v3.1-002
+// v3.1-003
 // file: docs/analytical_model.md
 # PMCSN ASF — Analytical Model (Stage 3.1)
 
 ## 1 ▪ Introduction
-This note defines the analytical representation that bridges the conceptual workflow in [`docs/CONCEPTUAL_WORKFLOW_MODEL.md`](CONCEPTUAL_WORKFLOW_MODEL.md) and the unified equation set recorded in [`docs/analytical_equations_3.2A.md`](analytical_equations_3.2A.md). It states the queueing network, developer-state submodel, and high-level balance equations that must stay consistent with the Jira alignment in [`docs/JIRA_WORKFLOW_MAPPING_2.2A.md`](JIRA_WORKFLOW_MAPPING_2.2A.md) and the dataset expectations listed in [`docs/DATA_LIST_1.3C.md`](DATA_LIST_1.3C.md). No derivations are provided here; Section 3.2A remains the canonical source for algebraic proofs and parameter estimation via the aforementioned equation compendium.
+This note defines the analytical representation that bridges the conceptual workflow in [`docs/CONCEPTUAL_WORKFLOW_MODEL.md`](CONCEPTUAL_WORKFLOW_MODEL.md) and the unified equation set recorded in [`docs/analytical_equations_3.2A.md`](analytical_equations_3.2A.md). It states the queueing network, developer-state submodel, and high-level balance equations that must stay consistent with the Jira alignment in [`docs/JIRA_WORKFLOW_MAPPING_2.2A.md`](JIRA_WORKFLOW_MAPPING_2.2A.md) and the dataset expectations listed in [`docs/DATA_LIST_1.3C.md`](DATA_LIST_1.3C.md). Definitions of throughput, utilization, queue lengths, and related indicators referenced throughout this note are centralized in [`docs/key_metrics_3.2C.md`](key_metrics_3.2C.md). No derivations are provided here; Section 3.2A remains the canonical source for algebraic proofs and parameter estimation via the aforementioned equation compendium.
 
 ## 2 ▪ Queueing Network Description
 - **Topology:** Serial-feedback network `BACKLOG → DEV → REV → TEST → DONE` with a feedback arc from REV and TEST to DEV for rework, mirroring the Jira transitions (`Reopened`, `Patch Available → In Progress`) documented in the workflow mapping.
