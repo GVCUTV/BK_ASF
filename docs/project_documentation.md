@@ -1,4 +1,4 @@
-// v4
+// v5
 // project_documentation.md
 # ASF Project
 
@@ -46,7 +46,7 @@ La nostra analisi si concentra sull'issue tracker Jira e sul repository GitHub d
 
 L'ambito è limitato alla storia e ai dati del progetto BookKeeper (non faremo confronti con altri progetti, se non come contesto). Probabilmente esamineremo un periodo significativo della storia del progetto (per esempio, gli ultimi anni di attività di sviluppo) per avere dati sufficienti sui cicli di vita delle funzionalità. Se disponibile e necessario, potremo incorporare altre fonti, come le discussioni nelle mailing list o i documenti di progettazione per un contesto qualitativo (ad esempio, per capire perché si sono verificati determinati ritardi), ma l'analisi principale sarà basata sui dati di Jira e GitHub. Questa analisi selettiva mantiene il progetto gestibile e assicura che il nostro studio rimanga fondato su prove derivate dagli artefatti di sviluppo del progetto.
 
-Una descrizione completa degli output di esplorazione dei dati e delle statistiche di coerenza è disponibile nel documento [DATA_LIST_1.3C](DATA_LIST_1.3C.md).
+Una descrizione completa degli output di esplorazione dei dati e delle statistiche di coerenza è disponibile nel documento [DATA_LIST_1.3C](DATA_LIST_1.3C.md). La pipeline ETL stabile, i percorsi degli snapshot CSV e le statistiche preliminari che alimentano i modelli sono raccolti in [ETL_OVERVIEW_2.2C](ETL_OVERVIEW_2.2C.md).
 
 ## 4. Modello concettuale
 
