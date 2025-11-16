@@ -1,4 +1,4 @@
-# v2
+# v3
 # file: simulation/stats.py
 
 """
@@ -7,18 +7,21 @@ Logs queue waits, cycle counts, time in system, feedback cycles, and outputs det
 All logs go to file and stdout.
 """
 
-import logging
 import csv
+import logging
 import os
 
 class StatsCollector:
     def __init__(self, state):
         self.state = state
         self.ticket_stats = {}
-        os.makedirs("output", exist_ok=True)
-        os.makedirs("logs", exist_ok=True)
-        self.csvfile = "output/ticket_stats.csv"
-        self.logfile = "logs/simulation_stats.log"
+        base_dir = os.path.dirname(__file__)
+        self.output_dir = os.path.join(base_dir, "output")
+        self.logs_dir = os.path.join(base_dir, "logs")
+        os.makedirs(self.output_dir, exist_ok=True)
+        os.makedirs(self.logs_dir, exist_ok=True)
+        self.csvfile = os.path.join(self.output_dir, "ticket_stats.csv")
+        self.logfile = os.path.join(self.logs_dir, "simulation_stats.log")
 
         # Setup a dedicated file handler for stats logging
         fh = logging.FileHandler(self.logfile, mode='w')
@@ -34,6 +37,8 @@ class StatsCollector:
             'queue_waits': {}, 'cycles': {}, 'final_time': None,
             'arrival_time': None, 'closed_time': None
         })
+        if stats['arrival_time'] is None and ticket_id in self.state.tickets:
+            stats['arrival_time'] = self.state.tickets[ticket_id].arrival_time
         if stage not in stats['queue_waits']:
             stats['queue_waits'][stage] = []
         stats['queue_waits'][stage].append(wait_time)
