@@ -13,133 +13,191 @@ All time references assume 5 h meetings with ≈ 7.5 net hours of distinct progr
 - **1.1 Docs / ASF / BK overview** ✅ Done  
   • Reviewed and documented repository structure (`README.md`, `AGENTS.md`, `GPT_INSTRUCTIONS.md`).  
   • Verified project requirements in `docs/PROJECT_REQUIREMENTS.md`.  
-  • Outcome: project context and AI agent roles understood by team.
+  • Outcome: project context and AI agent roles understood by team.  
+  • Impact (Markov policy): Minor doc update.  
+  • Markov reasoning: Intro/overview/diagrams must mention semi-Markov free-choice policy and developer state machine.
 
 - **1.2 Conceptual workflow model** ✅ Done  
   • Created high-level process diagrams (Draw.io, exported as images).  
   • Mapped ASF phases to BK foundation tasks.  
-  • Outcome: visual shared understanding of workflow.
+  • Outcome: visual shared understanding of workflow.  
+  • Impact (Markov policy): Minor doc update.  
+  • Markov reasoning: Intro/overview/diagrams must mention semi-Markov free-choice policy and developer state machine.
 
 - **1.3 A (Intro & objectives)** ⚠️ Partial  
   • Intro present in `docs/project_documentation.md` but needs clearer problem statement and goals.  
-  • Next: refine text for clarity and academic consistency.
+  • Next: refine text for clarity and academic consistency.  
+  • Impact (Markov policy): Minor doc update.  
+  • Markov reasoning: Intro/overview/diagrams must mention semi-Markov free-choice policy and developer state machine.
 
 - **1.3 B (First diagrams)** ✅ Done  
-  • Exported initial data and architecture diagrams for presentation slides.
+  • Exported initial data and architecture diagrams for presentation slides.  
+  • Impact (Markov policy): Minor doc update.  
+  • Markov reasoning: Intro/overview/diagrams must mention semi-Markov free-choice policy and developer state machine.
 
 - **1.3 C (Data list + JIRA/GitHub exploration)** ✅ Done  
   • Ran ETL queries and validated CSV outputs.  
-  • Plotted sample metrics to confirm data integrity.
+  • Plotted sample metrics to confirm data integrity.  
+  • Impact (Markov policy): Minor doc update.  
+  • Markov reasoning: Intro/overview/diagrams must mention semi-Markov free-choice policy and developer state machine.
 
 ---
 
 ## Meeting 2 — Conceptual Model & Data Mapping
 - **2.1 Finalize conceptual model & flows** ⚠️ Partial  
   • Logical model complete but requires formal diagram finalization.  
-  • Action: lock version and export as PDF/SVG for report.
+  • Action: lock version and export as PDF/SVG for report.  
+  • Impact (Markov policy): Moderate — data prep adjustments.  
+  • Markov reasoning: Ensure ETL emits sequences at ticket completion; enable stint-length extraction; no change to overlap weighting.
 
 - **2.2 A (Mapping JIRA ↔ real workflow)** ⚠️ Partial  
   • Identified main JIRA events and their real-world counterparts.  
-  • Need markdown explaining how each JIRA status maps to queue stages and developer states.
+  • Need markdown explaining how each JIRA status maps to queue stages and developer states.  
+  • Impact (Markov policy): Moderate — data prep adjustments.  
+  • Markov reasoning: Ensure ETL emits sequences at ticket completion; enable stint-length extraction; no change to overlap weighting.
 
 - **2.2 B (Flow charts for report)** ✅ Done  
-  • Produced final charts integrated into documentation.
+  • Produced final charts integrated into documentation.  
+  • Impact (Markov policy): Moderate — data prep adjustments.  
+  • Markov reasoning: Ensure ETL emits sequences at ticket completion; enable stint-length extraction; no change to overlap weighting.
 
 - **2.2 C (Preliminary data collection & stats)** ✅ Done  
   • Validated ETL outputs and computed basic aggregations.  
-  • Outcome: data pipeline stable and repeatable.
+  • Outcome: data pipeline stable and repeatable.  
+  • Impact (Markov policy): Moderate — measurement.  
+  • Markov reasoning: Service-time laws unchanged, but KPIs must track per-state utilization under dynamic staffing; add stint diagnostics.
 
 ---
 
 ## Meeting 3 — Data Analysis & Analytical Model
 - **3.1 Analytical model & assumptions** ⚠️ Partial  
   • Defined queue network structure but formal markdown missing.  
-  • Next: create `docs/analytical_model.md` with equations and assumptions.
+  • Next: create `docs/analytical_model.md` with equations and assumptions.  
+  • Impact (Markov policy): Minor doc update.  
+  • Markov reasoning: Review for terminology consistency and references to the new policy.
 
 - **3.2 A (Equations, state matrix, routing params)** ❌ Missing / Partial  
   • Equations not yet centralized; ETL contains raw parameters only.  
-  • Action: compile derived parameters and state transition probabilities.
+  • Action: compile derived parameters and state transition probabilities.  
+  • Impact (Markov policy): Major — new analytical layer.  
+  • Markov reasoning: Define Markov transition matrix P and stint PMFs; centralize equations and outputs; affects simulator inputs.
 
 - **3.2 B (Parameter estimation)** ✅ Done  
   • Estimation scripts and outputs verified.  
-  • Outcome: working statistical baselines for simulation.
+  • Outcome: working statistical baselines for simulation.  
+  • Impact (Markov policy): Moderate — update estimation.  
+  • Markov reasoning: Re-estimate P and stint PMFs from data; ensure semi-Markov (not geometric) stints; add smoothing and stationarity checks.
 
 - **3.2 C (Key metrics list)** ⚠️ Partial  
   • Metrics (throughput, utilization, queue length) computed but not documented centrally.  
-  • Next: write section listing definitions and symbols.
+  • Next: write section listing definitions and symbols.  
+  • Impact (Markov policy): Minor doc update.  
+  • Markov reasoning: Review for terminology consistency and references to the new policy.
 
 - **3.2 D (Team workflow simulation model)** ✅ Done  
   • Developed analytical model for team workflow: semi-Markov developer process with states OFF/DEV/REV/TEST.  
   • Introduced stint distribution (per-state jobs count) and overlap management through churn-weighted effort allocation.  
-  • Outcome: analytical foundation for developer availability and capacity estimation (~7.5 net h).
+  • Outcome: analytical foundation for developer availability and capacity estimation (~7.5 net h).  
+  • Impact (Markov policy): Major — DES architecture update.  
+  • Markov reasoning: Agents change state via Markov chain; resource capacities equal #agents per state; implement stint counters and blocking when queues empty.
 
 ---
 
 ## Meeting 4 — Simulation Architecture & Coding
 - **4.1 Simulation architecture (events/states)** ✅ Done  
   • Modular design of event system and state handlers completed.  
-  • Outcome: base simulation runnable end-to-end.
+  • Outcome: base simulation runnable end-to-end.  
+  • Impact (Markov policy): Major — event logic and resources.  
+  • Markov reasoning: Event on completion triggers state transition; dynamic resources per state; explicit queue-server mapping.
 
 - **4.2 A (Setup repo/code + input base)** ✅ Done  
-  • Initialized simulation folder with logging and config templates.
+  • Initialized simulation folder with logging and config templates.  
+  • Impact (Markov policy): Moderate — inputs.  
+  • Markov reasoning: Config must load P and stint PMFs; manage seed control; ensure reproducible draws for transitions and stint lengths.
 
 - **4.2 B (Arrivals, transitions, feedback loop)** ✅ Done  
   • Implemented core logic for job arrivals and feedback routing.  
-  • Outcome: dynamic flow between queues verified.
+  • Outcome: dynamic flow between queues verified.  
+  • Impact (Markov policy): Major — routing & flow.  
+  • Markov reasoning: Replace deterministic routing with state-driven capacity; define backlog selection when developer chooses next state; handle empty-stage fallback.
 
 - **4.2 C (Service logic, stats, output)** ✅ Done  
   • Finalized service-time handling and statistical outputs.  
-  • Logs and CSV results validated.
+  • Logs and CSV results validated.  
+  • Impact (Markov policy): Moderate — measurement.  
+  • Markov reasoning: Service-time laws unchanged, but KPIs must track per-state utilization under dynamic staffing; add stint diagnostics.
 
 - **4.3 A (Developer-state & overlap logic implementation)** ✅ Done  
   • Implemented churn-weighted allocator and semi-Markov developer state machine.  
   • Integrated calibration hooks for weights (c_add, c_mod, c_del = 1.0, 1.0, 0.5).  
-  • Validated synthetic runs showing correct allocation behavior (~7.5 net h).
+  • Validated synthetic runs showing correct allocation behavior (~7.5 net h).  
+  • Impact (Markov policy): Major — agent policy layer.  
+  • Markov reasoning: Implement semi-Markov policy: on entry draw stint length; decrement per completion; then sample next state via P.
 
 ---
 
 ## Meeting 5 — Verification & Debug
 - **5.1 E2E integrated run** ✅ Done  
-  • Verified that pipeline runs from data input to output logs without errors.
+  • Verified that pipeline runs from data input to output logs without errors.  
+  • Impact (Markov policy): Moderate — integration test.  
+  • Markov reasoning: Scenario configs must include P/PMFs hashes; golden outputs need refresh.
 
 - **5.2 A (Little’s Law, utilization checks)** ⚠️ Partial  
   • Preliminary calculations performed but missing formal validation markdown.  
-  • Next: compute L = λW for each queue and compare to simulation.
+  • Next: compute L = λW for each queue and compare to simulation.  
+  • Impact (Markov policy): Minor doc update.  
+  • Markov reasoning: Review for terminology consistency and references to the new policy.
 
 - **5.2 B (Parameter sweeps)** ⚠️ Partial  
   • Config generator exists but few experiments run.  
-  • Action: automate sweep execution and store outputs.
+  • Action: automate sweep execution and store outputs.  
+  • Impact (Markov policy): Minor doc update.  
+  • Markov reasoning: Review for terminology consistency and references to the new policy.
 
 - **5.2 C (Debug / validation write-up)** ⚠️ Partial  
   • Logs collected but interpretation pending.  
-  • Next: create `docs/validation.md` summarizing checks and results.
+  • Next: create `docs/validation.md` summarizing checks and results.  
+  • Impact (Markov policy): Minor doc update.  
+  • Markov reasoning: Review for terminology consistency and references to the new policy.
 
 ---
 
 ## Meeting 6 — Experiments & Results
 - **6.1 Scenarios & variables plan** ⚠️ Partial  
-  • Scenarios identified informally; need structured `docs/scenarios.md` with parameter sets.
+  • Scenarios identified informally; need structured `docs/scenarios.md` with parameter sets.  
+  • Impact (Markov policy): Moderate — experiment design refresh.  
+  • Markov reasoning: Add factors for P variants, stint-PMF perturbations, and policy constraints; update batch-run scripts.
 
 - **6.2 A (Transient / steady-state runs)** ⚠️ Partial  
   • Simulator supports both modes but outputs not labeled clearly.  
-  • Action: tag each run type and compare statistics.
+  • Action: tag each run type and compare statistics.  
+  • Impact (Markov policy): Moderate — experiment design refresh.  
+  • Markov reasoning: Add factors for P variants, stint-PMF perturbations, and policy constraints; update batch-run scripts.
 
 - **6.2 B (Graphs & tables)** ⚠️ Partial  
   • ETL produces rich CSV data; few visuals generated.  
-  • Next: create graphs summarizing performance metrics.
+  • Next: create graphs summarizing performance metrics.  
+  • Impact (Markov policy): Moderate — experiment design refresh.  
+  • Markov reasoning: Add factors for P variants, stint-PMF perturbations, and policy constraints; update batch-run scripts.
 
 - **6.2 C (Experiments write-up)** ❌ Missing  
-  • Need markdown document summarizing experiment design, findings, and interpretation.
+  • Need markdown document summarizing experiment design, findings, and interpretation.  
+  • Impact (Markov policy): Moderate — experiment design refresh.  
+  • Markov reasoning: Add factors for P variants, stint-PMF perturbations, and policy constraints; update batch-run scripts.
 
 ---
 
 ## Meeting 7 — Improvements & Optimization
 - **7.1 Select improvement** ❌ Missing  
-  • Decide which process optimization to test (e.g., adaptive routing or dynamic stints).
+  • Decide which process optimization to test (e.g., adaptive routing or dynamic stints).  
+  • Impact (Markov policy): Moderate — improvement selection changes.  
+  • Markov reasoning: Optimization targets may shift (e.g., balancing P to reduce bottlenecks); add sensitivity analysis.
 
 - **7.2 Implement improvement & compare** ❌ Missing  
   • Code and evaluate the chosen improvement vs. baseline runs.  
-  • Generate comparison plots and summaries.
+  • Generate comparison plots and summaries.  
+  • Impact (Markov policy): Moderate — improvement selection changes.  
+  • Markov reasoning: Optimization targets may shift (e.g., balancing P to reduce bottlenecks); add sensitivity analysis.
 
 - **7.x Interpretation & prep for final** ⚠️ Partial  
   • Preliminary interpretation exists; needs final synthesis for report.
@@ -149,22 +207,28 @@ All time references assume 5 h meetings with ≈ 7.5 net hours of distinct progr
 ## Meeting 8 — Final Deliverables
 - **8.1 Assemble final report** ⚠️ Partial  
   • Main report (`docs/project_documentation.md`) needs integration of analytical and simulation sections.  
-  • Add conclusions and future work.
+  • Add conclusions and future work.  
+  • Impact (Markov policy): Minor doc update.  
+  • Markov reasoning: Slides/report must reflect Markov-choice paradigm and results; regenerate visuals.
 
 - **8.2 Slides** ❌ Missing  
-  • Prepare presentation summarizing project evolution, results, and insights.
+  • Prepare presentation summarizing project evolution, results, and insights.  
+  • Impact (Markov policy): Minor doc update.  
+  • Markov reasoning: Slides/report must reflect Markov-choice paradigm and results; regenerate visuals.
 
 - **8.3 Rehearsal / Q&A / final polish** ❌ Missing  
-  • Perform mock presentation and Q&A; apply final proofreading.
+  • Perform mock presentation and Q&A; apply final proofreading.  
+  • Impact (Markov policy): Minor doc update.  
+  • Markov reasoning: Slides/report must reflect Markov-choice paradigm and results; regenerate visuals.
 
 ---
 
 ## Next Actions Summary (Expanded)
 1. **Add analytical model markdown (M3.2A)** — create `docs/analytical_model.md` with equations, state matrix, and assumptions.  
 2. **Create validation write-up (M5)** — summarize checks (Little’s Law, utilization, throughput) with plots.  
-3. **Design and document scenarios (M6)** — list baseline and variant experiments with parameters.  
-4. **Run labeled sweeps (M6)** — automate parameter grids and store results with metadata.  
-5. **Implement one optimization (M7)** — select and test an improvement such as adaptive stints or routing.  
-6. **Finalize report and slides (M8)** — merge all content and prepare presentation.  
+3. **Design and document scenarios (M6)** — list baseline and variant experiments with parameters, including Markov-policy variants (P, stint PMFs, policy constraints).  
+4. **Run labeled sweeps (M6)** — automate parameter grids and store results with metadata, including sensitivity to P and stint distributions.  
+5. **Implement one optimization (M7)** — select and test an improvement such as adaptive stints or routing, guided by the Markov free-choice policy analysis.  
+6. **Finalize report and slides (M8)** — merge all content and ensure terminology consistently reflects the semi-Markov developer policy and state machine.  
 7. **Calibrate churn-based effort weights (M6–M7)** — estimate `c_add`, `c_mod`, `c_del` from non-overlapped tickets and save `weights.yml`.  
-8. **Validate semi-Markov developer-state simulation (M7)** — compare simulated vs. observed transition frequencies and stint distributions.
+8. **Validate semi-Markov developer-state simulation (M7)** — compare simulated vs. observed transition frequencies and stint distributions, refreshing golden outputs where needed.
