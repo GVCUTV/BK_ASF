@@ -1,5 +1,6 @@
-# // v1.3B-First-Diagrams
-### PMCSN ASF — First Diagrams / Conceptual Visual Package  
+// v1.3C
+// FIRST_DIAGRAMS_v1.3B.md
+# PMCSN ASF — First Diagrams / Conceptual Visual Package
 *(Compliant with `GPT_INSTRUCTIONS.md` and the semi-Markov developer policy)*  
 
 ---
@@ -9,10 +10,11 @@
 This document defines the **first-generation conceptual diagrams** that visualize the PMCSN ASF workflow under the **semi-Markov free-choice paradigm**.  
 These diagrams will be used in both documentation and presentations to convey the new stochastic-behavior logic adopted in the updated model (v1.3 series).  
 
-They replace all previous deterministic or static diagrams, ensuring visual consistency with the following documents:  
-- `Intro_Overview_Refresh_v1.3.md`  
-- `ASF_BK_Overview_v1.2B.md`  
-- `CONCEPTUAL_WORKFLOW_MODEL_v1.2.md`
+They replace all previous deterministic or static diagrams, ensuring visual consistency with the following documents:
+- `Intro_Overview_Refresh_v1.4.md`
+- `ASF_BK_Overview_v1.3.md`
+- `CONCEPTUAL_WORKFLOW_MODEL.md` (v1.3)
+- `JIRA_WORKFLOW_MAPPING_2.2A.md`
 
 ---
 
@@ -49,49 +51,50 @@ They replace all previous deterministic or static diagrams, ensuring visual cons
 
 ---
 
-### D3 — Queue Network View  
-**Caption:** *Three service queues (DEV, REV, TEST) with dynamic servers equal to developers in each state.*  
-**Description:**  
-- DEV, REV, TEST drawn as process boxes; OFF represented as an external idle pool.  
-- Developers (agents) move among these queues per \( P \).  
-- Feedback path TEST → DEV included to indicate rework.  
-- Annotate each queue with service-time law \( T_s ∼ \text{LogNormal}(μ_s, σ_s) \).  
+### D3 — Queue Network View
+**Caption:** *Three service queues (DEV, REV, TEST) with dynamic servers equal to developers in each state.*
+**Description:**
+- DEV, REV, TEST drawn as process boxes; OFF represented as an external idle pool, while the BACKLOG queue feeds DEV following the mapping in `docs/JIRA_WORKFLOW_MAPPING_2.2A.md`.
+- Developers (agents) move among these queues per \( P \).
+- Feedback path TEST → DEV included to indicate rework.
+- Annotate each queue with service-time law \( T_s ∼ \text{LogNormal}(μ_s, σ_s) \) and show DONE as the absorbing sink.
 
 ---
 
-### D4 — Simulation Control Flow  
-**Caption:** *Event-driven sequence of ASF simulation activities.*  
-**Description:**  
-- Horizontal timeline or flowchart:  
-  `Task arrival → Queue → Service → Completion → State transition (via P) → Stint counter check → Feedback routing → Metrics update`.  
-- Indicates parallel developer agents and synchronization points.  
+### D4 — Simulation Control Flow
+**Caption:** *Event-driven sequence of ASF simulation activities.*
+**Description:**
+- Horizontal timeline or flowchart:
+  `Backlog arrival → DEV queue service → REV queue service → TEST queue service → DONE/feedback → State transition (via P) → Stint counter check → Metrics update`.
+- Indicates parallel developer agents and synchronization points tied to OFF/DEV/REV/TEST states.
 
 ---
 
 ### D5 — Validation Loop  
 **Caption:** *Feedback cycle linking empirical data to simulation calibration.*  
 **Description:**  
-- Shows empirical metrics (transition counts, stint PMFs, service times) feeding parameter estimation.  
-- Simulation outputs return to comparison modules (Little’s Law, χ², KS tests).  
-- Arrows back to Analytics represent automatic parameter tuning and re-estimation.  
+- Shows empirical metrics (transition counts, stint PMFs, service times) feeding parameter estimation.
+- Simulation outputs return to comparison modules (Little’s Law, χ², KS tests).
+- Arrows back to Analytics represent automatic parameter tuning and re-estimation while preserving the OFF/DEV/REV/TEST mapping.
 
 ---
 
 ## 4 ▪ Integration Guidelines  
 
 - Save this file as `docs/FIRST_DIAGRAMS_v1.3B.md`.  
-- Use provided captions and descriptions to generate the actual diagrams in Draw.io or Mermaid.  
-- Cross-link each diagram to its source section in:  
-  - `Intro_Overview_Refresh_v1.3.md`  
-  - `CONCEPTUAL_WORKFLOW_MODEL_v1.2.md`  
-  - `DERIVATIONS_3.2A.md`  
+- Use provided captions and descriptions to generate the actual diagrams in Draw.io or Mermaid.
+- Cross-link each diagram to its source section in:
+  - `Intro_Overview_Refresh_v1.4.md`
+  - `CONCEPTUAL_WORKFLOW_MODEL.md`
+  - `DERIVATIONS_3.2A.md`
+  - `JIRA_WORKFLOW_MAPPING_2.2A.md`
 - When rendered in slides, include one caption line and source reference at the bottom right corner.  
 
 ---
 
 ## 5 ▪ Definition of Done (DoD)  
 
-1. Version header `// v1.3B-First-Diagrams` present and referenced in `docs/schedule.md`.  
+1. Version header `// v1.3C` present and referenced in `docs/schedule.md`.
 2. Five diagram briefs fully described (text-only, no graphics).  
 3. Terminology aligned with semi-Markov policy and queueing interpretation.  
 4. File cross-referenced from intro and conceptual documents.  
@@ -99,5 +102,5 @@ They replace all previous deterministic or static diagrams, ensuring visual cons
 
 ---
 
-**End of Document — First Diagrams (v1.3B)**  
+**End of Document — First Diagrams (v1.3C)**
 _Compliant with PMCSN ASF project standards and `GPT_INSTRUCTIONS.md`._

@@ -1,4 +1,4 @@
-// v3
+// v4
 // project_documentation.md
 # ASF Project
 
@@ -69,7 +69,7 @@ Le issue approvate entrano nella **BACKLOG queue**, dove attendono di essere pre
 
 ### 4.3 Diagramma di riferimento
 
-Il diagramma concettuale corrente è archiviato in `docs/diagrams/Diagramma modello concettuale.drawio` con esportazioni `PNG/PDF` (es. `docs/diagrams/Diagramma modello concettuale.png`). Qualsiasi descrizione visiva del modello deve puntare a questi file, garantendo che la nomenclatura degli stati e delle code resti sincronizzata con questo documento.
+Il diagramma concettuale corrente è archiviato in `docs/diagrams/Diagramma modello concettuale.drawio` con esportazioni `PNG/PDF` (es. `docs/diagrams/Diagramma modello concettuale.png` e `docs/diagrams/Diagramma modello concettuale.pdf`). Qualsiasi descrizione visiva del modello deve puntare a questi file, garantendo che la nomenclatura degli stati e delle code resti sincronizzata con questo documento e con la mappatura descritta in `docs/JIRA_WORKFLOW_MAPPING_2.2A.md`.
 
 ### 4.4 Flusso operativo
 
