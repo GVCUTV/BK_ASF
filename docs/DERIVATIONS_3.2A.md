@@ -1,10 +1,10 @@
-// v3.2A-001
+// v3.2A-002
 // file: docs/DERIVATIONS_3.2A.md
 
 # Meeting 3.2A — State Equation Derivations
 
 ## Overview
-This note documents the analytical layer implemented in [`simulation/state_equations.py`](../simulation/state_equations.py) that converts ETL outputs into simulation-ready parameters for the semi-Markov developer model. The workflow uses the merged Jira/GitHub dataset at `etl/output/csv/tickets_prs_merged.csv` as the single source of empirical timelines for developer assignments.
+This note documents the analytical layer implemented in [`simulation/state_equations.py`](../simulation/state_equations.py) that converts ETL outputs into simulation-ready parameters for the semi-Markov developer model. The workflow uses the merged Jira/GitHub dataset at `etl/output/csv/tickets_prs_merged.csv` as the single source of empirical timelines for developer assignments. Queue and state labels for Jira events follow the canonical mapping in [`docs/JIRA_WORKFLOW_MAPPING_2.2A.md`](JIRA_WORKFLOW_MAPPING_2.2A.md) to keep analytical derivations aligned with the conceptual workflow.
 
 ## Transition Matrix \(P\)
 The developer state transition probabilities are derived from chronological stage events per contributor. For each developer, observed state changes yield empirical counts \(n_{ij}\) from state \(i\) to state \(j\). Laplace smoothing with \(\alpha = 1\) enforces non-zero mass across all outcomes:
