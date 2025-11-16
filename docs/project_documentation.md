@@ -1,4 +1,4 @@
-// v5
+// v6
 // project_documentation.md
 # ASF Project
 
@@ -50,7 +50,7 @@ Una descrizione completa degli output di esplorazione dei dati e delle statistic
 
 ## 4. Modello concettuale
 
-Il modello concettuale formalizza il comportamento della community di BookKeeper come una catena di stati sviluppatore e una rete di code coerente con `docs/CONCEPTUAL_WORKFLOW_MODEL.md`. Tale descrizione è la base sia per le derivazioni analitiche sia per la simulazione.
+Il modello concettuale formalizza il comportamento della community di BookKeeper come una catena di stati sviluppatore e una rete di code coerente con `docs/CONCEPTUAL_WORKFLOW_MODEL.md`. Tale descrizione è la base sia per le derivazioni analitiche sia per la simulazione. Tutte le equazioni, le matrici di transizione e i parametri di servizio utilizzati per le analisi 3.2A sono raccolti nel file [`docs/analytical_equations_3.2A.md`](analytical_equations_3.2A.md), che funge da riferimento unico per simulazione ed esposizioni teoriche.
 
 ### 4.1 Stati degli sviluppatori (OFF / DEV / REV / TEST)
 
