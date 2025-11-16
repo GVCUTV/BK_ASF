@@ -1,4 +1,4 @@
-// v6
+// v7
 // project_documentation.md
 # ASF Project
 
@@ -8,7 +8,7 @@ Il caso di studio presentato in questo elaborato riguarda l’analisi delle pres
 
 La specificità di BookKeeper, come di altri progetti ASF, risiede nell’organizzazione basata su contributi volontari, processi decisionali trasparenti e collaborazione asincrona. Queste caratteristiche differenziano fortemente il flusso di lavoro rispetto a quello di una tipica azienda software, introducendo variabilità nei tempi di risposta, iterazioni multiple tra sviluppo, testing e bugfix, e la possibilità di cicli di revisione multipli prima della chiusura definitiva di una issue.
 
-Il lavoro presentato segue una struttura classica di performance engineering: dopo la descrizione concettuale del sistema e la definizione degli obiettivi, viene costruito un modello a code per rappresentare i principali stati e transizioni del workflow di sviluppo. I parametri del modello verranno stimati tramite dati reali estratti dagli archivi pubblici di Jira e GitHub del progetto. Seguiranno la verifica di consistenza, la simulazione per la validazione del modello computazionale tramite confronto dei risultati prodotti con quelli rilevati e la proposta di possibili miglioramenti organizzativi basati sulle evidenze emerse.
+Il lavoro presentato segue una struttura classica di performance engineering: dopo la descrizione concettuale del sistema e la definizione degli obiettivi, viene costruito un modello a code per rappresentare i principali stati e transizioni del workflow di sviluppo. I parametri del modello verranno stimati tramite dati reali estratti dagli archivi pubblici di Jira e GitHub del progetto. Seguiranno la verifica di consistenza, la simulazione per la validazione del modello computazionale tramite confronto dei risultati prodotti con quelli rilevati e la proposta di possibili miglioramenti organizzativi basati sulle evidenze emerse. Le definizioni ufficiali delle metriche di throughput, utilizzo, tempi e capacità richiamate in queste analisi sono ora centralizzate in [`docs/key_metrics_3.2C.md`](key_metrics_3.2C.md), così da mantenere coerenza terminologica lungo tutto il progetto.
 
 ## 2. Background e contesto open-source
 
