@@ -1,16 +1,17 @@
-# // v1.2-Conceptual-Workflow-Model
-### PMCSN ASF — Conceptual Workflow Model  
-*(Aligned with the semi-Markov free-choice developer policy and `GPT_INSTRUCTIONS.md` conventions)*  
+// v1.3
+// CONCEPTUAL_WORKFLOW_MODEL.md
+# PMCSN ASF — Conceptual Workflow Model
+*(Aligned with the semi-Markov free-choice developer policy and `GPT_INSTRUCTIONS.md` conventions)*
 
 ---
 
 ## 1 ▪ Purpose
 
-This document defines the **conceptual workflow model** of the ASF team as a stochastic, queue-driven process.  
+This document defines the **conceptual workflow model** of the ASF team as a stochastic, queue-driven process.
 It provides the high-level structure that connects:
-- developer behavior (governed by a semi-Markov model),  
-- the ASF task queues (DEV, REV, TEST), and  
-- the feedback mechanisms linking stages in the software-development lifecycle.  
+- developer behavior (governed by a semi-Markov model),
+- the ASF task queues (**BACKLOG, DEV, REV, TEST, DONE**), and
+- the feedback mechanisms linking stages in the software-development lifecycle.
 
 This conceptual layer serves as the **foundation for the analytical (3.x)** and **simulation (4.x)** stages of the PMCSN ASF project.
 
@@ -22,58 +23,61 @@ This conceptual layer serves as the **foundation for the analytical (3.x)** and 
 | Entity | Description |
 |---------|--------------|
 | **Developer agent** | Individual representing a team member; follows a semi-Markov policy deciding which activity to perform next. |
-| **Queue stage** | One of three active workflow phases: **Development (DEV)**, **Review (REV)**, **Testing (TEST)**. |
+| **Developer state** | One of four modes: **OFF, DEV, REV, TEST**, modeling availability and focus. |
+| **Queue stage** | Ticket positions **BACKLOG → DEV → REV → TEST → DONE**; the middle stages correspond to the active workflow queues. |
 | **Task (ticket)** | Unit of work entering the ASF workflow; characterized by its state, effort, and service requirements. |
 | **Coordinator (policy layer)** | Implicit mechanism ensuring that each developer selects their next state according to the transition matrix \( P \). |
 | **System clock** | Advances on event completion; synchronizes all arrivals, transitions, and service completions. |
 
 ---
 
-### 2.2 Developer Behavior Model  
-Each developer is modeled as a **semi-Markov agent** with state set  
+### 2.2 Developer Behavior Model
+Each developer is modeled as a **semi-Markov agent** with state set
 $$
 S = \{ \text{OFF}, \text{DEV}, \text{REV}, \text{TEST} \}.
 $$
 
-- On **entry** to state _i_, the agent draws a *stint length* ℓ from the empirical distribution \( f_i(ℓ) \).  
-- The developer completes ℓ tickets sequentially in that state.  
-- Upon stint exhaustion, the agent transitions to state _j_ according to \( P_{ij} \).  
+- On **entry** to state _i_, the agent draws a *stint length* ℓ from the empirical distribution \( f_i(ℓ) \).
+- The developer completes ℓ tickets sequentially in that state (pulling from the queue that matches the state).
+- Upon stint exhaustion, the agent transitions to state _j_ according to \( P_{ij} \).
 - If the selected queue has no pending work, fallback logic (wait/switch) is applied by the simulation layer.
 
 This policy allows agents to **self-select** work focus periods, reflecting realistic autonomy in collaborative teams.
 
 ---
 
-### 2.3 Queueing Interpretation  
+### 2.3 Queueing Interpretation
 
 | Stage | Queue Type | Servers | Service-Time Law | Notes |
 |--------|-------------|----------|------------------|-------|
+| **BACKLOG** | Infinite buffer | Coordinated arrivals | $\lambda_{BL}$ arrivals/time unit | Tickets approved by the community wait for volunteers. |
 | **DEV** | Single FIFO queue per developer state | # developers in DEV | $ T_{DEV} \sim \text{LogNormal}(\mu_{DEV}, \sigma_{DEV}) $ | Code creation and modification. |
 | **REV** | Shared FIFO review queue | # developers in REV | $ T_{REV} \sim \text{LogNormal}(\mu_{REV}, \sigma_{REV}) $ | Peer code validation and comments. |
 | **TEST** | FIFO testing queue | # developers in TEST | $ T_{TEST} \sim \text{LogNormal}(\mu_{TEST}, \sigma_{TEST}) $ | Integration and regression testing. |
+| **DONE** | Absorbing sink | — | — | Tickets leave the system once confidence is achieved. |
 | **OFF** | Idle state (no service) | — | — | Developer unavailable or between stints. |
 
-The queues are connected in a **serial-feedback topology**:  
-DEV → REV → TEST → (release or rework feedback → DEV).  
+The queues are connected in a **serial-feedback topology**:
+BACKLOG → DEV → REV → TEST → (DONE or rework feedback → DEV).
 
-Each stage’s throughput and utilization depend dynamically on the number of active developers in that state.
+Each stage’s throughput and utilization depend dynamically on the number of active developers in each state and on the backlog pressure.
 
 ---
 
-## 3 ▪ Control Flow and Event Logic  
+## 3 ▪ Control Flow and Event Logic
 
-1. **Task Arrival**  
-   - Tasks originate from the backlog at a configured rate or trace replay.  
-2. **Assignment and Service Start**  
-   - Developers in active states pull tasks from their corresponding queues.  
-3. **Task Completion**  
-   - Upon completion, queue statistics are updated; the developer decrements their stint counter.  
-4. **State Transition (Decision Event)**  
-   - When stint counter = 0, the developer samples the next state from $P$.  
-5. **Feedback Routing**  
-   - Tasks may return to previous queues (e.g., DEV after failed TEST).  
-6. **Metrics Update**  
-   - WIP, throughput, and utilization recorded at each event.  
+1. **Task Arrival**
+   - Tasks originate from the backlog at a configured rate or trace replay.
+2. **Assignment and Service Start**
+   - Developers in active states pull tasks from their corresponding queues.
+3. **Task Completion**
+   - Upon completion, queue statistics are updated; the developer decrements their stint counter.
+4. **State Transition (Decision Event)**
+   - When stint counter = 0, the developer samples the next state from $P$.
+5. **Feedback Routing**
+   - Tasks may return to previous queues (e.g., DEV after failed TEST) or exit through DONE.
+6. **Metrics Update**
+   - WIP, throughput, and utilization recorded at each event.
 
 This logic underlies both the **analytical formulation (Section 3.2)** and the **simulation implementation (Section 4)**.
 
@@ -81,17 +85,19 @@ This logic underlies both the **analytical formulation (Section 3.2)** and the *
 
 ## 4 ▪ Conceptual Model Diagrams — Figure Briefs (No Graphics)
 
-1. **Figure 1 — Developer State Machine**  
-   *Depicts the semi-Markov chain with states OFF, DEV, REV, TEST and transition probabilities $P_{ij}$.*  
+> **Reference diagrams:** `docs/diagrams/Diagramma modello concettuale.drawio` (source), `docs/diagrams/Diagramma modello concettuale.png` (render).
 
-2. **Figure 2 — ASF Queue Network**  
-   *Shows three interconnected queues (DEV, REV, TEST) with dynamic capacities and feedback paths.*  
+1. **Figure 1 — Developer State Machine**
+   *Depicts the semi-Markov chain with states OFF, DEV, REV, TEST and transition probabilities $P_{ij}$.*
 
-3. **Figure 3 — Control Flow Timeline**  
-   *Represents the alternation between developer stint phases, state transitions, and system-wide event updates.*  
+2. **Figure 2 — ASF Queue Network**
+   *Shows the BACKLOG → DEV → REV → TEST → DONE flow with dynamic capacities and feedback paths.*
 
-4. **Figure 4 — End-to-End ASF Lifecycle**  
-   *Integrates backlog arrivals, queue processing, feedback, and state evolution for multiple agents.*  
+3. **Figure 3 — Control Flow Timeline**
+   *Represents the alternation between developer stint phases, state transitions, and system-wide event updates.*
+
+4. **Figure 4 — End-to-End ASF Lifecycle**
+   *Integrates backlog arrivals, queue processing, feedback, and state evolution for multiple agents.*
 
 ---
 
@@ -102,6 +108,7 @@ This logic underlies both the **analytical formulation (Section 3.2)** and the *
 | **Transition Matrix $P$** | Derived in 3.2 A | Governs inter-state developer transitions. |
 | **Stint PMFs $f_i(\mathcal{l})$** | Derived in 3.2 A | Define duration of focus in each state. |
 | **Service Laws $T_s$** | Derived in 3.2 A | Define per-stage ticket completion times. |
+| **Backlog arrival process** | Uses ETL data | Captures inflow that feeds the BACKLOG stage. |
 | **Parameter Estimation (3.2 B)** | Uses ETL data | Fits empirical distributions to observed metrics. |
 | **Simulation Architecture (4.x)** | Uses this model | Implements events, queues, and developer transitions. |
 
@@ -109,23 +116,23 @@ This logic underlies both the **analytical formulation (Section 3.2)** and the *
 
 ## 6 ▪ Integration Instructions
 
-- Save this document as `docs/CONCEPTUAL_WORKFLOW_MODEL.md`.  
-- Ensure all downstream analytical and simulation files reference this model explicitly.  
-- When generating diagrams, reuse captions and maintain consistent naming for states and queues.  
-- Add a link from `docs/project_documentation.md` under “Model Design”.  
+- Save this document as `docs/CONCEPTUAL_WORKFLOW_MODEL.md`.
+- Ensure `docs/project_documentation.md` and downstream analytical/simulation files reference this model explicitly.
+- When generating diagrams, reuse captions, state names (OFF/DEV/REV/TEST), and queue labels (BACKLOG/DEV/REV/TEST/DONE).
+- Reference `docs/diagrams/Diagramma modello concettuale.drawio` (and exported PNG/PDF) whenever citing the conceptual diagram.
 
 ---
 
 ## 7 ▪ Definition of Done (DoD)
 
-1. Document versioned (`// v1.2-Conceptual-Workflow-Model`).  
-2. Describes all four developer states and queue interactions.  
-3. Explicitly includes semi-Markov policy and stochastic stint concept.  
-4. Figure briefs ready for later diagram generation.  
-5. Cross-references analytical and simulation components correctly.  
-6. Markdown formatting validated and lint-clean.  
+1. Document versioned (`// v1.3`).
+2. Describes all four developer states and the BACKLOG → DEV → REV → TEST → DONE queue structure.
+3. Explicitly includes semi-Markov policy and stochastic stint concept.
+4. Figure briefs ready for later diagram generation.
+5. Cross-references analytical and simulation components correctly.
+6. Markdown formatting validated and lint-clean.
 
 ---
 
-**End of Document — Conceptual Workflow Model (v1.2)**  
+**End of Document — Conceptual Workflow Model (v1.3)**
 _Compliant with PMCSN ASF project conventions and `GPT_INSTRUCTIONS.md`._

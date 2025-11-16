@@ -1,4 +1,5 @@
-[comment]: # "v1"
+// v2
+// project_documentation.md
 # ASF Project
 
 ## 1. Introduzione
@@ -49,12 +50,33 @@ Una descrizione completa degli output di esplorazione dei dati e delle statistic
 
 ## 4. Modello concettuale
 
-## Flusso di lavoro
+Il modello concettuale formalizza il comportamento della community di BookKeeper come una catena di stati sviluppatore e una rete di code coerente con `docs/CONCEPTUAL_WORKFLOW_MODEL.md`. Tale descrizione è la base sia per le derivazioni analitiche sia per la simulazione.
 
-Il flusso di lavoro di Bookkeeper, così come quello di ogni software open source della ASF, si basa sul processo della comunità documentato tramite i software JIRA e GitHub, seguendo questi passi:
+### 4.1 Stati degli sviluppatori (OFF / DEV / REV / TEST)
 
-1. **Creazione di un ticket su JIRA:** Il lavoro di sviluppo inizia spesso con un nuovo ticket su Jira. Un collaboratore o un utente identifica un'esigenza, ad esempio una richiesta di funzionalità o una segnalazione di bug, e crea un issue in Jira (stato dell’issue= "*Aperto*"). Per semplicità il nostro caso di studio prende in considerazione solo i ticket che sono stati approvati in mailing list e che quindi verranno effettivamente sviluppati. Tutto ciò che accade prima dell’approvazione non è oggetto dello studio.
-2. **Assegnazione dello sviluppo:** A differenza di un'azienda in cui è un manager ad assegnare i compiti, in BookKeeper un issue viene solitamente preso in carico da un volontario che ci lavora per un tempo di servizio (stato dell’issue = “*In Progress*”). Lo sviluppatore implementa la correzione o la funzionalità nel suo fork del repo e poi apre una richiesta di pull su GitHub. La descrizione della PR di solito fa riferimento all’issue di Jira (ad esempio, "BOOKKEEPER-XYZ: descrizione..."). L'apertura della PR segnala che il codice è pronto per la revisione. In questo momento, i test CI automatizzati vengono eseguiti sulla PR (stato dell’issue= “*Review*”).
-3. **Revisione:** Perché la PR sia approvata un revisore deve analizzare il codice, se questa revisione ha esito negativo inizia un processo di revisione, comunemente composto anche da più cicli iterativi *Revisione → Sviluppo → Revisione*: i revisori possono richiedere modifiche, portando lo sviluppatore ad aggiornare la PR con nuovi commit. Una volta che la revisione avrà avuto esito positivo la PR viene unita al main branch di GitHub, questa modifica sarà quindi presente e disponibile nelle build snapshot o nella prossima release candidata, questo però non vuol dire che il processo è terminato perché è necessario passare alla fase di testing.
-4. **Testing:** Vengono eseguiti test addizionali durante un periodo di osservazione per scoprire eventuali problemi, al termine di questa fase la feature viene effettivamente rilasciata. Qualora i nuovi test nel tempo considerato di “prova” rilevino dei nuovi problemi si attiva un meccanismo di feedback che riporta alla fase di sviluppo, in cui saranno necessari nuovi commit per fixare gli errori trovati, commit che verranno revisionati e poi passati nuovamente al testing.
-Una volta passata anche la fase di testing si ha l’effettivo rilascio della funzionalità, ossia l’uscita del ticket dal sistema, che verrà consideranto *Resolved*
+Gli sviluppatori sono modellati come agenti semi-Markoviani che alternano quattro stati:
+
+- **OFF:** periodi di inattività o indisponibilità del volontario; nessuna risorsa viene erogata ma il ticket rimane nella coda associata.
+- **DEV:** il volontario lavora su implementazioni o bugfix, consumando i ticket disponibili nella coda di sviluppo.
+- **REV:** il contributore opera come revisore e smaltisce le richieste di pull in attesa.
+- **TEST:** il volontario supporta la campagna di validazione manuale/automatica post-merge.
+
+Ogni ingresso in stato attivo prevede l’estrazione di una durata (stint) che determina quanti ticket consecutivi verranno completati prima del prossimo cambio di stato. Al termine dello stint l’agente sorteggia il prossimo stato secondo la matrice di transizione \(P\), mantenendo così la natura volontaria e self-service del progetto.
+
+### 4.2 Code operative (BACKLOG / DEV / REV / TEST / DONE)
+
+Le issue approvate entrano nella **BACKLOG queue**, dove attendono di essere prese da un volontario. Quando un agente passa a **DEV**, estrae il prossimo ticket dalla relativa coda e lo lavora fino alla consegna; il completamento sposta il ticket in **REV** per la peer review. Dopo l’approvazione, il lavoro passa in **TEST** per le verifiche di integrazione. Se i test hanno esito negativo, il ticket ritorna a **DEV** con feedback esplicito; se positivi, l’item esce dal sistema nella coda **DONE**, che rappresenta i rilasci effettivi.
+
+### 4.3 Diagramma di riferimento
+
+Il diagramma concettuale corrente è archiviato in `docs/diagrams/Diagramma modello concettuale.drawio` con esportazioni `PNG/PDF` (es. `docs/diagrams/Diagramma modello concettuale.png`). Qualsiasi descrizione visiva del modello deve puntare a questi file, garantendo che la nomenclatura degli stati e delle code resti sincronizzata con questo documento.
+
+### 4.4 Flusso operativo
+
+1. **Arrivo e backlog:** un ticket validato dalle mailing list viene registrato su Jira e collocato nello stato BACKLOG, pronto per essere preso.
+2. **Sviluppo volontario (DEV):** un developer in stato DEV preleva il ticket e implementa la funzionalità o la correzione nel proprio fork GitHub.
+3. **Revisione cooperativa (REV):** la pull request viene esaminata dalla community; eventuali richieste di modifica riportano il ticket alla coda DEV finché la revisione non è positiva.
+4. **Testing e osservazione (TEST):** dopo il merge vengono condotti test CI/manuali. Se emergono regressioni, il ticket torna in DEV con nota di rework.
+5. **Chiusura (DONE):** superati i test, l’item viene contrassegnato come risolto e conteggiato nelle metriche di output.
+
+Questo flusso è pienamente allineato con il diagramma concettuale e fornisce la stessa sequenza di stati usata per la modellazione analitica e per il simulatore ad eventi discreti.
