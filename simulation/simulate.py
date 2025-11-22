@@ -1,4 +1,4 @@
-# v4
+# v5
 # file: simulation/simulate.py
 
 """
@@ -22,17 +22,21 @@ if __package__ is None or __package__ == "":  # pragma: no cover - runtime path 
 
 from simulation.config import (  # type: ignore
     ARRIVAL_RATE,
+    CHURN_WEIGHT_ADD,
+    CHURN_WEIGHT_DEL,
+    CHURN_WEIGHT_MOD,
     GLOBAL_RANDOM_SEED,
     LOG_FILE,
-    N_DEVS,
-    N_TESTERS,
     SEED_OVERRIDE_ENV_VAR,
     SIM_DURATION,
     STATE_PARAMETER_PATHS,
+    TOTAL_CONTRIBUTORS,
 )
 from simulation.entities import SystemState  # type: ignore
-from simulation.events import EventQueue  # type: ignore
+from simulation.developer_policy import DeveloperPool  # type: ignore
+from simulation.events import EventQueue, ServiceCompletionEvent  # type: ignore
 from simulation.stats import StatsCollector  # type: ignore
+from simulation.workflow_logic import WorkflowLogic  # type: ignore
 
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 
@@ -121,11 +125,13 @@ def _initialize_random_seed():
 
 def _log_config_summary(seed: int, override_source: str | None) -> None:
     logging.info(
-        "Simulation configuration — duration=%.2f days, λ=%.6f/day, N_DEVS=%d, N_TESTERS=%d",
+        "Simulation configuration — duration=%.2f days, λ=%.6f/day, contributors=%d (weights add/mod/del = %.2f/%.2f/%.2f)",
         SIM_DURATION,
         ARRIVAL_RATE,
-        N_DEVS,
-        N_TESTERS,
+        TOTAL_CONTRIBUTORS,
+        CHURN_WEIGHT_ADD,
+        CHURN_WEIGHT_MOD,
+        CHURN_WEIGHT_DEL,
     )
     if override_source:
         logging.info("Random seed %d provided via %s", seed, override_source)
@@ -139,9 +145,24 @@ def main():
     seed, override_source = _initialize_random_seed()
     _log_config_summary(seed, override_source)
 
-    state = SystemState()
+    matrix_path = _resolve_repo_path(STATE_PARAMETER_PATHS["matrix_P"])
+    stint_paths_list = STATE_PARAMETER_PATHS.get("stint_pmfs", [])
+    if len(stint_paths_list) < 4:
+        raise ValueError(
+            "STATE_PARAMETER_PATHS['stint_pmfs'] must include four entries for DEV/OFF/REV/TEST PMFs."
+        )
+    stint_paths = {
+        "DEV": _resolve_repo_path(stint_paths_list[0]),
+        "OFF": _resolve_repo_path(stint_paths_list[1]),
+        "REV": _resolve_repo_path(stint_paths_list[2]),
+        "TEST": _resolve_repo_path(stint_paths_list[3]),
+    }
+    developer_pool = DeveloperPool(matrix_path, stint_paths)
+
+    state = SystemState(developer_pool)
     state.sim_duration = SIM_DURATION
     stats = StatsCollector(state)
+    developer_pool.initialize_agents(TOTAL_CONTRIBUTORS, stats)
 
     event_queue = EventQueue()
     event_queue.schedule_initial_arrivals(state, stats)
@@ -154,6 +175,11 @@ def main():
             break
         event = event_queue.pop()
         logging.info("Processing event: %s", event)
+        logic = WorkflowLogic(state, stats)
+        changed = developer_pool.advance_time(event.time, stats)
+        if changed:
+            for stage in changed:
+                logic.try_start_service(stage, event_queue, event.time, ServiceCompletionEvent)
         try:
             event.process(event_queue, state, stats)
         except Exception as exc:  # noqa: BLE001 - explicit logging required

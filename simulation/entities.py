@@ -1,4 +1,4 @@
-# v4
+# v5
 # file: simulation/entities.py
 
 """
@@ -12,7 +12,7 @@ import logging
 from collections import deque
 from typing import Deque, Dict, List, Optional, Tuple
 
-from .config import N_DEVS, N_TESTERS
+from .developer_policy import DeveloperAgent
 
 
 class Ticket:
@@ -25,26 +25,31 @@ class Ticket:
         self.history: List[Tuple[str, float]] = [("arrival", arrival_time)]
         self.dev_review_cycles = 0
         self.test_cycles = 0
+        self.churn_add: Optional[float] = None
+        self.churn_mod: Optional[float] = None
+        self.churn_del: Optional[float] = None
 
 
 class SystemState:
     """Holds queues, servers, and book-keeping data for the simulation run."""
 
-    def __init__(self):
+    def __init__(self, developer_pool):
         self.sim_duration: float = 0.0
         self._next_ticket_id = 1
         self.closed_tickets: List[Ticket] = []
         self.tickets: Dict[int, Ticket] = {}
         self.backlog_buffer: Deque[Tuple[Ticket, float]] = deque()
+        self.developer_pool = developer_pool
 
         self.stage_queues: Dict[str, Deque[Tuple[Ticket, float]]] = {
             "dev_review": deque(),
             "testing": deque(),
         }
-        self.stage_servers: Dict[str, List[Optional[int]]] = {
-            "dev_review": [None] * N_DEVS,
-            "testing": [None] * N_TESTERS,
+        self.stage_assignments: Dict[str, Dict[int, int]] = {
+            "dev_review": {},
+            "testing": {},
         }
+        self.ticket_agent: Dict[int, int] = {}
 
     # ---- Backlog helpers ------------------------------------------------
     def enqueue_backlog(self, ticket: Ticket, event_time: float):
@@ -89,31 +94,38 @@ class SystemState:
         return queue.popleft()
 
     # ---- Server helpers -------------------------------------------------
-    def get_free_server(self, stage: str) -> Optional[int]:
-        servers = self.stage_servers.get(stage)
-        if servers is None:
-            logging.error("Unknown stage %s for server lookup.", stage)
-            return None
-        for idx, ticket_id in enumerate(servers):
-            if ticket_id is None:
-                return idx
-        return None
+    def available_agent(self, stage: str) -> Optional[DeveloperAgent]:
+        agent = self.developer_pool.available_agent_for_stage(stage)
+        if agent is None:
+            logging.debug("No available agent for stage %s at this time.", stage)
+        return agent
 
-    def occupy_server(self, stage: str, server_idx: int, ticket_id: int):
-        servers = self.stage_servers.get(stage)
-        if servers is None:
+    def occupy_server(self, stage: str, agent: DeveloperAgent, ticket_id: int):
+        assignments = self.stage_assignments.get(stage)
+        if assignments is None:
             logging.error("Unknown stage %s for occupy.", stage)
             return
-        servers[server_idx] = ticket_id
+        assignments[agent.agent_id] = ticket_id
+        self.ticket_agent[ticket_id] = agent.agent_id
+        agent.busy = True
 
     def release_server(self, stage: str, ticket_id: int) -> Optional[int]:
-        servers = self.stage_servers.get(stage)
-        if servers is None:
+        assignments = self.stage_assignments.get(stage)
+        if assignments is None:
             logging.error("Unknown stage %s for release.", stage)
             return None
-        for idx, current_id in enumerate(servers):
-            if current_id == ticket_id:
-                servers[idx] = None
-                return idx
-        logging.error("Ticket %s not found on %s servers during release.", ticket_id, stage)
-        return None
+        agent_id = self.ticket_agent.pop(ticket_id, None)
+        if agent_id is None:
+            logging.error("Ticket %s not tracked for release on stage %s.", ticket_id, stage)
+            return None
+        assignments.pop(agent_id, None)
+        return agent_id
+
+    def capacity_for_stage(self, stage: str) -> int:
+        capacity = 0
+        snapshot = self.developer_pool.current_capacity_by_stage()
+        if stage == "dev_review":
+            capacity = snapshot.get("DEV", 0) + snapshot.get("REV", 0)
+        elif stage == "testing":
+            capacity = snapshot.get("TEST", 0)
+        return capacity

@@ -1,4 +1,4 @@
-# v3
+# v4
 # file: simulation/config.py
 
 """
@@ -23,6 +23,7 @@ ARRIVAL_RATE = 0.3074951954  # tickets/day (lambda)
 # Derived from ETL distinct actors in the same window
 N_DEVS = 44        # source=dev_user
 N_TESTERS = 22  # source=heuristic_ratio
+TOTAL_CONTRIBUTORS = 44
 
 # --------------------------- Feedback probabilities --------------------------- #
 # Estimated from ETL within the same window
@@ -53,6 +54,11 @@ STATE_PARAMETER_PATHS = {
         "data/state_parameters/stint_PMF_TEST.csv"
     ]
 }
+
+# --------------------------- Churn weighting --------------------------- #
+CHURN_WEIGHT_ADD = 1.0
+CHURN_WEIGHT_MOD = 1.0
+CHURN_WEIGHT_DEL = 0.5
 
 # --------------------------- Random seeds --------------------------- #
 GLOBAL_RANDOM_SEED = 22015001
