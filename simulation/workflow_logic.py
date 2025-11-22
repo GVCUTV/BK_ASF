@@ -1,4 +1,4 @@
-# v5
+# v6
 # file: simulation/workflow_logic.py
 
 """
@@ -14,7 +14,7 @@ from typing import Deque, Optional
 
 import numpy as np
 
-from .config import ARRIVAL_RATE, FEEDBACK_P_DEV, FEEDBACK_P_TEST
+from .config import ARRIVAL_RATE, FEEDBACK_P_DEV, FEEDBACK_P_TEST, SERVICE_TIME_PARAMS
 from .developer_policy import select_with_churn
 from .service_distributions import sample_service_time
 
@@ -26,6 +26,18 @@ class WorkflowLogic:
         self.state = state
         self.stats = stats
         self.developer_pool = state.developer_pool
+        known_service_stages = {"dev", "review", "testing"}
+        if {"dev", "review"}.isdisjoint(SERVICE_TIME_PARAMS.keys()):
+            legacy_keys = [key for key in SERVICE_TIME_PARAMS.keys() if key not in known_service_stages]
+            if legacy_keys:
+                legacy_key = legacy_keys[0]
+                legacy_params = SERVICE_TIME_PARAMS.pop(legacy_key)
+                SERVICE_TIME_PARAMS["dev"] = dict(legacy_params)
+                SERVICE_TIME_PARAMS["review"] = dict(legacy_params)
+                logging.info(
+                    "Translated legacy %s service params into dev and review entries.",
+                    legacy_key,
+                )
 
     # ------------------------------------------------------------------
     def handle_ticket_arrival(self, ticket_id: int, event_time: float, event_queue, completion_event_cls):
@@ -36,7 +48,7 @@ class WorkflowLogic:
         self.stats.log_enqueue(ticket.ticket_id, "backlog", event_time, source="arrival")
         logging.info("Ticket %s arrived at t=%.2f; queued to backlog", ticket.ticket_id, event_time)
         self.state.enqueue_backlog(ticket, event_time)
-        self.try_start_service("dev_review", event_queue, event_time, completion_event_cls)
+        self.try_start_service("dev", event_queue, event_time, completion_event_cls)
 
     def schedule_next_arrival(self, event_queue, current_time: float, arrival_event_cls):
         """Poisson arrivals based on ARRIVAL_RATE until sim horizon."""
@@ -67,20 +79,27 @@ class WorkflowLogic:
             released_agent if released_agent is not None else -1, stage, service_time, event_time, self.stats
         )
 
-        if stage == "dev_review":
+        if stage == "dev":
+            self.stats.log_feedback(ticket.ticket_id, stage, "progress", event_time)
+            self.state.enqueue("review", ticket, event_time)
+            self.stats.log_enqueue(ticket.ticket_id, "review", event_time, source="dev_complete")
+            self.try_start_service("review", event_queue, event_time, completion_event_cls)
+        elif stage == "review":
             ticket.dev_review_cycles += 1
+            ticket.review_cycles += 1
             if np.random.rand() < FEEDBACK_P_DEV:
                 logging.info(
-                    "Ticket %s receives dev/review feedback; routing back to dev queue.",
+                    "Ticket %s receives review feedback; routing back to dev queue.",
                     ticket.ticket_id,
                 )
                 self.stats.log_feedback(ticket.ticket_id, stage, "feedback", event_time)
-                self.state.enqueue("dev_review", ticket, event_time)
-                self.stats.log_enqueue(ticket.ticket_id, "dev_review", event_time, source="dev_feedback")
+                self.state.enqueue("dev", ticket, event_time)
+                self.stats.log_enqueue(ticket.ticket_id, "dev", event_time, source="review_feedback")
+                self.try_start_service("dev", event_queue, event_time, completion_event_cls)
             else:
                 self.stats.log_feedback(ticket.ticket_id, stage, "progress", event_time)
                 self.state.enqueue("testing", ticket, event_time)
-                self.stats.log_enqueue(ticket.ticket_id, "testing", event_time, source="dev_complete")
+                self.stats.log_enqueue(ticket.ticket_id, "testing", event_time, source="review_complete")
                 self.try_start_service("testing", event_queue, event_time, completion_event_cls)
         elif stage == "testing":
             ticket.test_cycles += 1
@@ -90,8 +109,9 @@ class WorkflowLogic:
                     ticket.ticket_id,
                 )
                 self.stats.log_feedback(ticket.ticket_id, stage, "feedback", event_time)
-                self.state.enqueue("dev_review", ticket, event_time)
-                self.stats.log_enqueue(ticket.ticket_id, "dev_review", event_time, source="test_feedback")
+                self.state.enqueue("dev", ticket, event_time)
+                self.stats.log_enqueue(ticket.ticket_id, "dev", event_time, source="test_feedback")
+                self.try_start_service("dev", event_queue, event_time, completion_event_cls)
             else:
                 self.stats.log_feedback(ticket.ticket_id, stage, "complete", event_time)
                 self.state.close_ticket(ticket, event_time, self.stats)
@@ -147,8 +167,10 @@ class WorkflowLogic:
     # ------------------------------------------------------------------
     def _candidate_sources_for_stage(self, stage: str) -> list[str]:
         """Ordered list of queues/backlogs to pull from for a given stage."""
-        if stage == "dev_review":
-            return ["dev_review", "backlog"]
+        if stage == "dev":
+            return ["dev", "backlog"]
+        if stage == "review":
+            return ["review"]
         if stage == "testing":
             return ["testing"]
         return []
@@ -173,7 +195,7 @@ class WorkflowLogic:
         if queue_ref is None or len(queue_ref) == 0:
             return None
 
-        if stage in {"dev_review", "testing"} and len(queue_ref) > 1:
+        if stage in {"dev", "review", "testing"} and len(queue_ref) > 1:
             selected = select_with_churn(queue_ref)
             if selected:
                 ticket, queued_time, idx = selected

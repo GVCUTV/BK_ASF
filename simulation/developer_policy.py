@@ -1,4 +1,4 @@
-# v1
+# v2
 # file: simulation/developer_policy.py
 
 """
@@ -28,7 +28,7 @@ from .config import (
 )
 
 STATES = ["OFF", "DEV", "REV", "TEST"]
-STATE_TO_STAGE = {"DEV": "dev_review", "REV": "dev_review", "TEST": "testing"}
+STATE_TO_STAGE = {"DEV": "dev", "REV": "review", "TEST": "testing"}
 
 
 @dataclass
