@@ -1,4 +1,4 @@
-# v3
+# v4
 # file: simulation/workflow_logic.py
 
 """
@@ -29,6 +29,7 @@ class WorkflowLogic:
         ticket = self.state.create_ticket(ticket_id, event_time)
         ticket.current_stage = "backlog"
         self.stats.log_arrival_event(ticket.ticket_id, event_time, "backlog")
+        self.stats.log_enqueue(ticket.ticket_id, "backlog", event_time, source="arrival")
         logging.info("Ticket %s arrived at t=%.2f; queued to backlog", ticket.ticket_id, event_time)
         self.state.enqueue_backlog(ticket, event_time)
         self.try_start_service("dev_review", event_queue, event_time, completion_event_cls)
@@ -100,7 +101,7 @@ class WorkflowLogic:
             if server_idx is None:
                 break
 
-            selected = self._select_next_ticket(stage)
+            selected = self._select_next_ticket(stage, current_time)
             if selected is None:
                 break
 
@@ -108,7 +109,7 @@ class WorkflowLogic:
             self.state.occupy_server(stage, server_idx, ticket.ticket_id)
             ticket.current_stage = stage
             wait_time = max(0.0, current_time - queued_time)
-            self.stats.log_queue_wait(ticket.ticket_id, stage, wait_time)
+            self.stats.log_queue_wait(ticket.ticket_id, stage, wait_time, current_time)
             service_time = sample_service_time(stage)
             completion_time = current_time + service_time
             event_queue.push(completion_event_cls(completion_time, ticket.ticket_id, stage))
@@ -143,12 +144,13 @@ class WorkflowLogic:
             return ["testing"]
         return []
 
-    def _select_next_ticket(self, stage: str):
+    def _select_next_ticket(self, stage: str, current_time: float):
         """Select the next ticket using a prioritized, overridable queue policy."""
         for source in self._candidate_sources_for_stage(stage):
             queue_item = self._dequeue_from_source(source)
             if queue_item is not None:
                 ticket, queued_time = queue_item
+                self.stats.log_dequeue(ticket.ticket_id, source, current_time)
                 self.stats.log_routing_decision(ticket.ticket_id, source, stage)
                 return ticket, queued_time, source
         return None
