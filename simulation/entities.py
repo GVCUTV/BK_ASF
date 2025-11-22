@@ -1,4 +1,4 @@
-# v5
+# v6
 # file: simulation/entities.py
 
 """
@@ -24,6 +24,7 @@ class Ticket:
         self.current_stage = "backlog"
         self.history: List[Tuple[str, float]] = [("arrival", arrival_time)]
         self.dev_review_cycles = 0
+        self.review_cycles = 0
         self.test_cycles = 0
         self.churn_add: Optional[float] = None
         self.churn_mod: Optional[float] = None
@@ -42,11 +43,13 @@ class SystemState:
         self.developer_pool = developer_pool
 
         self.stage_queues: Dict[str, Deque[Tuple[Ticket, float]]] = {
-            "dev_review": deque(),
+            "dev": deque(),
+            "review": deque(),
             "testing": deque(),
         }
         self.stage_assignments: Dict[str, Dict[int, int]] = {
-            "dev_review": {},
+            "dev": {},
+            "review": {},
             "testing": {},
         }
         self.ticket_agent: Dict[int, int] = {}
@@ -124,8 +127,10 @@ class SystemState:
     def capacity_for_stage(self, stage: str) -> int:
         capacity = 0
         snapshot = self.developer_pool.current_capacity_by_stage()
-        if stage == "dev_review":
-            capacity = snapshot.get("DEV", 0) + snapshot.get("REV", 0)
+        if stage == "dev":
+            capacity = snapshot.get("DEV", 0)
+        elif stage == "review":
+            capacity = snapshot.get("REV", 0)
         elif stage == "testing":
             capacity = snapshot.get("TEST", 0)
         return capacity
