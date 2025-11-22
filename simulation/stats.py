@@ -1,4 +1,4 @@
-# v5
+# v6
 # file: simulation/stats.py
 
 """
@@ -43,6 +43,8 @@ class StatsCollector:
         self.service_busy_time: Dict[str, float] = {stage: 0.0 for stage in self.stage_names}
         self.stage_throughput: Dict[str, int] = {stage: 0 for stage in self.stage_names}
         self.service_time_records: Dict[str, List[float]] = {stage: [] for stage in self.stage_names}
+        self.developer_state_time: Dict[str, float] = {state: 0.0 for state in ["OFF", "DEV", "REV", "TEST"]}
+        self.developer_stints: Dict[str, List[float]] = {state: [] for state in ["OFF", "DEV", "REV", "TEST"]}
 
         base_dir = os.path.dirname(__file__)
         self.output_dir = os.path.join(base_dir, "output")
@@ -383,9 +385,14 @@ class StatsCollector:
             avg_wait = mean(self.queue_wait_records.get(stage, []) or [0.0])
             avg_queue_len = self.queue_tracking.get(stage, {}).get("area", 0.0) / horizon
             utilization = 0.0
-            servers = self.state.stage_servers.get(stage, [])
-            if servers:
-                utilization = self.service_busy_time.get(stage, 0.0) / (horizon * len(servers))
+            if stage == "dev_review":
+                avg_capacity = (
+                    self.developer_state_time.get("DEV", 0.0) + self.developer_state_time.get("REV", 0.0)
+                ) / horizon
+            else:
+                avg_capacity = self.developer_state_time.get("TEST", 0.0) / horizon
+            if avg_capacity > 0:
+                utilization = self.service_busy_time.get(stage, 0.0) / (horizon * avg_capacity)
             throughput = self.stage_throughput.get(stage, 0) / horizon
             summary_rows.extend(
                 [
@@ -429,21 +436,32 @@ class StatsCollector:
                 }
             )
 
-        # Reserved fields to keep CSV shape stable for Markov-aware metrics in 4.3A.
         summary_rows.append(
             {
                 "metric": "markov_time_in_states",
-                "value": "",
+                "value": self.developer_state_time,
                 "units": "days",
-                "description": "Placeholder for semi-Markov state residence times",
+                "description": "Aggregate time spent by all agents in each developer state",
+            }
+        )
+        stint_counts = {state: len(values) for state, values in self.developer_stints.items()}
+        stint_means = {
+            state: (float(np.mean(values)) if values else 0.0) for state, values in self.developer_stints.items()
+        }
+        summary_rows.append(
+            {
+                "metric": "markov_stint_counts",
+                "value": stint_counts,
+                "units": "count",
+                "description": "Number of stints observed per developer state during the run",
             }
         )
         summary_rows.append(
             {
-                "metric": "markov_stint_counts",
-                "value": "",
-                "units": "count",
-                "description": "Placeholder for stint count diagnostics",
+                "metric": "markov_stint_means",
+                "value": stint_means,
+                "units": "days",
+                "description": "Mean stint length per developer state (simulated)",
             }
         )
 
@@ -485,4 +503,15 @@ class StatsCollector:
         logging.info("Summary CSV available at %s", self.summary_csvfile)
         print(f"Per-ticket CSV: {self.ticket_csvfile}")
         print(f"Summary CSV: {self.summary_csvfile}")
+
+    # ------------------------------------------------------------------
+    # Developer policy tracking
+    # ------------------------------------------------------------------
+    def log_developer_state_time(self, state: str, delta: float) -> None:
+        self.developer_state_time[state] = self.developer_state_time.get(state, 0.0) + delta
+        logging.info("Developer pool accrued %.4f days in state %s", delta, state)
+
+    def log_developer_stint(self, state: str, length: float) -> None:
+        self.developer_stints.setdefault(state, []).append(length)
+        logging.info("Developer stint sampled for %s: %.4f days", state, length)
 

@@ -1,4 +1,4 @@
-# v4
+# v5
 # file: simulation/workflow_logic.py
 
 """
@@ -10,9 +10,12 @@ other layers focused on plumbing and instrumentation.
 from __future__ import annotations
 
 import logging
+from typing import Deque, Optional
+
 import numpy as np
 
 from .config import ARRIVAL_RATE, FEEDBACK_P_DEV, FEEDBACK_P_TEST
+from .developer_policy import select_with_churn
 from .service_distributions import sample_service_time
 
 
@@ -22,6 +25,7 @@ class WorkflowLogic:
     def __init__(self, state, stats):
         self.state = state
         self.stats = stats
+        self.developer_pool = state.developer_pool
 
     # ------------------------------------------------------------------
     def handle_ticket_arrival(self, ticket_id: int, event_time: float, event_queue, completion_event_cls):
@@ -50,15 +54,18 @@ class WorkflowLogic:
         self.stats.log_scheduled_arrival(next_ticket_id, next_time)
 
     # ------------------------------------------------------------------
-    def handle_service_completion(self, ticket, stage: str, event_time: float, event_queue, completion_event_cls):
+    def handle_service_completion(self, ticket, stage: str, event_time: float, event_queue, completion_event_cls, service_time: float):
         """Release servers, determine routing, and continue processing."""
         ticket.history.append((f"complete_{stage}", event_time))
         logging.info("Ticket %s completed %s at t=%.2f", ticket.ticket_id, stage, event_time)
         self.stats.log_service_completion(ticket.ticket_id, stage, event_time)
 
-        released_idx = self.state.release_server(stage, ticket.ticket_id)
-        if released_idx is None:
+        released_agent = self.state.release_server(stage, ticket.ticket_id)
+        if released_agent is None:
             logging.error("Ticket %s not found on %s servers at completion.", ticket.ticket_id, stage)
+        changed_stages = self.developer_pool.on_service_completion(
+            released_agent if released_agent is not None else -1, stage, service_time, event_time, self.stats
+        )
 
         if stage == "dev_review":
             ticket.dev_review_cycles += 1
@@ -92,13 +99,15 @@ class WorkflowLogic:
             logging.error("Unknown stage %s encountered during completion for ticket %s.", stage, ticket.ticket_id)
 
         self.try_start_service(stage, event_queue, event_time, completion_event_cls)
+        for affected in changed_stages:
+            self.try_start_service(affected, event_queue, event_time, completion_event_cls)
 
     # ------------------------------------------------------------------
     def try_start_service(self, stage: str, event_queue, current_time: float, completion_event_cls):
         """Start as many tickets as possible on available servers for a stage."""
         while True:
-            server_idx = self.state.get_free_server(stage)
-            if server_idx is None:
+            agent = self.state.available_agent(stage)
+            if agent is None:
                 break
 
             selected = self._select_next_ticket(stage, current_time)
@@ -106,17 +115,17 @@ class WorkflowLogic:
                 break
 
             ticket, queued_time, source_queue = selected
-            self.state.occupy_server(stage, server_idx, ticket.ticket_id)
+            self.state.occupy_server(stage, agent, ticket.ticket_id)
             ticket.current_stage = stage
             wait_time = max(0.0, current_time - queued_time)
             self.stats.log_queue_wait(ticket.ticket_id, stage, wait_time, current_time)
             service_time = sample_service_time(stage)
             completion_time = current_time + service_time
-            event_queue.push(completion_event_cls(completion_time, ticket.ticket_id, stage))
+            event_queue.push(completion_event_cls(completion_time, ticket.ticket_id, stage, service_time))
             self.stats.log_service_start(
                 ticket.ticket_id,
                 stage,
-                server_idx,
+                agent.agent_id,
                 current_time,
                 wait_time,
                 service_time,
@@ -127,7 +136,7 @@ class WorkflowLogic:
                 "Ticket %s started %s on server %s at t=%.2f (wait %.2f, svc %.2f, completes %.2f) from %s",
                 ticket.ticket_id,
                 stage,
-                server_idx,
+                agent.agent_id,
                 current_time,
                 wait_time,
                 service_time,
@@ -147,7 +156,7 @@ class WorkflowLogic:
     def _select_next_ticket(self, stage: str, current_time: float):
         """Select the next ticket using a prioritized, overridable queue policy."""
         for source in self._candidate_sources_for_stage(stage):
-            queue_item = self._dequeue_from_source(source)
+            queue_item = self._dequeue_from_source(source, stage)
             if queue_item is not None:
                 ticket, queued_time = queue_item
                 self.stats.log_dequeue(ticket.ticket_id, source, current_time)
@@ -155,7 +164,23 @@ class WorkflowLogic:
                 return ticket, queued_time, source
         return None
 
-    def _dequeue_from_source(self, source: str):
+    def _dequeue_from_source(self, source: str, stage: str):
+        queue_ref: Optional[Deque]
         if source == "backlog":
-            return self.state.dequeue_backlog()
-        return self.state.dequeue(source)
+            queue_ref = self.state.backlog_buffer
+        else:
+            queue_ref = self.state.stage_queues.get(source)
+        if queue_ref is None or len(queue_ref) == 0:
+            return None
+
+        if stage in {"dev_review", "testing"} and len(queue_ref) > 1:
+            selected = select_with_churn(queue_ref)
+            if selected:
+                ticket, queued_time, idx = selected
+                try:
+                    item = queue_ref[idx]
+                    del queue_ref[idx]
+                    return item
+                except Exception:  # noqa: BLE001 - defensive against deque index issues
+                    logging.warning("Failed weighted selection pop; defaulting to FIFO.")
+        return queue_ref.popleft()

@@ -1,4 +1,4 @@
-# v4
+# v5
 # file: simulation/events.py
 
 """
@@ -45,9 +45,10 @@ class TicketArrivalEvent(Event):
 class ServiceCompletionEvent(Event):
     """Service completion event — routing handled in WorkflowLogic."""
 
-    def __init__(self, time: float, ticket_id: int, stage: str):
+    def __init__(self, time: float, ticket_id: int, stage: str, service_time: float):
         super().__init__(time, ticket_id)
         self.stage = stage
+        self.service_time = service_time
 
     def process(self, event_queue, state, stats):
         logic = WorkflowLogic(state, stats)
@@ -60,7 +61,7 @@ class ServiceCompletionEvent(Event):
                 self.stage,
             )
             return
-        logic.handle_service_completion(ticket, self.stage, self.time, event_queue, ServiceCompletionEvent)
+        logic.handle_service_completion(ticket, self.stage, self.time, event_queue, ServiceCompletionEvent, self.service_time)
 
 
 class EventQueue:
