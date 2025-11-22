@@ -1,4 +1,4 @@
-# v3
+# v4
 # file: simulation/events.py
 
 """
@@ -38,8 +38,7 @@ class TicketArrivalEvent(Event):
 
     def process(self, event_queue, state, stats):
         logic = WorkflowLogic(state, stats)
-        ticket = state.create_ticket(self.ticket_id, self.time)
-        logic.handle_ticket_arrival(ticket, self.time, event_queue, ServiceCompletionEvent)
+        logic.handle_ticket_arrival(self.ticket_id, self.time, event_queue, ServiceCompletionEvent)
         logic.schedule_next_arrival(event_queue, self.time, TicketArrivalEvent)
 
 
@@ -88,9 +87,12 @@ class EventQueue:
     def schedule_initial_arrivals(
         self,
         state,
+        stats=None,
         arrival_event_cls: Type[TicketArrivalEvent] = TicketArrivalEvent,
     ):
         """Seed the queue with the first arrival at time zero."""
         first_ticket_id = state.issue_ticket_id()
         self.push(arrival_event_cls(0.0, first_ticket_id))
         logging.info("Initial arrival for ticket %s scheduled at t=0.00", first_ticket_id)
+        if stats is not None:
+            stats.log_scheduled_arrival(first_ticket_id, 0.0)

@@ -1,4 +1,4 @@
-# v3
+# v4
 # file: simulation/simulate.py
 
 """
@@ -144,7 +144,7 @@ def main():
     stats = StatsCollector(state)
 
     event_queue = EventQueue()
-    event_queue.schedule_initial_arrivals(state)
+    event_queue.schedule_initial_arrivals(state, stats)
 
     logging.info("Starting simulation loop. Target horizon: %.2f", SIM_DURATION)
     while not event_queue.empty():

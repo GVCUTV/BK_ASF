@@ -1,4 +1,4 @@
-# v3
+# v4
 # file: simulation/entities.py
 
 """
@@ -21,7 +21,7 @@ class Ticket:
     def __init__(self, ticket_id: int, arrival_time: float):
         self.ticket_id = ticket_id
         self.arrival_time = arrival_time
-        self.current_stage = "dev_review"
+        self.current_stage = "backlog"
         self.history: List[Tuple[str, float]] = [("arrival", arrival_time)]
         self.dev_review_cycles = 0
         self.test_cycles = 0
@@ -45,6 +45,16 @@ class SystemState:
             "dev_review": [None] * N_DEVS,
             "testing": [None] * N_TESTERS,
         }
+
+    # ---- Backlog helpers ------------------------------------------------
+    def enqueue_backlog(self, ticket: Ticket, event_time: float):
+        self.backlog_buffer.append((ticket, event_time))
+        logging.debug("Ticket %s enqueued in backlog at t=%.2f", ticket.ticket_id, event_time)
+
+    def dequeue_backlog(self) -> Optional[Tuple[Ticket, float]]:
+        if len(self.backlog_buffer) == 0:
+            return None
+        return self.backlog_buffer.popleft()
 
     # ---- Ticket helpers -------------------------------------------------
     def issue_ticket_id(self) -> int:

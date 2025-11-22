@@ -1,4 +1,4 @@
-# v2
+# v3
 # file: simulation/workflow_logic.py
 
 """
@@ -24,11 +24,13 @@ class WorkflowLogic:
         self.stats = stats
 
     # ------------------------------------------------------------------
-    def handle_ticket_arrival(self, ticket, event_time: float, event_queue, completion_event_cls):
-        """Queue arrivals into dev/review and kick off service if possible."""
-        logging.info("Ticket %s arrived at t=%.2f", ticket.ticket_id, event_time)
-        ticket.current_stage = "dev_review"
-        self.state.enqueue("dev_review", ticket, event_time)
+    def handle_ticket_arrival(self, ticket_id: int, event_time: float, event_queue, completion_event_cls):
+        """Register an arrival, queue it, and start work when capacity is free."""
+        ticket = self.state.create_ticket(ticket_id, event_time)
+        ticket.current_stage = "backlog"
+        self.stats.log_arrival_event(ticket.ticket_id, event_time, "backlog")
+        logging.info("Ticket %s arrived at t=%.2f; queued to backlog", ticket.ticket_id, event_time)
+        self.state.enqueue_backlog(ticket, event_time)
         self.try_start_service("dev_review", event_queue, event_time, completion_event_cls)
 
     def schedule_next_arrival(self, event_queue, current_time: float, arrival_event_cls):
@@ -44,12 +46,14 @@ class WorkflowLogic:
         next_ticket_id = self.state.issue_ticket_id()
         event_queue.push(arrival_event_cls(next_time, next_ticket_id))
         logging.info("Scheduled ticket %s arrival at t=%.2f", next_ticket_id, next_time)
+        self.stats.log_scheduled_arrival(next_ticket_id, next_time)
 
     # ------------------------------------------------------------------
     def handle_service_completion(self, ticket, stage: str, event_time: float, event_queue, completion_event_cls):
         """Release servers, determine routing, and continue processing."""
         ticket.history.append((f"complete_{stage}", event_time))
         logging.info("Ticket %s completed %s at t=%.2f", ticket.ticket_id, stage, event_time)
+        self.stats.log_service_completion(ticket.ticket_id, stage, event_time)
 
         released_idx = self.state.release_server(stage, ticket.ticket_id)
         if released_idx is None:
@@ -62,9 +66,13 @@ class WorkflowLogic:
                     "Ticket %s receives dev/review feedback; routing back to dev queue.",
                     ticket.ticket_id,
                 )
+                self.stats.log_feedback(ticket.ticket_id, stage, "feedback", event_time)
                 self.state.enqueue("dev_review", ticket, event_time)
+                self.stats.log_enqueue(ticket.ticket_id, "dev_review", event_time, source="dev_feedback")
             else:
+                self.stats.log_feedback(ticket.ticket_id, stage, "progress", event_time)
                 self.state.enqueue("testing", ticket, event_time)
+                self.stats.log_enqueue(ticket.ticket_id, "testing", event_time, source="dev_complete")
                 self.try_start_service("testing", event_queue, event_time, completion_event_cls)
         elif stage == "testing":
             ticket.test_cycles += 1
@@ -73,8 +81,11 @@ class WorkflowLogic:
                     "Ticket %s receives testing feedback; routing to dev queue.",
                     ticket.ticket_id,
                 )
+                self.stats.log_feedback(ticket.ticket_id, stage, "feedback", event_time)
                 self.state.enqueue("dev_review", ticket, event_time)
+                self.stats.log_enqueue(ticket.ticket_id, "dev_review", event_time, source="test_feedback")
             else:
+                self.stats.log_feedback(ticket.ticket_id, stage, "complete", event_time)
                 self.state.close_ticket(ticket, event_time, self.stats)
         else:
             logging.error("Unknown stage %s encountered during completion for ticket %s.", stage, ticket.ticket_id)
@@ -86,10 +97,14 @@ class WorkflowLogic:
         """Start as many tickets as possible on available servers for a stage."""
         while True:
             server_idx = self.state.get_free_server(stage)
-            queue_item = self.state.dequeue(stage)
-            if server_idx is None or queue_item is None:
+            if server_idx is None:
                 break
-            ticket, queued_time = queue_item
+
+            selected = self._select_next_ticket(stage)
+            if selected is None:
+                break
+
+            ticket, queued_time, source_queue = selected
             self.state.occupy_server(stage, server_idx, ticket.ticket_id)
             ticket.current_stage = stage
             wait_time = max(0.0, current_time - queued_time)
@@ -97,8 +112,7 @@ class WorkflowLogic:
             service_time = sample_service_time(stage)
             completion_time = current_time + service_time
             event_queue.push(completion_event_cls(completion_time, ticket.ticket_id, stage))
-            logging.info(
-                "Ticket %s started %s on server %s at t=%.2f (wait %.2f, svc %.2f, completes %.2f)",
+            self.stats.log_service_start(
                 ticket.ticket_id,
                 stage,
                 server_idx,
@@ -106,4 +120,40 @@ class WorkflowLogic:
                 wait_time,
                 service_time,
                 completion_time,
+                source_queue,
             )
+            logging.info(
+                "Ticket %s started %s on server %s at t=%.2f (wait %.2f, svc %.2f, completes %.2f) from %s",
+                ticket.ticket_id,
+                stage,
+                server_idx,
+                current_time,
+                wait_time,
+                service_time,
+                completion_time,
+                source_queue,
+            )
+
+    # ------------------------------------------------------------------
+    def _candidate_sources_for_stage(self, stage: str) -> list[str]:
+        """Ordered list of queues/backlogs to pull from for a given stage."""
+        if stage == "dev_review":
+            return ["dev_review", "backlog"]
+        if stage == "testing":
+            return ["testing"]
+        return []
+
+    def _select_next_ticket(self, stage: str):
+        """Select the next ticket using a prioritized, overridable queue policy."""
+        for source in self._candidate_sources_for_stage(stage):
+            queue_item = self._dequeue_from_source(source)
+            if queue_item is not None:
+                ticket, queued_time = queue_item
+                self.stats.log_routing_decision(ticket.ticket_id, source, stage)
+                return ticket, queued_time, source
+        return None
+
+    def _dequeue_from_source(self, source: str):
+        if source == "backlog":
+            return self.state.dequeue_backlog()
+        return self.state.dequeue(source)
