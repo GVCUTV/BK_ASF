@@ -1,4 +1,4 @@
-# v6
+# v7
 # file: simulation/workflow_logic.py
 
 """
@@ -80,12 +80,12 @@ class WorkflowLogic:
         )
 
         if stage == "dev":
+            ticket.dev_cycles += 1
             self.stats.log_feedback(ticket.ticket_id, stage, "progress", event_time)
             self.state.enqueue("review", ticket, event_time)
             self.stats.log_enqueue(ticket.ticket_id, "review", event_time, source="dev_complete")
             self.try_start_service("review", event_queue, event_time, completion_event_cls)
         elif stage == "review":
-            ticket.dev_review_cycles += 1
             ticket.review_cycles += 1
             if np.random.rand() < FEEDBACK_P_DEV:
                 logging.info(
