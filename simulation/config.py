@@ -8,6 +8,7 @@ Distributions are SciPy-style with explicit params (shape/scale/loc) and include
 Generated automatically by simulation/generate_sim_config.py on 2025-11-16 18:50:44.
 Repo: https://github.com/GVCUTV/BK_ASF.git
 """
+import os
 
 # ----------------------------- General ----------------------------- #
 SIM_DURATION = 365.000000  # days of simulated time
@@ -62,6 +63,8 @@ CHURN_WEIGHT_DEL = 0.5
 
 # --------------------------- Random seeds --------------------------- #
 GLOBAL_RANDOM_SEED = 22015001
+seed = os.getenv("BK_ASF_SIM_SEED", GLOBAL_RANDOM_SEED)
+GLOBAL_RANDOM_SEED = int(seed)
 SEED_OVERRIDE_ENV_VAR = "SIMULATION_RANDOM_SEED"
 ARRIVAL_STREAM_SEED = 22015002
 SERVICE_TIME_STREAM_SEED = 22015003
