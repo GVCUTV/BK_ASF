@@ -1,4 +1,4 @@
-# v6
+# v7
 # file: simulation/stats.py
 
 """
@@ -226,7 +226,8 @@ class StatsCollector:
     def log_closure(self, ticket, close_time: float) -> None:
         """Persist ticket closure details and cycle counts."""
         stats = self._ensure_ticket(ticket.ticket_id, ticket.arrival_time)
-        stats["cycles"]["dev_review"] = ticket.dev_review_cycles
+        stats["cycles"]["dev"] = ticket.dev_cycles
+        stats["cycles"]["review"] = ticket.review_cycles
         stats["cycles"]["testing"] = ticket.test_cycles
         stats["final_time"] = close_time - ticket.arrival_time
         stats["closed_time"] = close_time
@@ -234,10 +235,11 @@ class StatsCollector:
         self.event_counters["closures"] += 1
         self._record_event(ticket.ticket_id, "closed", close_time)
         logging.info(
-            "Ticket %s closed in %.2f units. DevReview cycles: %s, Test cycles: %s",
+            "Ticket %s closed in %.2f units. Dev cycles: %s, Review cycles: %s, Test cycles: %s",
             ticket.ticket_id,
             close_time - ticket.arrival_time,
-            ticket.dev_review_cycles,
+            ticket.dev_cycles,
+            ticket.review_cycles,
             ticket.test_cycles,
         )
 
@@ -245,10 +247,14 @@ class StatsCollector:
     # Reporting helpers
     # ------------------------------------------------------------------
     def _calculate_ticket_row(self, ticket_id: int, stat: Dict[str, Any]) -> Dict[str, Any]:
-        wait_dev_review = sum(stat.get("queue_waits", {}).get("dev_review", []))
+        wait_dev = sum(stat.get("queue_waits", {}).get("dev", []))
+        wait_review = sum(stat.get("queue_waits", {}).get("review", []))
         wait_testing = sum(stat.get("queue_waits", {}).get("testing", []))
         service_dev = sum(
-            start["service_time"] for start in stat.get("service_starts", []) if start.get("stage") == "dev_review"
+            start["service_time"] for start in stat.get("service_starts", []) if start.get("stage") == "dev"
+        )
+        service_review = sum(
+            start["service_time"] for start in stat.get("service_starts", []) if start.get("stage") == "review"
         )
         service_test = sum(
             start["service_time"] for start in stat.get("service_starts", []) if start.get("stage") == "testing"
@@ -259,14 +265,18 @@ class StatsCollector:
             "arrival_time": stat.get("arrival_time"),
             "closed_time": stat.get("closed_time"),
             "time_in_system": stat.get("final_time"),
-            "dev_review_cycles": stat.get("cycles", {}).get("dev_review", 0),
+            "dev_cycles": stat.get("cycles", {}).get("dev", 0),
+            "review_cycles": stat.get("cycles", {}).get("review", 0),
             "test_cycles": stat.get("cycles", {}).get("testing", 0),
-            "wait_dev_review": wait_dev_review,
+            "wait_dev": wait_dev,
+            "wait_review": wait_review,
             "wait_testing": wait_testing,
-            "total_wait": wait_dev_review + wait_testing,
-            "service_time_dev_review": service_dev,
+            "total_wait": wait_dev + wait_review + wait_testing,
+            "service_time_dev": service_dev,
+            "service_time_review": service_review,
             "service_time_testing": service_test,
-            "service_starts_dev_review": sum(1 for start in stat.get("service_starts", []) if start.get("stage") == "dev_review"),
+            "service_starts_dev": sum(1 for start in stat.get("service_starts", []) if start.get("stage") == "dev"),
+            "service_starts_review": sum(1 for start in stat.get("service_starts", []) if start.get("stage") == "review"),
             "service_starts_testing": sum(1 for start in stat.get("service_starts", []) if start.get("stage") == "testing"),
             # Reserved Markov-aware fields for 4.3A compatibility
             "markov_time_dev": "",
@@ -282,14 +292,18 @@ class StatsCollector:
             "arrival_time",
             "closed_time",
             "time_in_system",
-            "dev_review_cycles",
+            "dev_cycles",
+            "review_cycles",
             "test_cycles",
-            "wait_dev_review",
+            "wait_dev",
+            "wait_review",
             "wait_testing",
             "total_wait",
-            "service_time_dev_review",
+            "service_time_dev",
+            "service_time_review",
             "service_time_testing",
-            "service_starts_dev_review",
+            "service_starts_dev",
+            "service_starts_review",
             "service_starts_testing",
             "markov_time_dev",
             "markov_time_rev",
@@ -307,7 +321,8 @@ class StatsCollector:
     def _aggregate_summary(self) -> List[Dict[str, Any]]:
         self._finalize_queue_areas(self.state.sim_duration)
         all_times = [s.get("final_time") for s in self.ticket_stats.values() if s.get("final_time") is not None]
-        dev_cycles = [s.get("cycles", {}).get("dev_review", 0) for s in self.ticket_stats.values()]
+        dev_cycles = [s.get("cycles", {}).get("dev", 0) for s in self.ticket_stats.values()]
+        review_cycles = [s.get("cycles", {}).get("review", 0) for s in self.ticket_stats.values()]
         test_cycles = [s.get("cycles", {}).get("testing", 0) for s in self.ticket_stats.values()]
 
         summary_rows = [
@@ -364,10 +379,19 @@ class StatsCollector:
         if dev_cycles:
             summary_rows.append(
                 {
-                    "metric": "mean_dev_review_cycles",
+                    "metric": "mean_dev_cycles",
                     "value": float(np.mean(dev_cycles)),
                     "units": "cycles",
-                    "description": "Average dev/review cycles per ticket",
+                    "description": "Average dev cycles per ticket",
+                }
+            )
+        if review_cycles:
+            summary_rows.append(
+                {
+                    "metric": "mean_review_cycles",
+                    "value": float(np.mean(review_cycles)),
+                    "units": "cycles",
+                    "description": "Average review cycles per ticket",
                 }
             )
         if test_cycles:
@@ -385,10 +409,10 @@ class StatsCollector:
             avg_wait = mean(self.queue_wait_records.get(stage, []) or [0.0])
             avg_queue_len = self.queue_tracking.get(stage, {}).get("area", 0.0) / horizon
             utilization = 0.0
-            if stage == "dev_review":
-                avg_capacity = (
-                    self.developer_state_time.get("DEV", 0.0) + self.developer_state_time.get("REV", 0.0)
-                ) / horizon
+            if stage == "dev":
+                avg_capacity = self.developer_state_time.get("DEV", 0.0) / horizon
+            elif stage == "review":
+                avg_capacity = self.developer_state_time.get("REV", 0.0) / horizon
             else:
                 avg_capacity = self.developer_state_time.get("TEST", 0.0) / horizon
             if avg_capacity > 0:
@@ -489,14 +513,14 @@ class StatsCollector:
         logging.info("Closed tickets: %s", self.event_counters.get("closures", 0))
         if summary_rows:
             for row in summary_rows:
-                if row.get("metric") in {"throughput_dev_review", "throughput_testing", "closure_rate"}:
+                if row.get("metric") in {"throughput_dev", "throughput_review", "throughput_testing", "closure_rate"}:
                     logging.info("%s = %s %s", row["metric"], row["value"], row["units"])
 
         print("------ SIMULATION SUMMARY ------")
         print(f"Closed tickets: {self.event_counters.get('closures', 0)}")
         if summary_rows:
             for row in summary_rows:
-                if row.get("metric") in {"throughput_dev_review", "throughput_testing", "closure_rate"}:
+                if row.get("metric") in {"throughput_dev", "throughput_review", "throughput_testing", "closure_rate"}:
                     print(f"{row['metric']}: {row['value']} {row['units']}")
 
         logging.info("Per-ticket CSV available at %s", self.ticket_csvfile)

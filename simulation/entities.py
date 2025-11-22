@@ -1,4 +1,4 @@
-# v6
+# v7
 # file: simulation/entities.py
 
 """
@@ -23,7 +23,7 @@ class Ticket:
         self.arrival_time = arrival_time
         self.current_stage = "backlog"
         self.history: List[Tuple[str, float]] = [("arrival", arrival_time)]
-        self.dev_review_cycles = 0
+        self.dev_cycles = 0
         self.review_cycles = 0
         self.test_cycles = 0
         self.churn_add: Optional[float] = None
