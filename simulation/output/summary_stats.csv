@@ -1,0 +1,22 @@
+metric,value,units,description
+tickets_arrived,116,tickets,Total arrivals scheduled within the simulation horizon
+tickets_closed,10,tickets,Tickets processed to completion
+closure_rate,0.08620689655172414,fraction,Closed tickets divided by arrivals
+mean_time_in_system,177.940781932204,days,Average arrival-to-closure time
+median_time_in_system,160.22401126913775,days,Median arrival-to-closure time
+p95_time_in_system,293.18533595193696,days,95th percentile of arrival-to-closure time
+mean_dev_review_cycles,0.08620689655172414,cycles,Average dev/review cycles per ticket
+mean_test_cycles,0.08620689655172414,cycles,Average testing cycles per ticket
+throughput_dev_review,0.1726027397260274,tickets/day,Completed dev_review services per day
+avg_wait_dev_review,15.044889970076332,days,Average queue wait before dev_review service
+avg_queue_length_dev_review,0.0,tickets,Time-weighted average queue length for dev_review
+utilization_dev_review,1.137310527794751,fraction,Server utilization for dev_review
+throughput_testing,0.0273972602739726,tickets/day,Completed testing services per day
+avg_wait_testing,38.84088922686741,days,Average queue wait before testing service
+avg_queue_length_testing,13.665805872121952,tickets,Time-weighted average queue length for testing
+utilization_testing,1.5635689148888983,fraction,Server utilization for testing
+rework_rate_dev_review,1.0,fraction,Feedback loops per completion for dev_review
+rework_rate_testing,1.0,fraction,Feedback loops per completion for testing
+markov_time_in_states,"{'OFF': 2117.355591713594, 'DEV': 4779.434361475094, 'REV': 3545.598478265545, 'TEST': 1357.5315348021886}",days,Aggregate time spent by all agents in each developer state
+markov_stint_counts,"{'OFF': 56, 'DEV': 81, 'REV': 75, 'TEST': 48}",count,Number of stints observed per developer state during the run
+markov_stint_means,"{'OFF': 37.8035, 'DEV': 143.38374074074073, 'REV': 47.88193333333333, 'TEST': 1.3825629583333334}",days,Mean stint length per developer state (simulated)
