@@ -13,7 +13,7 @@ Repo: https://github.com/GVCUTV/BK_ASF.git
 SIM_DURATION = 365.000000  # days of simulated time
 
 # ----------------------------- Logging ----------------------------- #
-LOG_FILE = "logs/simulation.log"
+LOG_FILE = "simulation/logs/simulation.log"
 
 # --------------------------- Arrival process --------------------------- #
 # Estimated from ETL data in window [2009-04-01 .. 2017-10-18)
