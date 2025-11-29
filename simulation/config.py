@@ -1,4 +1,4 @@
-# v4
+# v5
 # file: simulation/config.py
 
 """
@@ -9,6 +9,7 @@ Generated automatically by simulation/generate_sim_config.py on 2025-11-16 18:50
 Repo: https://github.com/GVCUTV/BK_ASF.git
 """
 import os
+from typing import Any, Dict
 
 # ----------------------------- General ----------------------------- #
 SIM_DURATION = 365.000000  # days of simulated time
@@ -69,3 +70,22 @@ SEED_OVERRIDE_ENV_VAR = "SIMULATION_RANDOM_SEED"
 ARRIVAL_STREAM_SEED = 22015002
 SERVICE_TIME_STREAM_SEED = 22015003
 STATE_TRANSITION_STREAM_SEED = 22015004
+
+
+def current_config() -> Dict[str, Any]:
+    """Return a snapshot of the current configuration values."""
+    return {
+        key: value
+        for key, value in globals().items()
+        if key.isupper() and not key.startswith("__")
+    }
+
+
+def apply_overrides(overrides: Dict[str, Any]) -> Dict[str, Any]:
+    """Apply overrides to module-level settings and report what changed."""
+    applied: Dict[str, Any] = {}
+    for key, value in overrides.items():
+        target = key if key.isupper() else key.upper()
+        globals()[target] = value
+        applied[target] = value
+    return applied
