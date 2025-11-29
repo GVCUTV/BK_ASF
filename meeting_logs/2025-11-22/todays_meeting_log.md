@@ -194,4 +194,171 @@ When we resume in one week, start with:
 > **Today we verified the simulation, corrected assumptions, redesigned the workflow to separate DEV and REVIEW, prepared complete Codex prompts, and defined a precise roadmap for next session.**  
 >  
 > **Next time begins with executing the Codex prompts and validating the updated simulation.**
+---
+# 10. After log generation
+## Meeting 5 — Steps 4–5 Validation Summary (Updated After DEV/REVIEW Split)
 
+### **5.1 – Step 4: Event Loop & Workflow Behavior Validation**
+
+#### **Objective**
+Validate that the discrete-event simulation behaves correctly after introducing separate **DEV** and **REVIEW** workflow stages, ensuring correct routing, service lifecycle, event ordering, and Markov-driven developer state transitions.
+
+#### **Findings**
+- **Event ordering correctly handled**: all events processed in chronological order with no reversals or overlaps.
+- **Arrival process correct**: Poisson inter-arrival times, monotonic timestamps, correct scheduling until horizon.
+- **Workflow routing correct**:
+  - `backlog → dev → review → testing → closed`
+  - Review feedback loops return to **dev**
+  - Testing feedback loops return to **dev**
+- **DEV and REVIEW fully separated**:
+  - DEV completion → REVIEW
+  - REVIEW completion → TESTING or feedback to DEV
+  - TEST completion → CLOSED or feedback to DEV
+- **Developer Markov model functioning**:
+  - State transitions (DEV, REV, TEST, OFF) logged correctly
+  - Stint sampling from PMFs applied
+  - Aggregate developer-time metrics correctly accumulated
+- **Horizon termination correct**:
+  - Simulation stops cleanly when next event exceeds SIM_DURATION
+- **No warnings, no errors, no unhandled transitions**
+
+#### **Conclusion**
+➡ **Step 4 is fully satisfied.**  
+The event loop and workflow behaviors are correct, stable, and match the updated architecture with separate DEV and REVIEW stages.
+---
+### **5.1 – Step 5: Output & Statistics Validation**
+
+#### **Objective**
+Verify that the generated outputs (`tickets_stats.csv`, `summary_stats.csv`) reflect the updated three-stage workflow and remain structurally and numerically consistent.
+
+#### **Findings**
+
+##### **Output Structure**
+Both CSVs now correctly expose:
+- Separate DEV, REVIEW, TESTING metrics
+- Separate cycles: `dev_cycles`, `review_cycles`, `test_cycles`
+- Separate waits: `wait_dev`, `wait_review`, `wait_testing`
+- Separate service times and service start counts
+- Markov state-time aggregates and stint counts
+
+##### **Numerical Consistency**
+- `tickets_arrived` matches number of rows in tickets CSV (98)
+- `tickets_closed` matches non-null closed times (8)
+- `closure_rate = tickets_closed / tickets_arrived` verified
+- `time_in_system` values match `closed_time - arrival_time` exactly
+- No negative wait times or service times
+- Stage-level throughput, queue length, and wait-time metrics consistent with ticket flow
+- Markov summaries (time in states / stint means) consistent with logs
+
+##### **Behavioral Consistency**
+- Lower closure rate expected due to feedback loops and finite horizon
+- DEV throughput > REVIEW throughput > TEST throughput, consistent with multi-stage funnel
+- Ticket-level and system-level statistics show no contradictions
+
+#### **Conclusion**
+➡ **Step 5 is fully satisfied.**  
+Outputs match expectations for the updated workflow and demonstrate correct statistics collection at both per-ticket and aggregate levels.
+
+---
+
+### **Final Status**
+Both **Step 4** and **Step 5** validations are complete and successful.  
+The simulation is correct and ready for Steps **5.2A**, **5.2B**, and **5.2C**.
+## Meeting 5 — Steps 6–7 Validation Summary (Updated After DEV/REVIEW Split)
+
+### **5.1 – Step 6: Reproducibility Check**
+
+#### **Objective**
+Ensure that the simulation produces *identical outputs* (CSV files) when executed multiple times under the same configuration and seed. This verifies the determinism of the event scheduling, developer Markov chain, and workflow logic after the DEV/REVIEW split.
+
+#### **Method**
+Because the current repository version does **not** read seed values from environment variables, reproducibility is guaranteed only when using the same **GLOBAL_RANDOM_SEED** defined in:
+
+```
+simulation/config.py
+```
+
+#### **Procedure Executed**
+1. **Set a fixed seed**  
+   Updated `GLOBAL_RANDOM_SEED` inside `config.py` (e.g., `GLOBAL_RANDOM_SEED = 42`).
+
+2. **Run 1 – Save Outputs**
+   ```
+   python -m simulation.simulate
+   mkdir -p reproducibility/run1
+   cp simulation/output/*.csv reproducibility/run1/
+   ```
+
+3. **Run 2 – Save Outputs**
+   ```
+   python -m simulation.simulate
+   mkdir -p reproducibility/run2
+   cp simulation/output/*.csv reproducibility/run2/
+   ```
+
+4. **Compare Output Files**
+   ```
+   diff reproducibility/run1/tickets_stats.csv reproducibility/run2/tickets_stats.csv
+   diff reproducibility/run1/summary_stats.csv reproducibility/run2/summary_stats.csv
+   ```
+
+#### **Findings**
+- Both CSVs were **byte-identical** across the two runs.
+- No stochastic divergence was observed.
+- Developer Markov transitions, ticket routing, and queue behavior were fully deterministic given the fixed seed.
+- Log ordering was stable and consistent with previous runs.
+
+#### **Conclusion**
+➡ **Step 6 is fully satisfied.**  
+The simulation is reproducible under a fixed seed and deterministic configuration.
+
+---
+
+### **5.1 – Step 7: Baseline Snapshot Update**
+
+#### **Objective**
+Create a new “golden” reference output for regression testing, reflecting the updated workflow architecture (separate DEV, REVIEW, TESTING stages).
+
+#### **Procedure Executed**
+1. **Run Simulation with the chosen seed**
+   ```
+   python -m simulation.simulate
+   ```
+
+2. **Prepare baseline directory**
+   ```
+   mkdir -p simulation/baseline_outputs
+   ```
+
+3. **Copy the new stable output CSVs**
+   ```
+   cp simulation/output/tickets_stats.csv simulation/baseline_outputs/
+   cp simulation/output/summary_stats.csv simulation/baseline_outputs/
+   ```
+
+4. **Record baseline metadata (optional but recommended)**
+   ```
+   echo "Seed: 42" > simulation/baseline_outputs/metadata.txt
+   echo "Baseline after DEV+REVIEW split" >> simulation/baseline_outputs/metadata.txt
+   echo "Generated on: $(date)" >> simulation/baseline_outputs/metadata.txt
+   ```
+
+#### **Findings**
+- Baseline includes dev/review/testing-separated metrics.
+- Schema now reflects the updated codebase (per Codex prompts).
+- Baseline matches reproducibility output (Step 6 run1).
+- Suitable for future regression checks (e.g. Step 5.2B sweeps).
+
+#### **Conclusion**
+➡ **Step 7 is fully satisfied.**  
+A refreshed baseline snapshot has been created and is aligned with the updated simulation architecture.
+
+---
+
+### **Final Status**
+Steps **6** and **7** are completed successfully.  
+The repository now has:
+- Verified reproducibility  
+- A new canonical baseline snapshot to validate future updates (e.g., parameter sweeps, further workflow refinements)
+
+The system is ready to proceed with Tasks **5.2A**, **5.2B**, and **5.2C** using the updated architecture.
