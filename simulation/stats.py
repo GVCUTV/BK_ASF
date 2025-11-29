@@ -1,4 +1,4 @@
-# v7
+# v8
 # file: simulation/stats.py
 
 """
@@ -405,9 +405,26 @@ class StatsCollector:
             )
 
         horizon = max(1e-9, float(self.state.sim_duration))
+        backlog_area = self.queue_tracking.get("backlog", {}).get("area", 0.0)
+
+        summary_rows.append(
+            {
+                "metric": "avg_queue_length_backlog",
+                "value": backlog_area / horizon,
+                "units": "tickets",
+                "description": "Time-weighted average backlog length (raw backlog queue; source for dev queue metric)",
+            }
+        )
+
         for stage in self.stage_names:
             avg_wait = mean(self.queue_wait_records.get(stage, []) or [0.0])
-            avg_queue_len = self.queue_tracking.get(stage, {}).get("area", 0.0) / horizon
+            queue_area = backlog_area if stage == "dev" else self.queue_tracking.get(stage, {}).get("area", 0.0)
+            avg_queue_len = queue_area / horizon
+            queue_description = (
+                "Time-weighted average backlog length viewed as the dev queue"
+                if stage == "dev"
+                else f"Time-weighted average queue length for {stage}"
+            )
             utilization = 0.0
             if stage == "dev":
                 avg_capacity = self.developer_state_time.get("DEV", 0.0) / horizon
@@ -436,7 +453,7 @@ class StatsCollector:
                         "metric": f"avg_queue_length_{stage}",
                         "value": avg_queue_len,
                         "units": "tickets",
-                        "description": f"Time-weighted average queue length for {stage}",
+                        "description": queue_description,
                     },
                     {
                         "metric": f"utilization_{stage}",
