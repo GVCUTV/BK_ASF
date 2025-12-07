@@ -407,9 +407,13 @@ FEEDBACK_P_TEST = {p_test:.10f}
 # --------------------------- Service time distributions --------------------------- #
 # Names follow SciPy; params are explicit and include 'loc' (shift), if any.
 SERVICE_TIME_PARAMS = {{
-    "dev_review": {{
+    "dev": {{
         "dist": "{dev_dist}",
         "params": {dev_params}
+    }},
+    "review": {{
+        "dist": "{review_dist}",
+        "params": {review_params}
     }},
     "testing": {{
         "dist": "{test_dist}",
@@ -461,8 +465,9 @@ def main():
 
     # 4) fits
     fits = read_fit_summary(args.fit_csv)
-    dev_fit = pick_stage(fits, ["dev_review","development","review","dev"])
-    test_fit = pick_stage(fits, ["testing","qa","ci","test"])
+    dev_fit = pick_stage(fits, ["dev", "development", "dev_review"])
+    review_fit = pick_stage(fits, ["review", "rev", "dev_review", "development", "dev"])
+    test_fit = pick_stage(fits, ["testing", "qa", "ci", "test"])
     state_paths = collect_state_parameter_paths()
 
     # 5) render
@@ -477,6 +482,7 @@ def main():
         dev_source_col=dev_src, test_source_col=test_src,
         p_dev=p_dev, p_test=p_test,
         dev_dist=dev_fit[0], dev_params=json.dumps(dev_fit[1]),
+        review_dist=review_fit[0], review_params=json.dumps(review_fit[1]),
         test_dist=test_fit[0], test_params=json.dumps(test_fit[1]),
         state_paths=json.dumps(state_paths, indent=4, sort_keys=True),
         global_seed=DEFAULT_RANDOM_SEEDS["global"],
