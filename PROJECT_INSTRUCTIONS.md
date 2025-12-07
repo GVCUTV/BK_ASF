@@ -106,12 +106,12 @@ Codex must produce:
 
 ### Human Intervention
 If any task cannot be automated:
-````
+
 
 ### PROMPT FOR THE USER
 
 <description of the required manual action>
-```
+
 
 ---
 
