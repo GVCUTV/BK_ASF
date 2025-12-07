@@ -27,7 +27,7 @@ import sys
 from dataclasses import dataclass
 from typing import Any, Dict, Iterable, List, Tuple
 
-DEFAULT_SPEC_PATH = os.path.join("simulation", "sweeps", "5_2B_sweeps.csv")
+DEFAULT_SPEC_PATH = os.path.join("sweeps", "5_2B_sweeps.csv")
 DEFAULT_OUTDIR = os.path.join("experiments", "5_2B")
 SUMMARY_FILENAME = "summary_stats.csv"
 TICKETS_FILENAME = "tickets_stats.csv"
