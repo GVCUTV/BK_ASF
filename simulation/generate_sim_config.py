@@ -337,7 +337,7 @@ def read_fit_summary(fit_csv):
         _fail("fit_summary.csv must contain %s" % need, df)
     fits = {}
     for _, r in df.iterrows():
-        stage = str(r["stage"]).strip()
+        stage = str(r["stage"]).strip().lower()
         dist  = str(r["dist"]).strip().lower()
         if dist == "lognorm":
             params = {"s": float(r["s"]), "loc": float(r["loc"]), "scale": float(r["scale"])}
@@ -365,10 +365,7 @@ def pick_stage(fits, candidates):
         if c in fits:
             logging.info("Stage selected: %s", c)
             return fits[c]
-    # Fallback to first (still data-based)
-    sel = next(iter(fits.values()))
-    logging.info("Candidates %s not found; using first available.", candidates)
-    return sel
+    _fail(f"Candidates {candidates} not found in fit_summary. Available stages: {sorted(fits.keys())}")
 
 
 # --------------------------- template --------------------------- #
@@ -465,8 +462,8 @@ def main():
 
     # 4) fits
     fits = read_fit_summary(args.fit_csv)
-    dev_fit = pick_stage(fits, ["dev", "development", "dev_review"])
-    review_fit = pick_stage(fits, ["review", "rev", "dev_review", "development", "dev"])
+    dev_fit = pick_stage(fits, ["dev", "development"])
+    review_fit = pick_stage(fits, ["review", "rev", "development", "dev"])
     test_fit = pick_stage(fits, ["testing", "qa", "ci", "test"])
     state_paths = collect_state_parameter_paths()
 

@@ -22,3 +22,17 @@
 2025-08-19 19:29:02,975 - INFO - Loaded distribution_fit_stats: rows=4 cols=10
 2025-08-19 19:29:02,992 - INFO - Winner: Distribuzione=Lognormale | MAE_KDE_PDF=3.83073e-05 | AIC=14400.320615835186 | BIC=14414.684150782115 | Params=[0.151668487, -1042.86559, 1069.60338]
 2025-08-19 19:29:02,997 - INFO - fit_summary.csv saved: /Users/og/PycharmProjects/BK_ASF/etl/output/csv/fit_summary.csv | rows=2
+2025-12-07 15:22:47,686 - INFO - Logger ready. Logfile: /workspace/BK_ASF/etl/output/logs/export_fit_summary.log
+2025-12-07 15:22:47,687 - INFO - Base dir  : etl/output/csv
+2025-12-07 15:22:47,688 - INFO - Output CSV: etl/output/csv/fit_summary.csv
+2025-12-07 15:22:47,688 - INFO - Stages    : dev,review,testing
+2025-12-07 15:22:47,688 - INFO - [Stage: dev] Using CSV: etl/output/csv/distribution_fit_stats_dev_duration_days.csv
+2025-12-07 15:22:47,692 - INFO - [Stage: dev] Loaded distribution_fit_stats: rows=4 cols=11
+2025-12-07 15:22:47,696 - INFO - [Stage: dev] Winner: Distribuzione=Weibull | MAE_KDE_PDF=5.24729e-05 | AIC=3284.051030286721 | BIC=3293.885374264412 | Params=[2.13046983, -279.07055412, 335.38112967]
+2025-12-07 15:22:47,696 - INFO - [Stage: review] Using CSV: etl/output/csv/distribution_fit_stats_review.csv
+2025-12-07 15:22:47,698 - INFO - [Stage: review] Loaded distribution_fit_stats: rows=4 cols=10
+2025-12-07 15:22:47,701 - INFO - [Stage: review] Winner: Distribuzione=Lognormale | MAE_KDE_PDF=3.61083e-05 | AIC=2068.2919738787323 | BIC=2078.126317856424 | Params=[0.24601912, -168.41875397, 186.30272449]
+2025-12-07 15:22:47,701 - INFO - [Stage: testing] Using CSV: etl/output/csv/distribution_fit_stats_testing.csv
+2025-12-07 15:22:47,703 - INFO - [Stage: testing] Loaded distribution_fit_stats: rows=4 cols=10
+2025-12-07 15:22:47,705 - INFO - [Stage: testing] Winner: Distribuzione=Weibull | MAE_KDE_PDF=0.000191989 | AIC=1587.2537220624042 | BIC=1595.5657759358012 | Params=[2.39611186, -37.89737413, 44.13777317]
+2025-12-07 15:22:47,708 - INFO - fit_summary.csv saved: etl/output/csv/fit_summary.csv | rows=3
