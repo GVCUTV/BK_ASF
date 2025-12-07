@@ -35,13 +35,17 @@ FEEDBACK_P_TEST = 0.0000000000
 # --------------------------- Service time distributions --------------------------- #
 # Names follow SciPy; params are explicit and include 'loc' (shift), if any.
 SERVICE_TIME_PARAMS = {
-    "dev_review": {
+    "dev": {
         "dist": "lognorm",
-        "params": {"s": 0.151668487, "loc": -1042.86559, "scale": 1069.60338}
+        "params": {"s": 4.742488311894271, "scale": 0.557762454811239}
+    },
+    "review": {
+        "dist": "lognorm",
+        "params": {"s": 2.3343591432874167, "scale": 5.970274807660755}
     },
     "testing": {
         "dist": "lognorm",
-        "params": {"s": 0.151668487, "loc": -1042.86559, "scale": 1069.60338}
+        "params": {"s": 4.536985240600843, "scale": 0.0026672756514741617}
     }
 }
 
