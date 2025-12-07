@@ -36,8 +36,7 @@ class StatsCollector:
         }
 
         self.queue_tracking: Dict[str, Dict[str, float]] = {
-            **{stage: {"length": 0.0, "last_time": 0.0, "area": 0.0} for stage in self.stage_names},
-            "backlog": {"length": 0.0, "last_time": 0.0, "area": 0.0},
+            stage: {"length": 0.0, "last_time": 0.0, "area": 0.0} for stage in self.stage_names
         }
         self.queue_wait_records: Dict[str, List[float]] = {stage: [] for stage in self.stage_names}
         self.service_busy_time: Dict[str, float] = {stage: 0.0 for stage in self.stage_names}
@@ -100,7 +99,14 @@ class StatsCollector:
     # ------------------------------------------------------------------
     # Queue length tracking helpers
     # ------------------------------------------------------------------
+    @staticmethod
+    def _tracking_stage(stage: str) -> str:
+        """Normalize backlog events so the dev queue metric reflects the backlog."""
+
+        return "dev" if stage == "backlog" else stage
+
     def _update_queue_length(self, stage: str, event_time: float, delta: float) -> None:
+        stage = self._tracking_stage(stage)
         record = self.queue_tracking.setdefault(stage, {"length": 0.0, "last_time": event_time, "area": 0.0})
         elapsed = event_time - record["last_time"]
         if elapsed > 0:
@@ -405,25 +411,12 @@ class StatsCollector:
             )
 
         horizon = max(1e-9, float(self.state.sim_duration))
-        backlog_area = self.queue_tracking.get("backlog", {}).get("area", 0.0)
-
-        summary_rows.append(
-            {
-                "metric": "avg_queue_length_backlog",
-                "value": backlog_area / horizon,
-                "units": "tickets",
-                "description": "Time-weighted average backlog length (raw backlog queue; source for dev queue metric)",
-            }
-        )
-
         for stage in self.stage_names:
             avg_wait = mean(self.queue_wait_records.get(stage, []) or [0.0])
-            queue_area = backlog_area if stage == "dev" else self.queue_tracking.get(stage, {}).get("area", 0.0)
+            queue_area = self.queue_tracking.get(stage, {}).get("area", 0.0)
             avg_queue_len = queue_area / horizon
             queue_description = (
-                "Time-weighted average backlog length viewed as the dev queue"
-                if stage == "dev"
-                else f"Time-weighted average queue length for {stage}"
+                "Time-weighted average backlog length (dev queue)" if stage == "dev" else f"Time-weighted average queue length for {stage}"
             )
             utilization = 0.0
             if stage == "dev":
