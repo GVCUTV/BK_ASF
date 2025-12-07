@@ -26,18 +26,12 @@ class WorkflowLogic:
         self.state = state
         self.stats = stats
         self.developer_pool = state.developer_pool
-        known_service_stages = {"dev", "review", "testing"}
-        if {"dev", "review"}.isdisjoint(SERVICE_TIME_PARAMS.keys()):
-            legacy_keys = [key for key in SERVICE_TIME_PARAMS.keys() if key not in known_service_stages]
-            if legacy_keys:
-                legacy_key = legacy_keys[0]
-                legacy_params = SERVICE_TIME_PARAMS.pop(legacy_key)
-                SERVICE_TIME_PARAMS["dev"] = dict(legacy_params)
-                SERVICE_TIME_PARAMS["review"] = dict(legacy_params)
-                logging.info(
-                    "Translated legacy %s service params into dev and review entries.",
-                    legacy_key,
-                )
+        required_stages = {"dev", "review", "testing"}
+        missing = sorted(required_stages.difference(SERVICE_TIME_PARAMS.keys()))
+        if missing:
+            raise ValueError(
+                f"SERVICE_TIME_PARAMS missing required stages: {missing}. Configure dev, review, and testing explicitly."
+            )
 
     # ------------------------------------------------------------------
     def handle_ticket_arrival(self, ticket_id: int, event_time: float, event_queue, completion_event_cls):

@@ -51,7 +51,6 @@ SUMMARY_METRICS = [
     "avg_wait_dev",
     "avg_wait_review",
     "avg_wait_testing",
-    "avg_queue_length_backlog",
     "avg_queue_length_dev",
     "avg_queue_length_review",
     "avg_queue_length_testing",

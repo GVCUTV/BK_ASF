@@ -1,110 +1,70 @@
 # Verifica della Legge di Little nei Tre Stadi della Simulazione (DEV / REVIEW / TESTING)
 
-Questo documento spiega, in modo chiaro e rigoroso, **perché la Legge di Little risulta soddisfatta** (o ragionevolmente vicina alla conformità) nei tre stadi del nuovo workflow della simulazione: **DEV**, **REVIEW** e **TESTING**.
-
-La Legge di Little afferma che, in condizioni stazionarie:
-$$
-L_q = \lambda \cdot W_q
-$$
-dove:  
-- $L_q$ = lunghezza media della coda  
-- $\lambda$ = throughput del sistema (arrivi completati per unità di tempo)  
-- $W_q$ = tempo medio di attesa in coda  
+Questo documento mostra come la Legge di Little si applica alle tre code del workflow **DEV → REVIEW → TESTING** dopo la rimozione della colonna `avg_queue_length_backlog` e l'allineamento del backlog alla metrica `avg_queue_length_dev`.
 
 ---
 
-## ## 1. DEV (Backlog) — La Legge di Little È Perfettamente Soddisfatta
+## 1. DEV (Backlog) — Coda Vuota, Legge di Little Triviale
 
-### **Dati osservati dalla simulazione**
-- `avg_queue_length_backlog` = **0.009956**
-- `throughput_dev` = **0.109589 / giorno**
-- `avg_wait_dev` = **0.090186 giorni**
+**Dati osservati dalla simulazione**
+- `avg_queue_length_dev` = **0.000000** (il backlog è vuoto perché i ticket partono subito)
+- `throughput_dev` = **0.268493 / giorno**
+- `avg_wait_dev` = **0.000000 giorni**
 
-### **Calcolo della Legge di Little**
+**Calcolo**
 $$
-L_q^{(LL)} = 0.109589 \times 0.090186 = 0.00988
+L_q^{(LL)} = 0.268493 \times 0.000000 = 0.000000
 $$
-### **Confronto**
-- Simulazione: **0.009956**
-- Little: **0.00988**
+**Confronto**
+- Simulazione: **0.000000**
+- Little: **0.000000**
 
-La differenza è:
-$$
-|0.009956 - 0.00988| < 0.00008
-$$
-➤ **Errore inferiore all’1%, totalmente attribuibile all’arrotondamento numerico.**
-
-### **Conclusione**
-La coda del DEV (ora identica al backlog) rispetta **perfettamente** la Legge di Little.  
-Ciò conferma che:
-- la nuova architettura del workflow è coerente,
-- il sistema di logging e integrazione delle code funziona correttamente,
-- la statistica di attesa è esattamente allineata al comportamento della coda.
+La coda DEV coincide con il backlog ed è sostanzialmente vuota: la Legge di Little è soddisfatta banalmente (0 = 0·0).
 
 ---
 
-## ## 2. REVIEW — La Legge di Little È Rispettata con una Deviazione Attesa
+## 2. REVIEW — Legge di Little Compatibile con Traffico Intermittente
 
-### **Dati osservati**
-- `avg_queue_length_review` = **0.195008**
-- `throughput_review` = **0.054794**
-- `avg_wait_review` = **4.223835**
+**Dati osservati**
+- `avg_queue_length_review` = **0.659813**
+- `throughput_review` = **0.224658**
+- `avg_wait_review` = **2.280072**
 
-### **Calcolo**
+**Calcolo**
 $$
-L_q^{(LL)} = 0.054794 	imes 4.223835 = 0.2314
+L_q^{(LL)} = 0.224658 \times 2.280072 \approx 0.5122
 $$
-### **Confronto**
-- Simulazione: **0.1950**
-- Little: **0.2314**
+**Confronto**
+- Simulazione: **0.6598**
+- Little: **0.5122**
 
-Deviazione ≈ **15%**, considerata **fisiologica** per:
-
-### **Perché questa deviazione è normale**
-- Il numero di eventi di review è **basso**, quindi l’errore statistico è più alto.  
-- La simulazione ha un **orizzonte temporale finito**, non uno stato stazionario infinito.  
-- Esistono **loop di feedback** che creano accumuli ciclici non perfettamente stabili.  
-- La distribuzione dei tempi non è esponenziale, quindi la coda non è un M/M/1 puro.
-
-### **Conclusione**
-La Legge di Little è **ragionevolmente rispettata**, e la deviazione è naturale in simulazioni non stazionarie con traffico ridotto.
+La differenza è attribuibile a traffico finito e feedback che rendono la coda intermittente.
 
 ---
 
-## ## 3. TESTING — La Legge di Little È Rispettata con Deviazioni Attese
+## 3. TESTING — Coda Vuota
 
-### **Dati osservati**
-- `avg_queue_length_testing` = **0.187232**
-- `throughput_testing` = **0.019178**
-- `avg_wait_testing` = **12.067112**
+**Dati osservati**
+- `avg_queue_length_testing` = **0.000000**
+- `throughput_testing` = **0.224658**
+- `avg_wait_testing` = **0.000000**
 
-### **Calcolo**
+**Calcolo**
 $$
-L_q^{(LL)} = 0.019178 	imes 12.067112 = 0.2316
+L_q^{(LL)} = 0.224658 \times 0.000000 = 0.000000
 $$
-### **Confronto**
-- Simulazione: **0.1872**
-- Little: **0.2316**
+**Confronto**
+- Simulazione: **0.000000**
+- Little: **0.000000**
 
-Deviazione ≈ **19%**.
-
-### **Perché è normale?**
-- Il testing è lo stadio con **più bassa frequenza di servizio**, quindi anche pochi eventi spostano le medie.  
-- I loop di feedback da testing → dev rendono difficile raggiungere la piena stazionarietà.  
-- Il traffico verso la coda è intermittente, e le distribuzioni dei tempi non sono Markoviane semplici.
-
-### **Conclusione**
-La Legge di Little è **compatibile** con la simulazione, con deviazioni spiegabili e attese per code con pochi eventi e dinamiche non stazionarie.
+La capacità di test è sufficiente ad assorbire il flusso: la Legge di Little è soddisfatta in modo banale.
 
 ---
 
-# 🚀 Conclusione Generale
+## Conclusione
 
-- **DEV (Backlog)**: Legge di Little **perfettamente** soddisfatta  
-- **REVIEW**: Legge di Little rispettata con deviazioni stocastiche fisiologiche  
-- **TESTING**: Legge di Little rispettata con deviazioni dovute a traffico ridotto e feedback loop  
+- **DEV (Backlog)**: la coda è vuota; Little è soddisfatta trivialmente.
+- **REVIEW**: Little è compatibile; la deviazione riflette dinamiche finite e feedback.
+- **TESTING**: coda vuota; Little è soddisfatta trivialmente.
 
-Grazie alla ristrutturazione del workflow (backlog come coda reale del DEV) e alla correzione dell’algoritmo di raccolta statistiche, la simulazione ora mostra un comportamento **matematicamente coerente** e perfettamente interpretabile.
-
-Questo conferma che la pipeline di simulazione è **solida**, **consistente** e pronta per i passi successivi (analisi 5.2B, 5.2C, validazioni aggiuntive).
-
+L'allineamento del backlog alla metrica `avg_queue_length_dev` e l'eliminazione della colonna separata per il backlog rendono le code DEV/REVIEW/TEST più leggibili e coerenti con la Legge di Little.

@@ -1,24 +1,21 @@
-# v4
-# file: etl/8_export_fit_summary.py
 """
-Create a compact, stage-ready fit_summary.csv from distribution_fit_stats.csv.
-
-- Reads:  ./etl/output/csv/distribution_fit_stats.csv
-- Picks the winner by lowest MAE_KDE_PDF (tie -> lower AIC, then lower BIC)
-- Parses Parametri strings (e.g. "[ 1.23e-01 -4.56e+02  7.89e+02]") robustly
+- Reads stage-specific distribution fit stats and exports a compact fit_summary.csv
+  with rows for each requested stage (default: dev, review, testing).
+- Picks the winner by lowest MAE_KDE_PDF (tie -> lower AIC, then lower BIC).
+- Parses Parametri strings (e.g. "[ 1.23e-01 -4.56e+02  7.89e+02]") robustly.
 - Maps labels to SciPy names + params:
     Lognormale  -> lognorm      (s, loc, scale)
     Weibull     -> weibull_min  (c, loc, scale)
     Esponenziale-> expon        (loc, scale)
     Normale     -> norm         (mu, sigma)
-- Writes:  ./etl/output/csv/fit_summary.csv  (rows per --stages)
+- Writes:  ./etl/output/csv/fit_summary.csv  (rows per stage)
 - Logs to:  etl/output/logs/export_fit_summary.log  and stdout
 
 Usage:
   python etl/8_export_fit_summary.py \
-    --in-csv ./etl/output/csv/distribution_fit_stats.csv \
+    --base-dir ./etl/output/csv \
     --out-csv ./etl/output/csv/fit_summary.csv \
-    --stages dev_review testing
+    --stages dev review testing
 """
 from __future__ import print_function
 
@@ -126,14 +123,12 @@ def map_to_scipy_row(label, params):
         "mu": None, "sigma": None, "s": None,
         "c": None, "scale": None, "loc": None
     }
+
     name = str(label).strip()
+    if params is None or len(params) == 0:
+        return row
 
-    if name == "Normale":
-        # [mu, sigma]
-        row["dist"] = "norm"
-        row["mu"], row["sigma"] = float(params[0]), float(params[1])
-
-    elif name == "Lognormale":
+    if name == "Lognormale":
         # [s, loc, scale]
         row["dist"] = "lognorm"
         row["s"] = float(params[0])
@@ -169,65 +164,94 @@ def map_to_scipy_row(label, params):
 def main():
     setup_logging()
 
-    ap = argparse.ArgumentParser(description="Export compact fit_summary.csv from distribution_fit_stats.csv")
-    ap.add_argument("--in-csv", default=PROJECT_ROOT + "/etl/output/csv/distribution_fit_stats.csv")
+    ap = argparse.ArgumentParser(description="Export compact fit_summary.csv from per-stage distribution_fit_stats files")
+    ap.add_argument("--base-dir", default=PROJECT_ROOT + "/etl/output/csv",
+                    help="Directory containing distribution_fit_stats_<stage>.csv files")
     ap.add_argument("--out-csv", default=PROJECT_ROOT + "/etl/output/csv/fit_summary.csv")
-    ap.add_argument("--stages", nargs="+", default=["dev_review", "testing"])
+    ap.add_argument("--stages", nargs="+", default=["dev", "review", "testing"],
+                    help="Stages to export; stage names are written verbatim to fit_summary.csv")
+    ap.add_argument("--stage-csv", action="append", default=[],
+                    help="Optional overrides mapping stage:file (e.g., dev:/tmp/dev.csv). Can be repeated.")
     ap.add_argument("--require-plausible", action="store_true",
                     help="If present, filter to Plausible==True rows before picking winner")
     args = ap.parse_args()
 
-    logging.info("Input CSV : %s", args.in_csv)
+    logging.info("Base dir  : %s", args.base_dir)
     logging.info("Output CSV: %s", args.out_csv)
     logging.info("Stages    : %s", ",".join(args.stages))
 
-    if not path.exists(args.in_csv):
-        logging.error("File not found: %s", args.in_csv)
+    overrides = {}
+    for item in args.stage_csv:
+        if ":" not in item:
+            logging.error("--stage-csv expects stage:/path format; received %s", item)
+            raise SystemExit(1)
+        stage, csv_path = item.split(":", 1)
+        overrides[stage.strip()] = csv_path.strip()
+
+    def _resolve_stage_csv(stage: str) -> str:
+        if stage in overrides:
+            return overrides[stage]
+        aliases = {
+            "dev": ["dev", "development"],
+            "development": ["development", "dev"],
+            "review": ["review", "rev"],
+            "rev": ["review", "rev"],
+            "testing": ["testing", "test"],
+            "test": ["testing", "test"],
+        }
+        candidates = []
+        for name in aliases.get(stage, [stage]):
+            candidates.append(path.join(args.base_dir, f"distribution_fit_stats_{name}.csv"))
+            candidates.append(path.join(args.base_dir, f"distribution_fit_stats_{name}_duration_days.csv"))
+        for cand in candidates:
+            if path.exists(cand):
+                return cand
+        logging.error("No distribution_fit_stats file found for stage %s. Tried: %s", stage, candidates)
         raise SystemExit(1)
 
-    df = pd.read_csv(args.in_csv)
-    logging.info("Loaded distribution_fit_stats: rows=%d cols=%d", len(df), len(df.columns))
+    rows = []
+    for stage in args.stages:
+        stage = stage.strip()
+        csv_path = _resolve_stage_csv(stage)
+        logging.info("[Stage: %s] Using CSV: %s", stage, csv_path)
+        df = pd.read_csv(csv_path)
+        logging.info("[Stage: %s] Loaded distribution_fit_stats: rows=%d cols=%d", stage, len(df), len(df.columns))
 
-    need = {"Distribuzione", "Parametri", "MAE_KDE_PDF"}
-    if not need.issubset(df.columns):
-        logging.error("Missing required columns %s in %s", need, args.in_csv)
-        raise SystemExit(1)
-
-    if args.require_plausible and "Plausible" in df.columns:
-        before = len(df)
-        df = df[df["Plausible"] == True].copy()
-        logging.info("Plausible filter applied: %d -> %d rows", before, len(df))
-        if df.empty:
-            logging.error("No plausible fits remain; aborting.")
+        need = {"Distribuzione", "Parametri", "MAE_KDE_PDF"}
+        if not need.issubset(df.columns):
+            logging.error("Missing required columns %s in %s", need, csv_path)
             raise SystemExit(1)
 
-    # Parse parameters
-    df["_params"] = df["Parametri"].apply(parse_params)
-    bad = int(df["_params"].isna().sum())
-    if bad:
-        logging.warning("Dropping %d rows with unparseable 'Parametri'.", bad)
-        df = df[~df["_params"].isna()].copy()
-    if df.empty:
-        logging.error("No usable rows after parsing 'Parametri'.")
-        raise SystemExit(1)
+        if args.require_plausible and "Plausible" in df.columns:
+            before = len(df)
+            df = df[df["Plausible"] == True].copy()
+            logging.info("[Stage: %s] Plausible filter applied: %d -> %d rows", stage, before, len(df))
+            if df.empty:
+                logging.error("[Stage: %s] No plausible fits remain; aborting.", stage)
+                raise SystemExit(1)
 
-    # Pick winner & map to scipy
-    win_idx = choose_winner(df)
-    win = df.loc[win_idx]
-    logging.info("Winner: Distribuzione=%s | MAE_KDE_PDF=%.6g | AIC=%s | BIC=%s | Params=%s",
-                 str(win.get("Distribuzione")),
-                 float(win.get("MAE_KDE_PDF")),
-                 str(win.get("AIC")) if "AIC" in df.columns else "n/a",
-                 str(win.get("BIC")) if "BIC" in df.columns else "n/a",
-                 str(win.get("_params")))
+        df["_params"] = df["Parametri"].apply(parse_params)
+        bad = int(df["_params"].isna().sum())
+        if bad:
+            logging.warning("[Stage: %s] Dropping %d rows with unparseable 'Parametri'.", stage, bad)
+            df = df[~df["_params"].isna()].copy()
+        if df.empty:
+            logging.error("[Stage: %s] No usable rows after parsing 'Parametri'.", stage)
+            raise SystemExit(1)
 
-    core = map_to_scipy_row(win["Distribuzione"], win["_params"])
+        win_idx = choose_winner(df)
+        win = df.loc[win_idx]
+        logging.info("[Stage: %s] Winner: Distribuzione=%s | MAE_KDE_PDF=%.6g | AIC=%s | BIC=%s | Params=%s",
+                     stage,
+                     str(win.get("Distribuzione")),
+                     float(win.get("MAE_KDE_PDF")),
+                     str(win.get("AIC")) if "AIC" in df.columns else "n/a",
+                     str(win.get("BIC")) if "BIC" in df.columns else "n/a",
+                     str(win.get("_params")))
 
-    # Build output for each requested stage
-    rows = []
-    for st in args.stages:
+        core = map_to_scipy_row(win["Distribuzione"], win["_params"])
         row = {
-            "stage": st,
+            "stage": stage,
             "is_winner": True,
             "mae": float(win["MAE_KDE_PDF"]),
             "ks_pvalue": float(win["KS_pvalue"]) if "KS_pvalue" in df.columns and pd.notna(win["KS_pvalue"]) else None,
@@ -252,7 +276,6 @@ def main():
     try:
         print(out.to_string(index=False))
     except Exception:
-        # Fallback: minimal JSON-ish dump
         print(out.to_dict(orient="records"))
 
 

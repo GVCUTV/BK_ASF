@@ -39,11 +39,12 @@ class SystemState:
         self._next_ticket_id = 1
         self.closed_tickets: List[Ticket] = []
         self.tickets: Dict[int, Ticket] = {}
+        self.stage_names: Tuple[str, str, str] = ("dev", "review", "testing")
         self.backlog_buffer: Deque[Tuple[Ticket, float]] = deque()
         self.developer_pool = developer_pool
 
+        # Review and testing keep dedicated queues; backlog_buffer is the dev queue of record.
         self.stage_queues: Dict[str, Deque[Tuple[Ticket, float]]] = {
-            "dev": deque(),
             "review": deque(),
             "testing": deque(),
         }
