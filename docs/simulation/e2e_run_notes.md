@@ -45,7 +45,7 @@ The simulation correctly:
 Evidence from logs confirms:
 - 116 Poisson arrivals occurred during the horizon.
 - Tickets were created and routed through queues.
-- Service processes for both dev_review and testing started normally.
+- Service processes for both dev, review, and testing started normally.
 - Feedback loops occurred (tickets with >1 review or test cycle).
 - Developer Markov transitions occurred (REV→DEV, TEST→OFF, etc.).
 - The simulation terminated cleanly at the horizon (365 days).
