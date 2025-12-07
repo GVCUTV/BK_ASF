@@ -24,7 +24,9 @@ class StatsCollector:
     def __init__(self, state):
         self.state = state
         self.ticket_stats: Dict[int, Dict[str, Any]] = {}
-        self.stage_names: List[str] = sorted(self.state.stage_queues.keys())
+        self.stage_names: List[str] = list(getattr(self.state, "stage_names", []))
+        if not self.stage_names:
+            self.stage_names = ["dev"] + sorted(self.state.stage_queues.keys())
         self.event_counters: Dict[str, Any] = {
             "scheduled_arrivals": 0,
             "arrivals": 0,
