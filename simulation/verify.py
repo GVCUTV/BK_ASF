@@ -16,11 +16,14 @@ import datetime as dt
 import os
 import sys
 from dataclasses import dataclass
-from typing import Dict, Iterable, List, Sequence, Tuple
+from typing import Any, Dict, Iterable, List, Sequence, Tuple
+
+from simulation.run_sweeps import SUMMARY_METRICS, parse_value
 
 SUMMARY_FILENAME = "summary_stats.csv"
 TICKETS_FILENAME = "tickets_stats.csv"
 REPORT_FILENAME = "verification_report.md"
+AGGREGATE_FILENAME = "aggregate_summary.csv"
 
 
 # ---------------------------------------------------------------------------
@@ -152,6 +155,30 @@ def _load_summary(summary_path: str) -> Dict[str, float]:
     return metrics
 
 
+def _load_summary_with_parsing(summary_path: str) -> Dict[str, Any]:
+    metrics: Dict[str, Any] = {}
+    with open(summary_path, "r", newline="") as handle:
+        reader = csv.DictReader(handle)
+        for row in reader:
+            metric = (row.get("metric") or "").strip()
+            if not metric:
+                continue
+            metrics[metric] = parse_value(row.get("value", ""))
+    return metrics
+
+
+def _load_aggregate_summary(aggregate_path: str) -> Tuple[List[Dict[str, Any]], List[str]]:
+    with open(aggregate_path, "r", newline="") as handle:
+        reader = csv.DictReader(handle)
+        if reader.fieldnames is None:
+            raise ValueError(f"Aggregate file {aggregate_path} is missing headers.")
+        rows: List[Dict[str, Any]] = []
+        for row in reader:
+            parsed = {key: parse_value(value or "") for key, value in row.items()}
+            rows.append(parsed)
+    return rows, list(reader.fieldnames)
+
+
 def _load_tickets(tickets_path: str) -> List[Dict[str, str]]:
     with open(tickets_path, "r", newline="") as handle:
         reader = csv.DictReader(handle)
@@ -164,6 +191,10 @@ def _load_tickets(tickets_path: str) -> List[Dict[str, str]]:
 def _approx_equal(a: float, b: float, tolerance: float) -> bool:
     scale = max(1.0, abs(a), abs(b))
     return abs(a - b) <= tolerance * scale
+
+
+def _is_number(value: Any) -> bool:
+    return isinstance(value, (int, float)) and not isinstance(value, bool)
 
 
 # ---------------------------------------------------------------------------
@@ -301,6 +332,23 @@ def _ticket_bounds_check(ticket_rows: List[Dict[str, str]], tolerance: float) ->
         joined = "; ".join(violations)
         return CheckResult("Ticket domain bounds", False, f"Violations detected: {joined}")
     return CheckResult("Ticket domain bounds", True, "All waits and service times non-negative; time_in_system ≥ total_wait.")
+
+
+def _compare_metric_values(metric: str, aggregate_value: Any, summary_value: Any, tolerance: float) -> str | None:
+    if aggregate_value is None:
+        return f"{metric}: aggregate missing"
+    if summary_value is None:
+        return f"{metric}: summary missing"
+
+    if _is_number(aggregate_value) and _is_number(summary_value):
+        if _approx_equal(float(aggregate_value), float(summary_value), tolerance):
+            return None
+        return f"{metric}: aggregate {aggregate_value} vs summary {summary_value}"
+
+    if str(aggregate_value) != str(summary_value):
+        return f"{metric}: aggregate {aggregate_value} vs summary {summary_value}"
+
+    return None
 
 
 def _stage_cycle_consistency_check(ticket_rows: List[Dict[str, str]], tolerance: float) -> CheckResult:
@@ -656,6 +704,119 @@ def verify_single_run(
     return RunReport(base_dir, results)
 
 
+def verify_aggregate_summary(
+    base_dir: str, experiments: Sequence[str], tolerance: float, fail_fast: bool
+) -> RunReport:
+    label = os.path.join(base_dir, AGGREGATE_FILENAME)
+    results: List[CheckResult] = []
+
+    if not _ensure_exists(label, "aggregate_summary.csv present", results) and fail_fast:
+        return RunReport(label, results)
+
+    try:
+        aggregate_rows, fieldnames = _load_aggregate_summary(label)
+        results.append(CheckResult("aggregate_summary.csv parsed", True, f"Loaded {len(aggregate_rows)} rows."))
+    except Exception as exc:  # noqa: BLE001 - explicit failure reporting required
+        results.append(CheckResult("aggregate_summary.csv parsed", False, f"Failed to load aggregate file: {exc}"))
+        return RunReport(label, results)
+
+    required_columns = {"experiment_id", *SUMMARY_METRICS}
+    missing_columns = required_columns - set(fieldnames or [])
+    if missing_columns:
+        results.append(
+            CheckResult(
+                "Aggregate columns present",
+                False,
+                f"Missing columns: {', '.join(sorted(missing_columns))}",
+            )
+        )
+        if fail_fast:
+            return RunReport(label, results)
+    else:
+        results.append(CheckResult("Aggregate columns present", True, "All required columns found."))
+
+    expected_ids = [os.path.basename(path.rstrip(os.sep)) for path in experiments]
+    rows_by_id: Dict[str, Dict[str, Any]] = {}
+    duplicate_ids: List[str] = []
+    blank_ids = 0
+    for row in aggregate_rows:
+        exp_id = str(row.get("experiment_id") or "").strip()
+        if not exp_id:
+            blank_ids += 1
+            continue
+        if exp_id in rows_by_id:
+            duplicate_ids.append(exp_id)
+            continue
+        rows_by_id[exp_id] = row
+
+    missing_ids = [exp_id for exp_id in expected_ids if exp_id not in rows_by_id]
+    extra_ids = [exp_id for exp_id in rows_by_id if exp_id not in expected_ids]
+
+    coverage_parts: List[str] = []
+    if missing_ids:
+        coverage_parts.append(f"Missing rows: {', '.join(sorted(missing_ids))}")
+    if extra_ids:
+        coverage_parts.append(f"Unexpected rows: {', '.join(sorted(extra_ids))}")
+    if duplicate_ids:
+        coverage_parts.append(f"Duplicate experiment_ids: {', '.join(sorted(set(duplicate_ids)))}")
+    if blank_ids:
+        coverage_parts.append(f"Blank experiment_id entries: {blank_ids}")
+
+    coverage_passed = not coverage_parts and len(rows_by_id) == len(expected_ids)
+    coverage_details = "; ".join(coverage_parts) if coverage_parts else "One row per experiment directory detected."
+    results.append(CheckResult("Aggregate experiment coverage", coverage_passed, coverage_details))
+    if fail_fast and not coverage_passed:
+        return RunReport(label, results)
+
+    for experiment_dir in experiments:
+        exp_id = os.path.basename(experiment_dir.rstrip(os.sep))
+        aggregate_row = rows_by_id.get(exp_id)
+        if aggregate_row is None:
+            continue
+
+        summary_path = os.path.join(experiment_dir, SUMMARY_FILENAME)
+        try:
+            summary_metrics = _load_summary_with_parsing(summary_path)
+        except Exception as exc:  # noqa: BLE001 - explicit failure reporting required
+            results.append(
+                CheckResult(
+                    f"Aggregate alignment: {exp_id}",
+                    False,
+                    f"Failed to parse summary_stats.csv for {exp_id}: {exc}",
+                )
+            )
+            if fail_fast:
+                return RunReport(label, results)
+            continue
+
+        mismatches: List[str] = []
+        for metric in SUMMARY_METRICS:
+            discrepancy = _compare_metric_values(metric, aggregate_row.get(metric), summary_metrics.get(metric), tolerance)
+            if discrepancy:
+                mismatches.append(discrepancy)
+
+        if mismatches:
+            results.append(
+                CheckResult(
+                    f"Aggregate alignment: {exp_id}",
+                    False,
+                    "; ".join(mismatches),
+                )
+            )
+            if fail_fast:
+                return RunReport(label, results)
+        else:
+            results.append(
+                CheckResult(
+                    f"Aggregate alignment: {exp_id}",
+                    True,
+                    f"All {len(SUMMARY_METRICS)} metrics match summary_stats.csv.",
+                )
+            )
+
+    return RunReport(label, results)
+
+
 def verify_sweep(
     input_dir: str,
     tolerance: float,
@@ -692,6 +853,10 @@ def verify_sweep(
 
         if fail_fast and not report.passed:
             break
+
+    aggregate_report = verify_aggregate_summary(input_dir, experiments, tolerance, fail_fast)
+    run_reports.append(aggregate_report)
+    overall_passed = overall_passed and aggregate_report.passed
 
     return run_reports, overall_passed
 
