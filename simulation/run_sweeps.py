@@ -60,6 +60,12 @@ SUMMARY_METRICS = [
     "markov_time_in_states",
     "markov_stint_means",
     "markov_stint_counts",
+    "avg_servers_dev",
+    "avg_servers_review",
+    "avg_servers_testing",
+    "avg_system_length_dev",
+    "avg_system_length_review",
+    "avg_system_length_testing",
 ]
 
 
