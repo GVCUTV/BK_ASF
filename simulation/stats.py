@@ -12,7 +12,6 @@ from __future__ import annotations
 import csv
 import logging
 import os
-from statistics import mean
 from typing import Any, Dict, List, Optional
 
 import numpy as np
@@ -195,7 +194,10 @@ class StatsCollector:
         source_queue: str,
     ) -> None:
         self.event_counters["service_starts"][stage] = self.event_counters["service_starts"].get(stage, 0) + 1
-        start_list = self._ensure_ticket(ticket_id).setdefault("service_starts", [])
+        ticket_stats = self._ensure_ticket(ticket_id)
+        cycles = ticket_stats.setdefault("cycles", {})
+        cycles[stage] = cycles.get(stage, 0) + 1
+        start_list = ticket_stats.setdefault("service_starts", [])
         start_list.append(
             {
                 "stage": stage,
@@ -282,6 +284,11 @@ class StatsCollector:
     # Reporting helpers
     # ------------------------------------------------------------------
     def _calculate_ticket_row(self, ticket_id: int, stat: Dict[str, Any]) -> Dict[str, Any]:
+        arrival_time = stat.get("arrival_time") if stat.get("arrival_time") is not None else 0.0
+        closed_time = stat.get("closed_time")
+        final_time = stat.get("final_time")
+        horizon = float(self.state.sim_duration)
+
         wait_dev = sum(stat.get("queue_waits", {}).get("dev", []))
         wait_review = sum(stat.get("queue_waits", {}).get("review", []))
         wait_testing = sum(stat.get("queue_waits", {}).get("testing", []))
@@ -295,14 +302,27 @@ class StatsCollector:
             start["service_time"] for start in stat.get("service_starts", []) if start.get("stage") == "testing"
         )
 
+        dev_starts = sum(1 for start in stat.get("service_starts", []) if start.get("stage") == "dev")
+        review_starts = sum(1 for start in stat.get("service_starts", []) if start.get("stage") == "review")
+        testing_starts = sum(1 for start in stat.get("service_starts", []) if start.get("stage") == "testing")
+
+        dev_cycles = stat.get("cycles", {}).get("dev", dev_starts)
+        review_cycles = stat.get("cycles", {}).get("review", review_starts)
+        test_cycles = stat.get("cycles", {}).get("testing", testing_starts)
+
+        if final_time is None:
+            final_time = max(0.0, horizon - arrival_time)
+        if closed_time is None:
+            closed_time = arrival_time + final_time
+
         return {
             "ticket_id": ticket_id,
-            "arrival_time": stat.get("arrival_time"),
-            "closed_time": stat.get("closed_time"),
-            "time_in_system": stat.get("final_time"),
-            "dev_cycles": stat.get("cycles", {}).get("dev", 0),
-            "review_cycles": stat.get("cycles", {}).get("review", 0),
-            "test_cycles": stat.get("cycles", {}).get("testing", 0),
+            "arrival_time": arrival_time,
+            "closed_time": closed_time,
+            "time_in_system": final_time,
+            "dev_cycles": dev_cycles,
+            "review_cycles": review_cycles,
+            "test_cycles": test_cycles,
             "wait_dev": wait_dev,
             "wait_review": wait_review,
             "wait_testing": wait_testing,
@@ -310,9 +330,9 @@ class StatsCollector:
             "service_time_dev": service_dev,
             "service_time_review": service_review,
             "service_time_testing": service_test,
-            "service_starts_dev": sum(1 for start in stat.get("service_starts", []) if start.get("stage") == "dev"),
-            "service_starts_review": sum(1 for start in stat.get("service_starts", []) if start.get("stage") == "review"),
-            "service_starts_testing": sum(1 for start in stat.get("service_starts", []) if start.get("stage") == "testing"),
+            "service_starts_dev": dev_starts,
+            "service_starts_review": review_starts,
+            "service_starts_testing": testing_starts,
             # Reserved Markov-aware fields for 4.3A compatibility
             "markov_time_dev": "",
             "markov_time_rev": "",
@@ -441,7 +461,20 @@ class StatsCollector:
 
         horizon = max(1e-9, float(self.state.sim_duration))
         for stage in self.stage_names:
-            avg_wait = mean(self.queue_wait_records.get(stage, []) or [0.0])
+            total_wait = 0.0
+            tickets_in_stage = 0
+            for ticket_stat in self.ticket_stats.values():
+                wait_sum = sum(ticket_stat.get("queue_waits", {}).get(stage, []))
+                service_sum = sum(
+                    start.get("service_time", 0.0)
+                    for start in ticket_stat.get("service_starts", [])
+                    if start.get("stage") == stage
+                )
+                cycle_count = ticket_stat.get("cycles", {}).get(stage, 0)
+                if cycle_count > 0 or service_sum > 0.0:
+                    total_wait += wait_sum
+                    tickets_in_stage += 1
+            avg_wait = total_wait / tickets_in_stage if tickets_in_stage else 0.0
             queue_area = self.queue_tracking.get(self._tracking_stage(stage), {}).get("area", 0.0)
             avg_queue_len = queue_area / horizon
             queue_description = (
