@@ -153,11 +153,9 @@ class DeveloperPool:
             return set()
         changed_stages: set[str] = set()
         for agent in self.agents.values():
-            if agent.busy:
-                continue
             agent.remaining_stint -= delta
             self._record_state_time(agent.current_state, delta, stats)
-            if agent.remaining_stint <= 0:
+            if agent.remaining_stint <= 0 and not agent.busy:
                 changed_stages.update(self._transition_agent(agent, current_time, stats))
         self.last_update_time = current_time
         return changed_stages
@@ -168,8 +166,6 @@ class DeveloperPool:
             logging.error("Unknown agent %s at completion of %s.", agent_id, stage)
             return set()
         agent.busy = False
-        agent.remaining_stint -= service_time
-        self._record_state_time(agent.current_state, service_time, stats)
         changed_stages: set[str] = set()
         if agent.remaining_stint <= 0:
             changed_stages = self._transition_agent(agent, event_time, stats)
@@ -227,6 +223,24 @@ class DeveloperPool:
         self.stint_samples[state].append(stint)
         if stats is not None:
             stats.log_developer_stint(state, stint)
+
+    def finalize_state_time(self, sim_end_time: float, stats=None) -> None:
+        """Accrue any remaining stint time through the simulation horizon.
+
+        The DES stops processing events once the horizon is reached, which means
+        busy agents whose completions land beyond the horizon would otherwise
+        never record their in-progress stint time. This method charges the
+        elapsed time since the last update to each agent's current state so that
+        capacity exposure matches the observation window.
+        """
+
+        delta = max(0.0, sim_end_time - self.last_update_time)
+        if delta <= 0:
+            return
+
+        for agent in self.agents.values():
+            self._record_state_time(agent.current_state, delta, stats)
+        self.last_update_time = sim_end_time
 
 
 # ----------------------------------------------------------------------
