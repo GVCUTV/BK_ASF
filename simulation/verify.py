@@ -222,6 +222,116 @@ def _mean_time_check(summary_value: float | None, ticket_rows: List[Dict[str, st
     )
 
 
+def _ticket_bounds_check(ticket_rows: List[Dict[str, str]], tolerance: float) -> CheckResult:
+    fields = [
+        "wait_dev",
+        "wait_review",
+        "wait_testing",
+        "service_time_dev",
+        "service_time_review",
+        "service_time_testing",
+        "total_wait",
+        "time_in_system",
+    ]
+
+    violations: List[str] = []
+    for row in ticket_rows:
+        ticket_id = row.get("ticket_id", "<unknown>")
+        parsed: Dict[str, float] = {}
+        for field in fields:
+            try:
+                parsed[field] = float(row.get(field, 0.0))
+            except (TypeError, ValueError):
+                violations.append(f"ticket {ticket_id}: unable to parse {field}")
+                continue
+
+        for field, value in parsed.items():
+            if value < -tolerance:
+                violations.append(f"ticket {ticket_id}: {field}={value}")
+
+        total_wait = parsed.get("total_wait")
+        time_in_system = parsed.get("time_in_system")
+        if total_wait is not None and time_in_system is not None:
+            if time_in_system + tolerance < total_wait:
+                violations.append(
+                    f"ticket {ticket_id}: time_in_system {time_in_system} < total_wait {total_wait}"
+                )
+
+    if violations:
+        joined = "; ".join(violations)
+        return CheckResult("Ticket domain bounds", False, f"Violations detected: {joined}")
+    return CheckResult("Ticket domain bounds", True, "All waits and service times non-negative; time_in_system ≥ total_wait.")
+
+
+def _stage_cycle_consistency_check(ticket_rows: List[Dict[str, str]], tolerance: float) -> CheckResult:
+    stages = [
+        ("dev", "dev_cycles", "wait_dev", "service_time_dev"),
+        ("review", "review_cycles", "wait_review", "service_time_review"),
+        ("testing", "test_cycles", "wait_testing", "service_time_testing"),
+    ]
+
+    violations: List[str] = []
+    for row in ticket_rows:
+        ticket_id = row.get("ticket_id", "<unknown>")
+        for _, cycles_field, wait_field, service_field in stages:
+            try:
+                cycles = float(row.get(cycles_field, 0.0))
+                wait_value = float(row.get(wait_field, 0.0))
+                service_value = float(row.get(service_field, 0.0))
+            except (TypeError, ValueError):
+                violations.append(f"ticket {ticket_id}: unable to parse cycle data for {cycles_field}")
+                continue
+
+            if _approx_equal(cycles, 0.0, tolerance):
+                if abs(wait_value) > tolerance:
+                    violations.append(f"ticket {ticket_id}: {wait_field}={wait_value} with {cycles_field}=0")
+                if abs(service_value) > tolerance:
+                    violations.append(f"ticket {ticket_id}: {service_field}={service_value} with {cycles_field}=0")
+
+    if violations:
+        return CheckResult("Stage cycle consistency", False, "; ".join(violations))
+    return CheckResult("Stage cycle consistency", True, "Zero-cycle stages have zero wait and service time.")
+
+
+def _wait_decomposition_check(ticket_rows: List[Dict[str, str]], tolerance: float) -> CheckResult:
+    violations: List[str] = []
+    for row in ticket_rows:
+        ticket_id = row.get("ticket_id", "<unknown>")
+        try:
+            wait_dev = float(row.get("wait_dev", 0.0))
+            wait_review = float(row.get("wait_review", 0.0))
+            wait_testing = float(row.get("wait_testing", 0.0))
+            total_wait = float(row.get("total_wait", 0.0))
+        except (TypeError, ValueError):
+            violations.append(f"ticket {ticket_id}: unable to parse wait components")
+            continue
+
+        if not _approx_equal(total_wait, wait_dev + wait_review + wait_testing, tolerance):
+            violations.append(
+                f"ticket {ticket_id}: total_wait {total_wait} != waits sum {wait_dev + wait_review + wait_testing}"
+            )
+
+    if violations:
+        return CheckResult("Total wait decomposition", False, "; ".join(violations))
+    return CheckResult("Total wait decomposition", True, "total_wait aligns with component waits.")
+
+
+def _summary_bounds_check(summary_metrics: Dict[str, float], tolerance: float) -> CheckResult:
+    violations: List[str] = []
+
+    for metric, value in summary_metrics.items():
+        if metric.startswith(("avg_wait_", "avg_queue_length_", "throughput_")):
+            if value < -tolerance:
+                violations.append(f"{metric}={value}")
+        if metric.startswith("utilization_"):
+            if value < -tolerance or value > 1 + tolerance:
+                violations.append(f"{metric}={value}")
+
+    if violations:
+        return CheckResult("Summary metric bounds", False, f"Out-of-bounds metrics: {', '.join(violations)}")
+    return CheckResult("Summary metric bounds", True, "Throughput, waits, queue lengths non-negative; utilizations within [0, 1].")
+
+
 # ---------------------------------------------------------------------------
 # Verification runners
 # ---------------------------------------------------------------------------
@@ -255,6 +365,7 @@ def verify_single_run(base_dir: str, tolerance: float, fail_fast: bool) -> RunRe
 
     checks: List[CheckResult] = [
         _required_metrics_check(summary_metrics, ["tickets_arrived", "tickets_closed", "closure_rate"], tolerance),
+        _summary_bounds_check(summary_metrics, tolerance),
     ]
 
     arrivals_reported = summary_metrics.get("tickets_arrived")
@@ -270,6 +381,9 @@ def verify_single_run(base_dir: str, tolerance: float, fail_fast: bool) -> RunRe
         checks.append(_closure_rate_check(closure_rate_reported, arrivals_reported, closures_reported, tolerance))
 
     checks.append(_mean_time_check(summary_metrics.get("mean_time_in_system"), ticket_rows, tolerance))
+    checks.append(_ticket_bounds_check(ticket_rows, tolerance))
+    checks.append(_stage_cycle_consistency_check(ticket_rows, tolerance))
+    checks.append(_wait_decomposition_check(ticket_rows, tolerance))
 
     for check in checks:
         results.append(check)
