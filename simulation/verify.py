@@ -78,6 +78,12 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
         help="Tolerance for floating-point comparisons.",
     )
     parser.add_argument(
+        "--mean-jobs-rel-tolerance",
+        type=float,
+        default=0.02,
+        help="Relative tolerance for Little mean-jobs identity checks (default: 0.02).",
+    )
+    parser.add_argument(
         "--mode",
         choices=["single", "sweep"],
         default="single",
@@ -472,6 +478,70 @@ def _stage_identity_checks(
     return checks
 
 
+def _mean_jobs_identity_check(summary_metrics: Dict[str, float], rel_tolerance: float) -> CheckResult:
+    stages = ["dev", "review", "testing"]
+    missing_segments: List[str] = []
+    comparisons: List[str] = []
+    passed = True
+
+    for stage in stages:
+        queue_key = f"avg_queue_length_{stage}"
+        servers_key = f"avg_servers_{stage}"
+        util_key = f"utilization_{stage}"
+        system_key = f"avg_system_length_{stage}"
+
+        queue_length = summary_metrics.get(queue_key)
+        avg_servers = summary_metrics.get(servers_key)
+        utilization = summary_metrics.get(util_key)
+        system_length = summary_metrics.get(system_key)
+
+        missing_keys = [
+            key
+            for key, value in [
+                (queue_key, queue_length),
+                (servers_key, avg_servers),
+                (util_key, utilization),
+                (system_key, system_length),
+            ]
+            if value is None
+        ]
+        if missing_keys:
+            passed = False
+            missing_segments.append(f"{stage} missing: {', '.join(missing_keys)}")
+            continue
+
+        ls_value = avg_servers * utilization
+        expected = queue_length + ls_value
+        if _approx_equal(system_length, expected, rel_tolerance):
+            comparisons.append(
+                (
+                    f"{stage}: {system_key}={system_length:.6f}, expected {expected:.6f}"
+                    f" from queue {queue_length:.6f} + Ls {ls_value:.6f}"
+                    f" (avg_servers={avg_servers:.6f}, utilization={utilization:.6f})"
+                    f" within ±{rel_tolerance * 100:.2f}%"
+                )
+            )
+        else:
+            passed = False
+            comparisons.append(
+                (
+                    f"{stage}: {system_key}={system_length:.6f} vs expected {expected:.6f}"
+                    f" from queue {queue_length:.6f} + Ls {ls_value:.6f}"
+                    f" (avg_servers={avg_servers:.6f}, utilization={utilization:.6f});"
+                    f" outside ±{rel_tolerance * 100:.2f}%"
+                )
+            )
+
+    details_parts: List[str] = []
+    if comparisons:
+        details_parts.append("; ".join(comparisons))
+    if missing_segments:
+        details_parts.append("; ".join(missing_segments))
+    details = " ".join(details_parts) if details_parts else "No stage data available."
+
+    return CheckResult("Mean jobs identity (Little)", passed, details)
+
+
 def _summary_bounds_check(summary_metrics: Dict[str, float], tolerance: float) -> CheckResult:
     violations: List[str] = []
 
@@ -491,7 +561,9 @@ def _summary_bounds_check(summary_metrics: Dict[str, float], tolerance: float) -
 # ---------------------------------------------------------------------------
 # Verification runners
 # ---------------------------------------------------------------------------
-def verify_single_run(base_dir: str, tolerance: float, fail_fast: bool) -> RunReport:
+def verify_single_run(
+    base_dir: str, tolerance: float, mean_jobs_rel_tolerance: float, fail_fast: bool
+) -> RunReport:
     results: List[CheckResult] = []
     if not os.path.isdir(base_dir):
         results.append(CheckResult("Input directory present", False, f"Directory not found: {base_dir}"))
@@ -529,6 +601,7 @@ def verify_single_run(base_dir: str, tolerance: float, fail_fast: bool) -> RunRe
         ),
         _required_metrics_check(summary_metrics, ["tickets_arrived", "tickets_closed", "closure_rate"], tolerance),
         _summary_bounds_check(summary_metrics, tolerance),
+        _mean_jobs_identity_check(summary_metrics, mean_jobs_rel_tolerance),
     ]
 
     arrivals_reported = summary_metrics.get("tickets_arrived")
@@ -558,7 +631,9 @@ def verify_single_run(base_dir: str, tolerance: float, fail_fast: bool) -> RunRe
     return RunReport(base_dir, results)
 
 
-def verify_sweep(input_dir: str, tolerance: float, fail_fast: bool) -> Tuple[List[RunReport], bool]:
+def verify_sweep(
+    input_dir: str, tolerance: float, mean_jobs_rel_tolerance: float, fail_fast: bool
+) -> Tuple[List[RunReport], bool]:
     run_reports: List[RunReport] = []
     if not os.path.isdir(input_dir):
         return [RunReport(input_dir, [CheckResult("Sweep directory present", False, f"Directory not found: {input_dir}")])], False
@@ -574,7 +649,7 @@ def verify_sweep(input_dir: str, tolerance: float, fail_fast: bool) -> Tuple[Lis
 
     overall_passed = True
     for subdir in subdirs:
-        report = verify_single_run(subdir, tolerance, fail_fast)
+        report = verify_single_run(subdir, tolerance, mean_jobs_rel_tolerance, fail_fast)
         run_reports.append(report)
         overall_passed = overall_passed and report.passed
         if fail_fast and not report.passed:
@@ -598,16 +673,18 @@ def build_report(
     input_dir: str,
     mode: str,
     tolerance: float,
+    mean_jobs_rel_tolerance: float,
     run_reports: Sequence[RunReport],
     overall_passed: bool,
 ) -> str:
     lines: List[str] = [
         "# Verification Report",
         f"*Generated: {dt.datetime.utcnow().isoformat()}Z*",
-        "",
+        "", 
         f"- Input directory: `{input_dir}`",
         f"- Mode: {mode}",
         f"- Tolerance: {tolerance}",
+        f"- Mean-jobs relative tolerance: {mean_jobs_rel_tolerance}",
         "",
     ]
 
@@ -637,13 +714,24 @@ def write_report(input_dir: str, content: str) -> str:
 def main(argv: Sequence[str] | None = None) -> int:
     args = parse_args(argv)
     if args.mode == "sweep":
-        run_reports, overall_passed = verify_sweep(args.input, args.tolerance, args.fail_fast)
+        run_reports, overall_passed = verify_sweep(
+            args.input, args.tolerance, args.mean_jobs_rel_tolerance, args.fail_fast
+        )
     else:
-        run_report = verify_single_run(args.input, args.tolerance, args.fail_fast)
+        run_report = verify_single_run(
+            args.input, args.tolerance, args.mean_jobs_rel_tolerance, args.fail_fast
+        )
         run_reports = [run_report]
         overall_passed = run_report.passed
 
-    report_content = build_report(args.input, args.mode, args.tolerance, run_reports, overall_passed)
+    report_content = build_report(
+        args.input,
+        args.mode,
+        args.tolerance,
+        args.mean_jobs_rel_tolerance,
+        run_reports,
+        overall_passed,
+    )
     report_path = write_report(args.input, report_content)
     print(f"Verification report written to {report_path}")
     return 0 if overall_passed else 1
