@@ -287,7 +287,6 @@ class StatsCollector:
         arrival_time = stat.get("arrival_time") if stat.get("arrival_time") is not None else 0.0
         closed_time = stat.get("closed_time")
         final_time = stat.get("final_time")
-        horizon = float(self.state.sim_duration)
 
         wait_dev = sum(stat.get("queue_waits", {}).get("dev", []))
         wait_review = sum(stat.get("queue_waits", {}).get("review", []))
@@ -309,11 +308,6 @@ class StatsCollector:
         dev_cycles = stat.get("cycles", {}).get("dev", dev_starts)
         review_cycles = stat.get("cycles", {}).get("review", review_starts)
         test_cycles = stat.get("cycles", {}).get("testing", testing_starts)
-
-        if final_time is None:
-            final_time = max(0.0, horizon - arrival_time)
-        if closed_time is None:
-            closed_time = arrival_time + final_time
 
         return {
             "ticket_id": ticket_id,
