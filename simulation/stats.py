@@ -442,7 +442,7 @@ class StatsCollector:
         horizon = max(1e-9, float(self.state.sim_duration))
         for stage in self.stage_names:
             avg_wait = mean(self.queue_wait_records.get(stage, []) or [0.0])
-            queue_area = self.queue_tracking.get(stage, {}).get("area", 0.0)
+            queue_area = self.queue_tracking.get(self._tracking_stage(stage), {}).get("area", 0.0)
             avg_queue_len = queue_area / horizon
             queue_description = (
                 "Time-weighted average backlog length (dev queue)" if stage == "dev" else f"Time-weighted average queue length for {stage}"
@@ -463,6 +463,8 @@ class StatsCollector:
                     raise ValueError(
                         f"Utilization exceeds capacity for {stage}: busy_time={busy_time}, capacity_time={capacity_time}, horizon={horizon}"
                     )
+            avg_servers = capacity_time / horizon
+            avg_system_length = avg_queue_len + avg_servers * utilization
             throughput = self.stage_throughput.get(stage, 0) / horizon
             summary_rows.extend(
                 [
@@ -489,6 +491,18 @@ class StatsCollector:
                         "value": utilization,
                         "units": "fraction",
                         "description": f"Server utilization for {stage}",
+                    },
+                    {
+                        "metric": f"avg_servers_{stage}",
+                        "value": avg_servers,
+                        "units": "servers",
+                        "description": f"Time-averaged server capacity for {stage}",
+                    },
+                    {
+                        "metric": f"avg_system_length_{stage}",
+                        "value": avg_system_length,
+                        "units": "tickets",
+                        "description": f"Average number of tickets in {stage} (queue + in service)",
                     },
                 ]
             )
