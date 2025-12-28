@@ -420,15 +420,22 @@ class StatsCollector:
             queue_description = (
                 "Time-weighted average backlog length (dev queue)" if stage == "dev" else f"Time-weighted average queue length for {stage}"
             )
-            utilization = 0.0
             if stage == "dev":
-                avg_capacity = self.developer_state_time.get("DEV", 0.0) / horizon
+                capacity_time = self.developer_state_time.get("DEV", 0.0)
             elif stage == "review":
-                avg_capacity = self.developer_state_time.get("REV", 0.0) / horizon
+                capacity_time = self.developer_state_time.get("REV", 0.0)
             else:
-                avg_capacity = self.developer_state_time.get("TEST", 0.0) / horizon
-            if avg_capacity > 0:
-                utilization = self.service_busy_time.get(stage, 0.0) / (horizon * avg_capacity)
+                capacity_time = self.developer_state_time.get("TEST", 0.0)
+
+            busy_time = self.service_busy_time.get(stage, 0.0)
+            utilization = 0.0
+            if capacity_time > 0:
+                utilization = busy_time / capacity_time
+                tolerance = 1e-9
+                if busy_time - capacity_time > tolerance:
+                    raise ValueError(
+                        f"Utilization exceeds capacity for {stage}: busy_time={busy_time}, capacity_time={capacity_time}, horizon={horizon}"
+                    )
             throughput = self.stage_throughput.get(stage, 0) / horizon
             summary_rows.extend(
                 [

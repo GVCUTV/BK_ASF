@@ -186,6 +186,7 @@ def main():
             logging.exception("Error while processing %s: %s", event, exc)
             break
 
+    developer_pool.finalize_state_time(SIM_DURATION, stats)
     stats.final_report()
     logging.info("Simulation complete.")
 
