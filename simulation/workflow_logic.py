@@ -74,13 +74,11 @@ class WorkflowLogic:
         )
 
         if stage == "dev":
-            ticket.dev_cycles += 1
             self.stats.log_feedback(ticket.ticket_id, stage, "progress", event_time)
             self.state.enqueue("review", ticket, event_time)
             self.stats.log_enqueue(ticket.ticket_id, "review", event_time, source="dev_complete")
             self.try_start_service("review", event_queue, event_time, completion_event_cls)
         elif stage == "review":
-            ticket.review_cycles += 1
             if np.random.rand() < FEEDBACK_P_DEV:
                 logging.info(
                     "Ticket %s receives review feedback; routing back to backlog for dev re-entry.",
@@ -97,7 +95,6 @@ class WorkflowLogic:
                 self.stats.log_enqueue(ticket.ticket_id, "testing", event_time, source="review_complete")
                 self.try_start_service("testing", event_queue, event_time, completion_event_cls)
         elif stage == "testing":
-            ticket.test_cycles += 1
             if np.random.rand() < FEEDBACK_P_TEST:
                 logging.info(
                     "Ticket %s receives testing feedback; routing to backlog for dev re-entry.",
@@ -137,6 +134,12 @@ class WorkflowLogic:
             self.stats.log_queue_wait(ticket.ticket_id, stage, wait_time, current_time)
             service_time = sample_service_time(stage)
             completion_time = current_time + service_time
+            if stage == "dev":
+                ticket.dev_cycles += 1
+            elif stage == "review":
+                ticket.review_cycles += 1
+            elif stage == "testing":
+                ticket.test_cycles += 1
             event_queue.push(completion_event_cls(completion_time, ticket.ticket_id, stage, service_time))
             self.stats.log_service_start(
                 ticket.ticket_id,
