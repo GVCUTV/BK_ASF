@@ -22,3 +22,8 @@
 - Each developer’s semi-Markov state (DEV/REV/TEST/OFF) represents capacity for that stage. Utilization is defined as **busy server time divided by available state time** for that stage over the observation horizon.
 - No clamping is applied; utilizations remain within [0, 1] by construction, and a guard fails fast if busy time exceeds capacity time.
 - Validation is covered by an automated sweep-based test that asserts utilizations stay within bounds for the three core experiments.
+
+## Debug instrumentation (BK_UTILIZATION_DEBUG)
+- Added a temporary debug switch `BK_UTILIZATION_DEBUG` that logs each busy-time accrual with ticket, stage, server, and running busy/capacity totals, plus every capacity-time accrual from developer state updates.
+- When enabled, the final report prints per-stage busy, capacity, utilization, and throughput so we can verify numerators and denominators match the observation window.
+- Running with the flag showed busy-time rises only at service starts (truncated to the horizon) while capacity-time grows whenever developer stints advance; no additional busy events fired when utilization already matched capacity, confirming the earlier overages were caused by missing capacity accrual rather than double-counted busy time.
