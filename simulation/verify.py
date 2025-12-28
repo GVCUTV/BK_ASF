@@ -110,6 +110,31 @@ def _ensure_exists(path: str, label: str, results: List[CheckResult]) -> bool:
     return False
 
 
+def detect_sweep_experiments(input_dir: str) -> List[str]:
+    """Detect sweep experiment directories containing required output files.
+
+    A directory qualifies as an experiment when it is an immediate child of
+    ``input_dir`` and contains both ``summary_stats.csv`` and
+    ``tickets_stats.csv``.
+    """
+
+    if not os.path.isdir(input_dir):
+        return []
+
+    experiments: List[str] = []
+    for name in sorted(os.listdir(input_dir)):
+        candidate = os.path.join(input_dir, name)
+        if not os.path.isdir(candidate):
+            continue
+
+        summary_path = os.path.join(candidate, SUMMARY_FILENAME)
+        tickets_path = os.path.join(candidate, TICKETS_FILENAME)
+        if os.path.isfile(summary_path) and os.path.isfile(tickets_path):
+            experiments.append(candidate)
+
+    return experiments
+
+
 def _load_summary(summary_path: str) -> Dict[str, float]:
     metrics: Dict[str, float] = {}
     with open(summary_path, "r", newline="") as handle:
@@ -632,26 +657,39 @@ def verify_single_run(
 
 
 def verify_sweep(
-    input_dir: str, tolerance: float, mean_jobs_rel_tolerance: float, fail_fast: bool
+    input_dir: str,
+    tolerance: float,
+    mean_jobs_rel_tolerance: float,
+    fail_fast: bool,
+    experiment_dirs: Sequence[str] | None = None,
 ) -> Tuple[List[RunReport], bool]:
     run_reports: List[RunReport] = []
     if not os.path.isdir(input_dir):
         return [RunReport(input_dir, [CheckResult("Sweep directory present", False, f"Directory not found: {input_dir}")])], False
 
-    subdirs = [
-        os.path.join(input_dir, name)
-        for name in sorted(os.listdir(input_dir))
-        if os.path.isdir(os.path.join(input_dir, name))
-    ]
-
-    if not subdirs:
-        return [RunReport(input_dir, [CheckResult("Sweep contents", False, "No experiment subdirectories found.")])], False
+    experiments = list(experiment_dirs) if experiment_dirs is not None else detect_sweep_experiments(input_dir)
+    if not experiments:
+        message = (
+            "No experiment subdirectories found containing summary_stats.csv and tickets_stats.csv."
+        )
+        return [RunReport(input_dir, [CheckResult("Sweep contents", False, message)])], False
 
     overall_passed = True
-    for subdir in subdirs:
+    for subdir in experiments:
         report = verify_single_run(subdir, tolerance, mean_jobs_rel_tolerance, fail_fast)
         run_reports.append(report)
         overall_passed = overall_passed and report.passed
+
+        per_experiment_content = build_report(
+            subdir,
+            "single",
+            tolerance,
+            mean_jobs_rel_tolerance,
+            [report],
+            report.passed,
+        )
+        write_report(subdir, per_experiment_content)
+
         if fail_fast and not report.passed:
             break
 
@@ -677,10 +715,22 @@ def build_report(
     run_reports: Sequence[RunReport],
     overall_passed: bool,
 ) -> str:
+    def _format_heading(base: str, path: str) -> str:
+        if os.path.exists(base) and os.path.exists(path):
+            try:
+                if os.path.samefile(base, path):
+                    return path
+            except FileNotFoundError:
+                pass
+        try:
+            return os.path.relpath(path, base)
+        except ValueError:
+            return path
+
     lines: List[str] = [
         "# Verification Report",
         f"*Generated: {dt.datetime.utcnow().isoformat()}Z*",
-        "", 
+        "",
         f"- Input directory: `{input_dir}`",
         f"- Mode: {mode}",
         f"- Tolerance: {tolerance}",
@@ -692,8 +742,24 @@ def build_report(
     lines.append(f"## Overall Status: {overall_status}")
     lines.append("")
 
+    if mode == "sweep":
+        lines.append("## Experiment Summary")
+        lines.append("| Experiment | Status | Checks |")
+        lines.append("| --- | --- | --- |")
+        for report in run_reports:
+            heading = _format_heading(input_dir, report.label)
+            total_checks = len(report.results)
+            passed_checks = sum(1 for result in report.results if result.passed)
+            first_failure = next((result for result in report.results if not result.passed), None)
+            details = f"{passed_checks}/{total_checks} checks passed"
+            if first_failure:
+                details += f"; first failure: {first_failure.name}"
+            status = "✅ PASS" if report.passed else "❌ FAIL"
+            lines.append(f"| {heading} | {status} | {details} |")
+        lines.append("")
+
     for report in run_reports:
-        heading = report.label if os.path.samefile(input_dir, report.label) else os.path.relpath(report.label, input_dir)
+        heading = _format_heading(input_dir, report.label)
         lines.append(f"### Run: {heading}")
         lines.extend(_render_table(report.results))
         lines.append("")
@@ -713,9 +779,16 @@ def write_report(input_dir: str, content: str) -> str:
 # ---------------------------------------------------------------------------
 def main(argv: Sequence[str] | None = None) -> int:
     args = parse_args(argv)
-    if args.mode == "sweep":
+    mode = args.mode
+    experiment_dirs = None
+    if args.mode == "single":
+        experiment_dirs = detect_sweep_experiments(args.input)
+        if experiment_dirs:
+            mode = "sweep"
+
+    if mode == "sweep":
         run_reports, overall_passed = verify_sweep(
-            args.input, args.tolerance, args.mean_jobs_rel_tolerance, args.fail_fast
+            args.input, args.tolerance, args.mean_jobs_rel_tolerance, args.fail_fast, experiment_dirs
         )
     else:
         run_report = verify_single_run(
@@ -726,7 +799,7 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     report_content = build_report(
         args.input,
-        args.mode,
+        mode,
         args.tolerance,
         args.mean_jobs_rel_tolerance,
         run_reports,
