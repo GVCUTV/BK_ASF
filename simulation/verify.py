@@ -47,6 +47,15 @@ class RunReport:
         return all(result.passed for result in self.results)
 
 
+@dataclass
+class StageSamples:
+    """Ticket-level samples for a single stage."""
+
+    waits: List[float]
+    services: List[float]
+    parse_failures: int
+
+
 # ---------------------------------------------------------------------------
 # Argument parsing
 # ---------------------------------------------------------------------------
@@ -316,6 +325,153 @@ def _wait_decomposition_check(ticket_rows: List[Dict[str, str]], tolerance: floa
     return CheckResult("Total wait decomposition", True, "total_wait aligns with component waits.")
 
 
+def _collect_stage_samples(ticket_rows: List[Dict[str, str]], tolerance: float) -> Dict[str, StageSamples]:
+    """Gather waits and services for each stage using the stage-entry rule.
+
+    Inclusion rule: tickets count toward stage means only when they entered the stage,
+    defined as having strictly positive cycles or service time (within tolerance).
+    """
+
+    stages = {
+        "dev": ("dev_cycles", "wait_dev", "service_time_dev"),
+        "review": ("review_cycles", "wait_review", "service_time_review"),
+        "testing": ("test_cycles", "wait_testing", "service_time_testing"),
+    }
+
+    samples: Dict[str, StageSamples] = {
+        name: StageSamples([], [], 0) for name in stages
+    }
+
+    for row in ticket_rows:
+        for stage, (cycles_field, wait_field, service_field) in stages.items():
+            try:
+                cycles = float(row.get(cycles_field, 0.0))
+                wait_value = float(row.get(wait_field, 0.0))
+                service_value = float(row.get(service_field, 0.0))
+            except (TypeError, ValueError):
+                samples[stage].parse_failures += 1
+                continue
+
+            if cycles > tolerance or service_value > tolerance:
+                samples[stage].waits.append(wait_value)
+                samples[stage].services.append(service_value)
+            elif cycles < -tolerance or service_value < -tolerance or wait_value < -tolerance:
+                samples[stage].parse_failures += 1
+                continue
+            else:
+                continue
+
+    return samples
+
+
+def _avg_wait_alignment_check(
+    summary_metrics: Dict[str, float],
+    stage_samples: Dict[str, StageSamples],
+    tolerance: float,
+) -> List[CheckResult]:
+    """Compare per-stage wait means from microdata against reported summaries."""
+
+    checks: List[CheckResult] = []
+    summary_keys = {
+        "dev": "avg_wait_dev",
+        "review": "avg_wait_review",
+        "testing": "avg_wait_testing",
+    }
+
+    inclusion_rule = (
+        "Averages computed only over tickets that entered the stage (service_time>0 or cycles>0)."
+    )
+
+    for stage, summary_key in summary_keys.items():
+        summary_value = summary_metrics.get(summary_key)
+        samples = stage_samples.get(stage, StageSamples([], [], 0))
+        waits = samples.waits
+
+        if summary_value is None:
+            checks.append(
+                CheckResult(
+                    f"{stage} wait summary present",
+                    False,
+                    f"Missing {summary_key} in summary_stats.csv. {inclusion_rule}",
+                )
+            )
+            continue
+
+        if not waits:
+            if _approx_equal(summary_value, 0.0, tolerance):
+                details = (
+                    f"No tickets entered {stage}; summary {summary_key}={summary_value:.6f}. {inclusion_rule}"
+                )
+                checks.append(CheckResult(f"{stage} average wait", True, details))
+            else:
+                details = (
+                    f"No stage entries for {stage} under inclusion rule, but summary {summary_key}={summary_value:.6f}."
+                    f" {inclusion_rule}"
+                )
+                checks.append(CheckResult(f"{stage} average wait", False, details))
+            continue
+
+        micro_mean = sum(waits) / len(waits)
+        if _approx_equal(summary_value, micro_mean, tolerance):
+            details = (
+                f"Summary {summary_key}={summary_value:.6f} vs micro mean {micro_mean:.6f} ({len(waits)} samples)."
+                f" {inclusion_rule}"
+            )
+            checks.append(CheckResult(f"{stage} average wait", True, details))
+        else:
+            details = (
+                f"Mismatch for {stage}: summary {summary_key}={summary_value:.6f}, micro mean {micro_mean:.6f}"
+                f" ({len(waits)} samples). {inclusion_rule}"
+            )
+            checks.append(CheckResult(f"{stage} average wait", False, details))
+
+        if samples.parse_failures:
+            checks[-1].details += f" Parse issues for {samples.parse_failures} rows (excluded)."
+
+    return checks
+
+
+def _stage_identity_checks(
+    stage_samples: Dict[str, StageSamples],
+    tolerance: float,
+) -> List[CheckResult]:
+    """Validate Little-family identity E[T]=E[wait]+E[service] per stage."""
+
+    checks: List[CheckResult] = []
+    for stage, samples in stage_samples.items():
+        waits = samples.waits
+        services = samples.services
+
+        if not waits or not services:
+            details = (
+                f"No stage entries for {stage} under inclusion rule (service_time>0 or cycles>0); skipping identity check."
+            )
+            checks.append(CheckResult(f"{stage} Little identity", True, details))
+            continue
+
+        mean_wait = sum(waits) / len(waits)
+        mean_service = sum(services) / len(services)
+        mean_total = sum(w + s for w, s in zip(waits, services)) / len(waits)
+
+        if _approx_equal(mean_total, mean_wait + mean_service, tolerance):
+            details = (
+                f"E[T]={mean_total:.6f} vs E[wait]+E[service]={mean_wait + mean_service:.6f} for {len(waits)} tickets."
+                " Inclusion rule: service_time>0 or cycles>0."
+            )
+            checks.append(CheckResult(f"{stage} Little identity", True, details))
+        else:
+            details = (
+                f"Mismatch for {stage}: E[T]={mean_total:.6f} vs E[wait]+E[service]={mean_wait + mean_service:.6f}"
+                f" ({len(waits)} tickets). Inclusion rule: service_time>0 or cycles>0."
+            )
+            checks.append(CheckResult(f"{stage} Little identity", False, details))
+
+        if samples.parse_failures:
+            checks[-1].details += f" Parse issues for {samples.parse_failures} rows (excluded)."
+
+    return checks
+
+
 def _summary_bounds_check(summary_metrics: Dict[str, float], tolerance: float) -> CheckResult:
     violations: List[str] = []
 
@@ -363,7 +519,14 @@ def verify_single_run(base_dir: str, tolerance: float, fail_fast: bool) -> RunRe
         results.append(CheckResult("tickets_stats.csv parsed", False, f"Failed to load tickets file: {exc}"))
         return RunReport(base_dir, results)
 
+    stage_samples = _collect_stage_samples(ticket_rows, tolerance)
+
     checks: List[CheckResult] = [
+        CheckResult(
+            "Stage entry inclusion rule",
+            True,
+            "Per-stage means use only tickets with service_time>0 or cycles>0, matching queue_wait_records aggregation.",
+        ),
         _required_metrics_check(summary_metrics, ["tickets_arrived", "tickets_closed", "closure_rate"], tolerance),
         _summary_bounds_check(summary_metrics, tolerance),
     ]
@@ -384,6 +547,8 @@ def verify_single_run(base_dir: str, tolerance: float, fail_fast: bool) -> RunRe
     checks.append(_ticket_bounds_check(ticket_rows, tolerance))
     checks.append(_stage_cycle_consistency_check(ticket_rows, tolerance))
     checks.append(_wait_decomposition_check(ticket_rows, tolerance))
+    checks.extend(_avg_wait_alignment_check(summary_metrics, stage_samples, tolerance))
+    checks.extend(_stage_identity_checks(stage_samples, tolerance))
 
     for check in checks:
         results.append(check)
