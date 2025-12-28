@@ -23,6 +23,16 @@ class StatsCollector:
 
     def __init__(self, state):
         self.state = state
+        self.utilization_debug = str(os.environ.get("BK_UTILIZATION_DEBUG", "")).lower() in {
+            "1",
+            "true",
+            "yes",
+            "on",
+        }
+        self.utilization_tolerance = 1e-9
+        if self.utilization_debug:
+            logging.info("[UTIL_DEBUG] Busy/capacity tracing enabled via BK_UTILIZATION_DEBUG.")
+
         self.ticket_stats: Dict[int, Dict[str, Any]] = {}
         self.stage_names: List[str] = list(getattr(self.state, "stage_names", []))
         if not self.stage_names:
@@ -106,6 +116,14 @@ class StatsCollector:
         """Normalize backlog events so the dev queue metric reflects the backlog."""
 
         return "dev" if stage == "backlog" else stage
+
+    @staticmethod
+    def _stage_to_state(stage: str) -> str:
+        if stage == "dev":
+            return "DEV"
+        if stage == "review":
+            return "REV"
+        return "TEST"
 
     def _update_queue_length(self, stage: str, event_time: float, delta: float) -> None:
         stage = self._tracking_stage(stage)
@@ -192,6 +210,15 @@ class StatsCollector:
         usable_time = max(0.0, min(service_time, self.state.sim_duration - start_time))
         self.service_busy_time[stage] += usable_time
         self.service_time_records[stage].append(service_time)
+        self._log_busy_increment(
+            ticket_id,
+            stage,
+            server_idx,
+            usable_time,
+            start_time,
+            completion_time,
+            source_queue,
+        )
         self._record_event(
             ticket_id,
             "service_start",
@@ -527,6 +554,7 @@ class StatsCollector:
         self._write_ticket_csv()
         summary_rows = self._aggregate_summary()
         self._write_summary_csv(summary_rows)
+        self._log_utilization_summary()
 
         logging.info("------ SIMULATION SUMMARY ------")
         logging.info("Closed tickets: %s", self.event_counters.get("closures", 0))
@@ -552,9 +580,81 @@ class StatsCollector:
     # ------------------------------------------------------------------
     def log_developer_state_time(self, state: str, delta: float) -> None:
         self.developer_state_time[state] = self.developer_state_time.get(state, 0.0) + delta
+        if self.utilization_debug:
+            logging.info(
+                "[UTIL_DEBUG] Capacity accrual: state=%s delta=%.6f total=%.6f",
+                state,
+                delta,
+                self.developer_state_time[state],
+            )
         logging.info("Developer pool accrued %.4f days in state %s", delta, state)
 
     def log_developer_stint(self, state: str, length: float) -> None:
         self.developer_stints.setdefault(state, []).append(length)
         logging.info("Developer stint sampled for %s: %.4f days", state, length)
+
+    # ------------------------------------------------------------------
+    # Utilization debugging helpers
+    # ------------------------------------------------------------------
+    def _capacity_time_for_stage(self, stage: str) -> float:
+        state_key = self._stage_to_state(stage)
+        return self.developer_state_time.get(state_key, 0.0)
+
+    def _log_busy_increment(
+        self,
+        ticket_id: int,
+        stage: str,
+        server_idx: int,
+        delta_busy: float,
+        start_time: float,
+        completion_time: float,
+        source_queue: str,
+    ) -> None:
+        if not self.utilization_debug:
+            return
+        busy_time = self.service_busy_time.get(stage, 0.0)
+        capacity_time = self._capacity_time_for_stage(stage)
+        util = busy_time / capacity_time if capacity_time > 0 else None
+        logging.info(
+            "[UTIL_DEBUG] Busy accrual: stage=%s server=%s ticket=%s start=%.6f complete=%.6f source=%s "
+            "delta_busy=%.6f busy_total=%.6f capacity_total=%.6f util=%s",
+            stage,
+            server_idx,
+            ticket_id,
+            start_time,
+            completion_time,
+            source_queue,
+            delta_busy,
+            busy_time,
+            capacity_time,
+            f"{util:.6f}" if util is not None else "n/a",
+        )
+        if capacity_time > 0 and busy_time - capacity_time > self.utilization_tolerance:
+            logging.warning(
+                "[UTIL_DEBUG] Busy exceeded capacity: stage=%s ticket=%s server=%s busy_total=%.6f capacity_total=%.6f",
+                stage,
+                ticket_id,
+                server_idx,
+                busy_time,
+                capacity_time,
+            )
+
+    def _log_utilization_summary(self) -> None:
+        if not self.utilization_debug:
+            return
+        horizon = max(1e-9, float(self.state.sim_duration))
+        logging.info("[UTIL_DEBUG] -------- Utilization summary --------")
+        for stage in self.stage_names:
+            capacity_time = self._capacity_time_for_stage(stage)
+            busy_time = self.service_busy_time.get(stage, 0.0)
+            utilization = busy_time / capacity_time if capacity_time > 0 else 0.0
+            logging.info(
+                "[UTIL_DEBUG] stage=%s busy=%.6f capacity=%.6f util=%.6f horizon=%.6f throughput=%.6f",
+                stage,
+                busy_time,
+                capacity_time,
+                utilization,
+                horizon,
+                self.stage_throughput.get(stage, 0) / horizon,
+            )
 
