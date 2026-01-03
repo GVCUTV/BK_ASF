@@ -18,6 +18,18 @@ Outputs are written to a timestamped directory under the chosen `--outdir` (for 
 - `validation_report.md` and `validation_results.json` at the run root summarizing all checks
 - `distribution_checks.json` and optional `validation/plots/*.png` summarizing plausibility diagnostics against ETL fits
 
+## Sweep-driven validation (monotonicity)
+
+Use the dedicated sweep spec to exercise monotonic arrival/feedback/capacity cases while keeping outputs under a deterministic path:
+
+```bash
+python -m simulation.run_sweeps \
+  --spec simulation/sweeps/validation_monotonicity.csv \
+  --outdir simulation/experiments/validation_monotonicity
+```
+
+Each experiment folder mirrors the validation runner layout (summary/ticket stats plus `config_used.json`). The sweep writes `aggregate_summary.csv` and a `validation_sweep_report.md` at the sweep root, summarizing baseline deltas and directionality checks. Run `python -m simulation.verify --mode sweep --input simulation/experiments/validation_monotonicity` to attach consolidated verification reports alongside the sweep artifacts.
+
 ## Scenarios and overrides
 
 The harness runs five scenarios with deterministic seeds derived from the base seed:

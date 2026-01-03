@@ -1,0 +1,9 @@
+# v1
+# file: simulation/sweeps/validation_monotonicity.csv
+# Validation sweep covering arrival, feedback, and capacity directionality checks.
+experiment_id,validation_case,arrival_rate,feedback_dev,feedback_test,total_contributors,global_seed,sim_duration
+baseline,baseline,0.3074951954,0.0,0.0,44,33015001,365.0
+arrival_high,arrival_up,0.4612427931,0.0,0.0,44,33015011,365.0
+arrival_low,arrival_down,0.2152466368,0.0,0.0,44,33015021,365.0
+feedback_high,feedback_up,0.3074951954,0.12,0.08,44,33015031,365.0
+capacity_high,capacity_up,0.3074951954,0.0,0.0,60,33015041,365.0
