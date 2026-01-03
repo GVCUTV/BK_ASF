@@ -14,7 +14,13 @@ from typing import Deque, Optional
 
 import numpy as np
 
-from .config import ARRIVAL_RATE, FEEDBACK_P_DEV, FEEDBACK_P_TEST, SERVICE_TIME_PARAMS
+from .config import (
+    ARRIVAL_RATE,
+    FEEDBACK_P_DEV,
+    FEEDBACK_P_TEST,
+    GLOBAL_RANDOM_SEED,
+    SERVICE_TIME_PARAMS,
+)
 from .developer_policy import select_with_churn
 from .service_distributions import sample_service_time
 
@@ -32,6 +38,10 @@ class WorkflowLogic:
             raise ValueError(
                 f"SERVICE_TIME_PARAMS missing required stages: {missing}. Configure dev, review, and testing explicitly."
             )
+        arrival_seed = GLOBAL_RANDOM_SEED + 1
+        feedback_seed = GLOBAL_RANDOM_SEED + 3
+        self.arrival_rng = np.random.default_rng(arrival_seed)
+        self.feedback_rng = np.random.default_rng(feedback_seed)
 
     # ------------------------------------------------------------------
     def handle_ticket_arrival(self, ticket_id: int, event_time: float, event_queue, completion_event_cls):
@@ -49,7 +59,7 @@ class WorkflowLogic:
         if ARRIVAL_RATE <= 0:
             logging.warning("ARRIVAL_RATE not positive; no additional arrivals scheduled.")
             return
-        interarrival = np.random.exponential(1 / ARRIVAL_RATE)
+        interarrival = self.arrival_rng.exponential(1 / ARRIVAL_RATE)
         next_time = current_time + interarrival
         if next_time > self.state.sim_duration:
             logging.info("Reached simulation horizon; no more arrivals after t=%.2f", current_time)
@@ -79,7 +89,7 @@ class WorkflowLogic:
             self.stats.log_enqueue(ticket.ticket_id, "review", event_time, source="dev_complete")
             self.try_start_service("review", event_queue, event_time, completion_event_cls)
         elif stage == "review":
-            if np.random.rand() < FEEDBACK_P_DEV:
+            if self.feedback_rng.random() < FEEDBACK_P_DEV:
                 logging.info(
                     "Ticket %s receives review feedback; routing back to backlog for dev re-entry.",
                     ticket.ticket_id,
@@ -95,7 +105,7 @@ class WorkflowLogic:
                 self.stats.log_enqueue(ticket.ticket_id, "testing", event_time, source="review_complete")
                 self.try_start_service("testing", event_queue, event_time, completion_event_cls)
         elif stage == "testing":
-            if np.random.rand() < FEEDBACK_P_TEST:
+            if self.feedback_rng.random() < FEEDBACK_P_TEST:
                 logging.info(
                     "Ticket %s receives testing feedback; routing to backlog for dev re-entry.",
                     ticket.ticket_id,

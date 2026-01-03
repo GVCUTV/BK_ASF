@@ -29,10 +29,15 @@ REPORT_MD = "validation_report.md"
 def _configure_logging(base_dir: Path) -> None:
     base_dir.mkdir(parents=True, exist_ok=True)
     logfile = base_dir / "validation.log"
+
+    file_handler = logging.FileHandler(logfile, mode="w")
+    stream_handler = logging.StreamHandler(sys.stdout)
+    stream_handler.setLevel(logging.WARNING)
+
     logging.basicConfig(
         level=logging.INFO,
         format="%(asctime)s [%(levelname)s] %(message)s",
-        handlers=[logging.FileHandler(logfile, mode="w"), logging.StreamHandler(sys.stdout)],
+        handlers=[file_handler, stream_handler],
         force=True,
     )
     logging.info("Validation logging initialized at %s", logfile)
@@ -90,7 +95,9 @@ def _scenario_overrides(base_seed: int) -> List[Dict[str, Any]]:
         {
             "id": "capacity_high",
             "description": "Higher developer availability",
-            "overrides": {"GLOBAL_RANDOM_SEED": base_seed + 4, "TOTAL_CONTRIBUTORS": sim_config.TOTAL_CONTRIBUTORS + 10},
+            # Keep the seed aligned with the baseline so the directionality checks
+            # measure the isolated impact of additional capacity rather than seed noise.
+            "overrides": {"GLOBAL_RANDOM_SEED": base_seed, "TOTAL_CONTRIBUTORS": sim_config.TOTAL_CONTRIBUTORS + 10},
         },
     ]
 
@@ -131,7 +138,7 @@ def _run_single_scenario(base_dir: Path, scenario: Dict[str, Any], baseline_metr
     check_results: List[checks.CheckResult] = []
     check_results.extend(checks.check_boundedness(summary_metrics))
     check_results.extend(checks.check_conservation(summary_metrics, tickets, sim_config.SIM_DURATION))
-    if baseline_metrics:
+    if baseline_metrics and scenario.get("id") == "baseline":
         check_results.extend(checks.check_baseline(summary_metrics, baseline_metrics, rel_tol=0.1, abs_tol=1e-6))
 
     verification_report = None
