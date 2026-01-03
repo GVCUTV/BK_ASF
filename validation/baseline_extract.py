@@ -27,9 +27,17 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
+
+def _resolve_path(path_like: Path | str) -> Path:
+    """Return an absolute path anchored at the project root when needed."""
+
+    path = Path(path_like).expanduser()
+    return path if path.is_absolute() else PROJECT_ROOT / path
+
+
 from simulation import config as sim_config
 
-DEFAULT_CONFIG_PATH = Path("validation/baseline_config.yaml")
+DEFAULT_CONFIG_PATH = PROJECT_ROOT / "validation" / "baseline_config.yaml"
 
 
 @dataclasses.dataclass
@@ -54,15 +62,16 @@ class BaselineConfig:
 
     @classmethod
     def from_file(cls, path: Path) -> "BaselineConfig":
-        with open(path, "r", encoding="utf-8") as fh:
+        config_path = _resolve_path(path)
+        with open(config_path, "r", encoding="utf-8") as fh:
             raw = yaml.safe_load(fh) or {}
         merged = {
             **dataclasses.asdict(
                 cls(
-                    input_csv=Path("etl/output/csv/tickets_prs_merged.csv"),
-                    fit_summary_csv=Path("etl/output/csv/fit_summary.csv"),
-                    output_metrics_csv=Path("validation/baseline_metrics.csv"),
-                    output_metadata_json=Path("validation/baseline_metadata.json"),
+                    input_csv=_resolve_path("etl/output/csv/tickets_prs_merged.csv"),
+                    fit_summary_csv=_resolve_path("etl/output/csv/fit_summary.csv"),
+                    output_metrics_csv=_resolve_path("validation/baseline_metrics.csv"),
+                    output_metadata_json=_resolve_path("validation/baseline_metadata.json"),
                 )
             ),
             **raw,
@@ -70,10 +79,10 @@ class BaselineConfig:
         if merged.get("window_override"):
             win = merged["window_override"]
             merged["window_override"] = (win[0], win[1])
-        merged["input_csv"] = Path(merged["input_csv"])
-        merged["fit_summary_csv"] = Path(merged["fit_summary_csv"])
-        merged["output_metrics_csv"] = Path(merged["output_metrics_csv"])
-        merged["output_metadata_json"] = Path(merged["output_metadata_json"])
+        merged["input_csv"] = _resolve_path(merged["input_csv"])
+        merged["fit_summary_csv"] = _resolve_path(merged["fit_summary_csv"])
+        merged["output_metrics_csv"] = _resolve_path(merged["output_metrics_csv"])
+        merged["output_metadata_json"] = _resolve_path(merged["output_metadata_json"])
         return cls(**merged)
 
 
