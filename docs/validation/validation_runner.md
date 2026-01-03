@@ -30,6 +30,17 @@ python -m simulation.run_sweeps \
 
 Each experiment folder mirrors the validation runner layout (summary/ticket stats plus `config_used.json`). The sweep writes `aggregate_summary.csv` and a `validation_sweep_report.md` at the sweep root, summarizing baseline deltas and directionality checks. Run `python -m simulation.verify --mode sweep --input simulation/experiments/validation_monotonicity` to attach consolidated verification reports alongside the sweep artifacts.
 
+**Sweep scenarios (validation_monotonicity.csv)**
+
+- `baseline` — current configuration with `ARRIVAL_RATE=0.3074951954`, `FEEDBACK_P_* = 0`, `TOTAL_CONTRIBUTORS=44`.
+- `arrival_up` — raises arrival pressure to `0.399744` tickets/day.
+- `arrival_down` — relieves arrivals to `0.215247` tickets/day.
+- `feedback_up` — increases feedback routes (`FEEDBACK_P_DEV=0.18`, `FEEDBACK_P_TEST=0.12`).
+- `capacity_up` — expands capacity via `TOTAL_CONTRIBUTORS=60`.
+- `capacity_down` — contracts capacity to `TOTAL_CONTRIBUTORS=30`.
+
+Seeds are unique per row (starting at `33015001`) to keep runs reproducible; all scenarios simulate `365` days. The `validation_tag` column drives the monotonic checks in `validation_sweep_report.md` (`arrival_up/down`, `feedback_up`, `capacity_up/down`). Use the provided `--outdir` to avoid clobbering other sweeps.
+
 ## Scenarios and overrides
 
 The harness runs five scenarios with deterministic seeds derived from the base seed:
