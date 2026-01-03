@@ -13,7 +13,7 @@ from typing import Any, Dict
 
 import numpy as np
 
-from .config import SERVICE_TIME_PARAMS
+from .config import GLOBAL_RANDOM_SEED, SERVICE_TIME_PARAMS, SERVICE_TIME_STREAM_SEED
 
 SUPPORTED_DISTRIBUTIONS = {
     "lognorm",
@@ -28,6 +28,8 @@ SUPPORTED_DISTRIBUTIONS = {
 }
 
 _DISTRIBUTION_LOGGED = False
+_SERVICE_SEED = SERVICE_TIME_STREAM_SEED if SERVICE_TIME_STREAM_SEED is not None else GLOBAL_RANDOM_SEED + 2
+_SERVICE_RNG = np.random.default_rng(_SERVICE_SEED)
 
 
 def _log_service_configuration_once() -> None:
@@ -51,37 +53,37 @@ def _draw_sample(dist_type: str, params: Dict[str, Any]) -> float:
         if sigma is None:
             raise ValueError("Lognormal distribution requires 's' or 'sigma' parameter.")
         scale = params.get("scale", 1.0)
-        return float(np.random.lognormal(mean=np.log(scale), sigma=sigma))
+        return float(_SERVICE_RNG.lognormal(mean=np.log(scale), sigma=sigma))
 
     if dist_type in {"weibull", "weibull_min"}:
         shape = params.get("shape") or params.get("k")
         if shape is None:
             raise ValueError("Weibull distribution requires 'shape' or 'k' parameter.")
         scale = params.get("scale", 1.0)
-        return float(np.random.weibull(shape) * scale)
+        return float(_SERVICE_RNG.weibull(shape) * scale)
 
     if dist_type == "gamma":
         shape = params.get("shape") or params.get("k")
         if shape is None:
             raise ValueError("Gamma distribution requires 'shape' or 'k' parameter.")
         scale = params.get("scale", 1.0)
-        return float(np.random.gamma(shape, scale))
+        return float(_SERVICE_RNG.gamma(shape, scale))
 
     if dist_type == "expon":
         scale = params.get("scale", 1.0)
-        return float(np.random.exponential(scale))
+        return float(_SERVICE_RNG.exponential(scale))
 
     if dist_type == "pareto":
         shape = params.get("shape") or params.get("alpha")
         if shape is None:
             raise ValueError("Pareto distribution requires 'shape' or 'alpha' parameter.")
         scale = params.get("scale", 1.0)
-        return float(np.random.pareto(shape) * scale)
+        return float(_SERVICE_RNG.pareto(shape) * scale)
 
     if dist_type in {"norm", "normal"}:
         mean = params.get("mean", 0.0)
         scale = params.get("scale", 1.0)
-        return float(np.random.normal(loc=mean, scale=scale))
+        return float(_SERVICE_RNG.normal(loc=mean, scale=scale))
 
     raise ValueError(
         f"Unsupported distribution '{dist_type}'. Supported options: {sorted(SUPPORTED_DISTRIBUTIONS)}.")
