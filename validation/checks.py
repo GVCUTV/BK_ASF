@@ -135,13 +135,17 @@ def check_conservation(summary: Dict[str, Any], tickets: List[Dict[str, Any]], s
         )
 
     # Throughput ~= completions / horizon using per-ticket cycle counts
-    for stage, throughput_key, cycles_field in [
-        ("dev", "throughput_dev", "service_starts_dev"),
-        ("review", "throughput_review", "service_starts_review"),
-        ("testing", "throughput_testing", "service_starts_testing"),
+    for stage, throughput_key, starts_field, completions_field in [
+        ("dev", "throughput_dev", "service_starts_dev", "service_completions_dev"),
+        ("review", "throughput_review", "service_starts_review", "service_completions_review"),
+        ("testing", "throughput_testing", "service_starts_testing", "service_completions_testing"),
     ]:
         throughput = summary.get(throughput_key)
-        cycle_total = _mean(float(row.get(cycles_field, 0.0)) for row in tickets) * len(tickets)
+        completion_counts = [row.get(completions_field) for row in tickets]
+        if any(count not in {None, ""} for count in completion_counts):
+            cycle_total = _mean(float(row.get(completions_field, 0.0)) for row in tickets) * len(tickets)
+        else:
+            cycle_total = _mean(float(row.get(starts_field, 0.0)) for row in tickets) * len(tickets)
         computed = cycle_total / sim_duration if sim_duration else 0.0
         if isinstance(throughput, (int, float)):
             results.append(
