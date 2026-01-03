@@ -34,6 +34,7 @@ TICKETS_FILENAME = "tickets_stats.csv"
 CONFIG_FILENAME = "config_used.json"
 AGGREGATE_FILENAME = "aggregate_summary.csv"
 LOG_FILENAME = "sweep.log"
+VALIDATION_REPORT_FILENAME = "validation_sweep_report.md"
 
 SPEC_KEY_MAP = {
     "arrival_rate": "ARRIVAL_RATE",
@@ -222,7 +223,7 @@ def build_aggregate(
     experiments: List[SweepExperiment],
     param_columns: List[str],
     base_outdir: str,
-) -> None:
+) -> str | None:
     """Combine per-experiment parameters and metrics into one CSV."""
     aggregate_rows: List[Dict[str, Any]] = []
     for exp in experiments:
@@ -240,7 +241,7 @@ def build_aggregate(
 
     if not aggregate_rows:
         logging.warning("No experiments produced summaries; aggregate not written.")
-        return
+        return None
 
     aggregate_path = os.path.join(base_outdir, AGGREGATE_FILENAME)
     fieldnames = ["experiment_id", *param_columns, *SUMMARY_METRICS]
@@ -249,6 +250,166 @@ def build_aggregate(
         writer.writeheader()
         writer.writerows(aggregate_rows)
     logging.info("Aggregate summary written to %s", aggregate_path)
+    return aggregate_path
+
+
+def _load_aggregate_rows(aggregate_path: str) -> Tuple[List[Dict[str, Any]], List[str]]:
+    with open(aggregate_path, "r", newline="", encoding="utf-8") as handle:
+        reader = csv.DictReader(handle)
+        if reader.fieldnames is None:
+            raise ValueError(f"Aggregate file {aggregate_path} is missing headers.")
+        rows: List[Dict[str, Any]] = []
+        for row in reader:
+            parsed = {key: parse_value(value or "") for key, value in row.items()}
+            rows.append(parsed)
+    return rows, list(reader.fieldnames)
+
+
+def _direction_ok(baseline: Any, scenario: Any, direction: str, tol: float = 1e-9) -> bool:
+    if baseline is None or scenario is None:
+        return True
+    if isinstance(baseline, (int, float)) and isinstance(scenario, (int, float)):
+        if direction == "up":
+            return scenario >= baseline - tol
+        if direction == "down":
+            return scenario <= baseline + tol
+    return True
+
+
+def _format_delta(baseline: Any, scenario: Any) -> tuple[str, str]:
+    if not isinstance(baseline, (int, float)) or not isinstance(scenario, (int, float)):
+        return ("—", "—")
+    diff = scenario - baseline
+    pct = "∞" if baseline == 0 else f"{(diff / baseline) * 100:.2f}%"
+    return (f"{diff:.6f}", pct)
+
+
+def build_validation_report(
+    aggregate_path: str, param_columns: List[str], base_outdir: str
+) -> None:
+    """Create a Markdown report with baseline deltas and directionality checks."""
+
+    rows, _ = _load_aggregate_rows(aggregate_path)
+    validation_key = None
+    for candidate in ["validation_case", "validation_tag", "scenario"]:
+        if candidate in param_columns:
+            validation_key = candidate
+            break
+    if validation_key is None:
+        logging.info("No validation tag column detected; skipping validation sweep report.")
+        return
+
+    baseline_row = next(
+        (
+            row
+            for row in rows
+            if str(row.get(validation_key, "")).lower() == "baseline"
+            or str(row.get("experiment_id", "")).lower() == "baseline"
+        ),
+        None,
+    )
+    if baseline_row is None:
+        logging.warning("Validation sweep missing a baseline row; report not written.")
+        return
+
+    wait_metrics = ["avg_wait_dev", "avg_wait_review", "avg_wait_testing"]
+    queue_metrics = ["avg_queue_length_dev", "avg_queue_length_review", "avg_queue_length_testing"]
+    utilization_metrics = ["utilization_dev", "utilization_review", "utilization_testing"]
+
+    rules = {
+        "arrival_up": {
+            "description": "Higher arrival rate should increase waits/queues and may reduce closure.",
+            "up": wait_metrics + queue_metrics,
+            "down": ["closure_rate"],
+        },
+        "arrival_down": {
+            "description": "Lower arrival rate should relieve waits/queues and improve closure.",
+            "down": wait_metrics + queue_metrics + utilization_metrics,
+            "up": ["closure_rate"],
+        },
+        "feedback_up": {
+            "description": "Higher feedback loops should worsen waits/queues and lower closure.",
+            "up": wait_metrics + queue_metrics,
+            "down": ["closure_rate"],
+        },
+        "capacity_up": {
+            "description": "More capacity should lower waits/queues/utilization and improve closure.",
+            "down": wait_metrics + queue_metrics + utilization_metrics,
+            "up": ["closure_rate"],
+        },
+        "capacity_down": {
+            "description": "Less capacity should raise waits/queues/utilization and lower closure.",
+            "up": wait_metrics + queue_metrics + utilization_metrics,
+            "down": ["closure_rate"],
+        },
+    }
+
+    lines: List[str] = []
+    lines.append("# Validation sweep report")
+    lines.append("")
+    lines.append(
+        "Baseline: ``{}`` (validation_case) with experiment_id ``{}``.".format(
+            baseline_row.get(validation_key), baseline_row.get("experiment_id")
+        )
+    )
+    lines.append("")
+    lines.append("## Directionality checks")
+    lines.append("| Scenario | Status | Details |")
+    lines.append("| --- | --- | --- |")
+
+    key_metrics = wait_metrics + queue_metrics + ["closure_rate", *utilization_metrics]
+    deviation_header = ["Scenario", "Metric", "Baseline", "Value", "Delta", "% change"]
+    deviation_rows: List[List[str]] = []
+
+    for row in rows:
+        scenario_tag = str(row.get(validation_key, ""))
+        if scenario_tag.lower() == "baseline":
+            continue
+        rule = rules.get(scenario_tag)
+        if rule is None:
+            lines.append(
+                f"| {row.get('experiment_id')} | ⚪ | No validation rule for tag '{scenario_tag}'. |"
+            )
+            continue
+
+        failures: List[str] = []
+        for metric in rule.get("up", []):
+            if not _direction_ok(baseline_row.get(metric), row.get(metric), "up"):
+                failures.append(f"{metric} not ≥ baseline")
+        for metric in rule.get("down", []):
+            if not _direction_ok(baseline_row.get(metric), row.get(metric), "down"):
+                failures.append(f"{metric} not ≤ baseline")
+
+        status = "PASS" if not failures else "FAIL"
+        detail = rule.get("description", "")
+        if failures:
+            detail = f"{detail} Problems: {', '.join(failures)}"
+        lines.append(f"| {row.get('experiment_id')} | {status} | {detail} |")
+
+        for metric in key_metrics:
+            delta, pct = _format_delta(baseline_row.get(metric), row.get(metric))
+            deviation_rows.append(
+                [
+                    str(row.get("experiment_id")),
+                    metric,
+                    str(baseline_row.get(metric)),
+                    str(row.get(metric)),
+                    delta,
+                    pct,
+                ]
+            )
+
+    lines.append("")
+    lines.append("## Deviations vs baseline")
+    lines.append("| " + " | ".join(deviation_header) + " |")
+    lines.append("| " + " | ".join(["---"] * len(deviation_header)) + " |")
+    for deviation in deviation_rows:
+        lines.append("| " + " | ".join(deviation) + " |")
+
+    report_path = os.path.join(base_outdir, VALIDATION_REPORT_FILENAME)
+    with open(report_path, "w", encoding="utf-8") as handle:
+        handle.write("\n".join(lines))
+    logging.info("Validation sweep report written to %s", report_path)
 
 
 def parse_args(argv: List[str]) -> argparse.Namespace:
@@ -283,8 +444,11 @@ def main(argv: List[str] | None = None) -> None:
             completed.append(exp)
 
     logging.info("Completed %d/%d experiments", len(completed), len(experiments))
+    aggregate_path = None
     if not args.skip_aggregate:
-        build_aggregate(completed, param_columns, args.outdir)
+        aggregate_path = build_aggregate(completed, param_columns, args.outdir)
+    if aggregate_path:
+        build_validation_report(aggregate_path, param_columns, args.outdir)
 
 
 if __name__ == "__main__":
