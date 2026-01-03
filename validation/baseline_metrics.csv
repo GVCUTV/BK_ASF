@@ -1,0 +1,19 @@
+metric,value,units,source,note,ci_low,ci_high
+arrival_rate,0.3075693954004596,tickets/day,ETL arrivals,Created tickets per day over empirical window,,
+closure_rate,0.9239583333333333,fraction,ETL closures,Resolved divided by created,0.907190673231969,0.9407259934346976
+throughput_closed,0.2841813059585496,tickets/day,ETL closures,Completion rate per day (all stages),0.26547923212652325,0.302883379790576
+throughput_dev,0.06279541822759384,tickets/day,ETL stage durations,Stage completions per day (non-null durations),0.0540040596757307,0.07158677677945698
+avg_wait_dev,,days,not_observed,Queue waits not captured in ETL; requires simulation,,
+avg_queue_length_dev,,tickets,not_observed,Queue lengths require simulation; unavailable in ETL,,
+utilization_dev,,fraction,not_observed,Server utilization not directly observable; use simulation,,
+rework_rate_dev,,fraction,ETL proxy,Proxy from rework flags when available,,
+throughput_review,0.06279541822759384,tickets/day,ETL stage durations,Stage completions per day (non-null durations),0.0540040596757307,0.07158677677945698
+avg_wait_review,,days,not_observed,Queue waits not captured in ETL; requires simulation,,
+avg_queue_length_review,,tickets,not_observed,Queue lengths require simulation; unavailable in ETL,,
+utilization_review,,fraction,not_observed,Server utilization not directly observable; use simulation,,
+rework_rate_review,0.0,fraction,ETL proxy,Proxy from rework flags when available,,
+throughput_testing,0.03780540485130649,tickets/day,ETL stage durations,Stage completions per day (non-null durations),0.030984076410711846,0.04462673329190114
+avg_wait_testing,,days,not_observed,Queue waits not captured in ETL; requires simulation,,
+avg_queue_length_testing,,tickets,not_observed,Queue lengths require simulation; unavailable in ETL,,
+utilization_testing,,fraction,not_observed,Server utilization not directly observable; use simulation,,
+rework_rate_testing,0.0,fraction,ETL proxy,Proxy from rework flags when available,,

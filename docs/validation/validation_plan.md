@@ -53,3 +53,10 @@ The table aligns simulator KPIs to measurable quantities or derived checks from 
 - **State parameters:** Runs must reference `STATE_PARAMETER_PATHS` (transition matrix, service params, stint PMFs) from `simulation/config.py`; changes require re-validating against ETL fits.
 - **Artifacts to retain:** Keep `summary_stats.csv`, `tickets_stats.csv`, run logs, and any `verification_report.md` produced by `simulation.verify`. For sweeps, also retain `aggregate_summary.csv`.
 - **Baseline preservation:** Store copies of the exact config (`config_used.json` where applicable), seed values, and output CSVs for any run used as a validation anchor or regression reference.
+
+### Baseline extractions (empirical reference)
+- The script `validation/baseline_extract.py` reads `etl/output/csv/tickets_prs_merged.csv` and `etl/output/csv/fit_summary.csv` to export:
+  - `validation/baseline_metrics.csv`: KPIs aligned to `simulation/output/summary_stats.csv` (arrival rate, closure rate, throughput_* per stage, placeholders for wait/queue/utilization, and rework proxies) with confidence bounds when available.
+  - `validation/baseline_metadata.json`: provenance (source file hashes, ETL window, seed, config snapshot, state-parameter hashes) plus stage-level service-duration summaries.
+- Configuration lives in `validation/baseline_config.yaml`; paths, seeds, and window overrides can be adjusted without code edits.
+- Outputs are deterministic given fixed inputs/seeds and do **not** change simulator behavior; regenerate as needed to refresh “golden” baselines prior to validation runs.
