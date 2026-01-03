@@ -308,6 +308,16 @@ class StatsCollector:
         review_starts = sum(1 for start in stat.get("service_starts", []) if start.get("stage") == "review")
         testing_starts = sum(1 for start in stat.get("service_starts", []) if start.get("stage") == "testing")
 
+        dev_completions = sum(
+            1 for completion in stat.get("service_completions", []) if completion.get("stage") == "dev"
+        )
+        review_completions = sum(
+            1 for completion in stat.get("service_completions", []) if completion.get("stage") == "review"
+        )
+        testing_completions = sum(
+            1 for completion in stat.get("service_completions", []) if completion.get("stage") == "testing"
+        )
+
         dev_cycles = stat.get("cycles", {}).get("dev", dev_starts)
         review_cycles = stat.get("cycles", {}).get("review", review_starts)
         test_cycles = stat.get("cycles", {}).get("testing", testing_starts)
@@ -331,6 +341,9 @@ class StatsCollector:
             "service_starts_dev": dev_starts,
             "service_starts_review": review_starts,
             "service_starts_testing": testing_starts,
+            "service_completions_dev": dev_completions,
+            "service_completions_review": review_completions,
+            "service_completions_testing": testing_completions,
             # Reserved Markov-aware fields for 4.3A compatibility
             "markov_time_dev": "",
             "markov_time_rev": "",
@@ -359,6 +372,9 @@ class StatsCollector:
             "service_starts_dev",
             "service_starts_review",
             "service_starts_testing",
+            "service_completions_dev",
+            "service_completions_review",
+            "service_completions_testing",
             "markov_time_dev",
             "markov_time_rev",
             "markov_time_test",
