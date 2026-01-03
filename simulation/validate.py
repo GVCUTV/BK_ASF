@@ -16,9 +16,10 @@ from simulation.run_sweeps import apply_config_overrides
 from simulation.verify import main as verify_main
 from validation import checks
 
-DEFAULT_OUTDIR = Path("simulation/experiments")
+REPO_ROOT = Path(__file__).resolve().parent.parent
+DEFAULT_OUTDIR = REPO_ROOT / "simulation/experiments"
 SCENARIO_PREFIX = "validation"
-BASELINE_PATH = Path("validation/baseline_metrics.csv")
+BASELINE_PATH = REPO_ROOT / "validation/baseline_metrics.csv"
 SUMMARY_FILENAME = checks.SUMMARY_FILENAME
 TICKETS_FILENAME = checks.TICKETS_FILENAME
 RESULTS_JSON = "validation_results.json"
@@ -262,9 +263,9 @@ def main(argv: List[str] | None = None) -> int:
 
     baseline = scenario_map.get("baseline")
     if baseline:
-        fit_path = Path("etl/output/csv/fit_summary.csv")
-        service_params_path = Path(sim_config.STATE_PARAMETER_PATHS["service_params"])
-        baseline_metadata_path = Path("validation/baseline_metadata.json")
+        fit_path = REPO_ROOT / "etl/output/csv/fit_summary.csv"
+        service_params_path = REPO_ROOT / sim_config.STATE_PARAMETER_PATHS["service_params"]
+        baseline_metadata_path = REPO_ROOT / "validation/baseline_metadata.json"
 
         param_results, param_stats = checks.compare_service_parameters(
             baseline.config_snapshot,
