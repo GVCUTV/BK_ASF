@@ -325,7 +325,12 @@ def build_metrics_vector(arrival_info: Dict[str, Any], stage_info: Dict[str, Dic
 
 
 def collect_metadata(cfg: BaselineConfig, arrival_info: Dict[str, Any], stage_info: Dict[str, Dict[str, Any]], fit_rows: Dict[str, Dict[str, Any]]) -> Dict[str, Any]:
-    state_paths = sim_config.STATE_PARAMETER_PATHS
+    state_paths_raw = sim_config.STATE_PARAMETER_PATHS
+    state_paths = {
+        "matrix_P": _resolve_path(state_paths_raw["matrix_P"]),
+        "service_params": _resolve_path(state_paths_raw["service_params"]),
+        "stint_pmfs": [_resolve_path(p) for p in state_paths_raw["stint_pmfs"]],
+    }
     state_hashes = {
         "matrix_P": sha256sum(Path(state_paths["matrix_P"])),
         "service_params": sha256sum(Path(state_paths["service_params"])),
