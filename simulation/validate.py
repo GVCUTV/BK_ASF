@@ -4,7 +4,6 @@ from __future__ import annotations
 import argparse
 import json
 import logging
-import os
 import shutil
 import sys
 from datetime import datetime
@@ -24,6 +23,7 @@ SUMMARY_FILENAME = checks.SUMMARY_FILENAME
 TICKETS_FILENAME = checks.TICKETS_FILENAME
 RESULTS_JSON = "validation_results.json"
 REPORT_MD = "validation_report.md"
+DISTRIBUTION_JSON = "distribution_checks.json"
 
 
 def _configure_logging(base_dir: Path) -> None:
@@ -162,7 +162,13 @@ def _run_single_scenario(base_dir: Path, scenario: Dict[str, Any], baseline_metr
     )
 
 
-def _render_markdown(base_dir: Path, scenario_results: List[checks.ScenarioResult], monotonic_results: List[checks.CheckResult]) -> str:
+def _render_markdown(
+    base_dir: Path,
+    scenario_results: List[checks.ScenarioResult],
+    monotonic_results: List[checks.CheckResult],
+    plausibility_results: List[checks.CheckResult] | None = None,
+    plausibility_stats: Dict[str, Any] | None = None,
+) -> str:
     lines: List[str] = []
     lines.append("# Validation Summary")
     lines.append("")
@@ -183,6 +189,29 @@ def _render_markdown(base_dir: Path, scenario_results: List[checks.ScenarioResul
             status = "PASS" if check.passed else "FAIL"
             lines.append(f"| {check.name} | {status} | {check.details} |")
         lines.append("")
+
+    if plausibility_results:
+        lines.append("## Plausibility Checks")
+        lines.append("")
+        lines.append("| Check | Status | Details |")
+        lines.append("| --- | --- | --- |")
+        for check in plausibility_results:
+            status = "PASS" if check.passed else "FAIL"
+            lines.append(f"| {check.name} | {status} | {check.details} |")
+        lines.append("")
+        if plausibility_stats:
+            lines.append("### Distribution Diagnostics")
+            for stage, payload in plausibility_stats.get("distributions", {}).get("stages", {}).items():
+                ks_val = payload.get("ks_stat")
+                ks_text = f"{ks_val:.4f}" if isinstance(ks_val, (int, float)) else "n/a"
+                lines.append(f"- **{stage}**: KS={ks_text} with quantiles {payload.get('quantiles')}")
+            arrival = plausibility_stats.get("arrivals", {}).get("arrival_rate")
+            if arrival:
+                lines.append(
+                    f"- **Arrival rate**: config={arrival.get('config')} vs ETL={arrival.get('etl')} "
+                    f"(rel_change={arrival.get('relative_change'):.3f})"
+                )
+    lines.append("")
 
     lines.append("## Artifacts")
     for result in scenario_results:
@@ -228,9 +257,42 @@ def main(argv: List[str] | None = None) -> int:
 
     scenario_map = {res.name: res for res in results}
     monotonic_results = checks.monotonicity_checks(scenario_map)
-    all_checks = results + []
+    plausibility_results: List[checks.CheckResult] = []
+    plausibility_stats: Dict[str, Any] = {}
 
-    report_md = _render_markdown(run_dir, results, monotonic_results)
+    baseline = scenario_map.get("baseline")
+    if baseline:
+        fit_path = Path("etl/output/csv/fit_summary.csv")
+        service_params_path = Path(sim_config.STATE_PARAMETER_PATHS["service_params"])
+        baseline_metadata_path = Path("validation/baseline_metadata.json")
+
+        param_results, param_stats = checks.compare_service_parameters(
+            baseline.config_snapshot,
+            str(fit_path),
+            str(service_params_path),
+            tolerance=checks.DEFAULT_DISTRIBUTION_TOLERANCE,
+        )
+        dist_results, dist_stats = checks.compare_empirical_distributions(
+            baseline.config_snapshot,
+            str(fit_path),
+            str(service_params_path),
+            plot_dir=str(run_dir / "validation" / "plots"),
+        )
+        arrival_results, arrival_stats = checks.validate_arrival_and_feedback(
+            baseline.config_snapshot,
+            str(baseline_metadata_path),
+            tolerance=checks.DEFAULT_DISTRIBUTION_TOLERANCE,
+        )
+
+        plausibility_results.extend(param_results + dist_results + arrival_results)
+        plausibility_stats = {
+            "parameters": param_stats,
+            "distributions": dist_stats,
+            "arrivals": arrival_stats,
+        }
+        checks.write_json_report(str(run_dir / DISTRIBUTION_JSON), plausibility_stats)
+
+    report_md = _render_markdown(run_dir, results, monotonic_results, plausibility_results, plausibility_stats)
     report_path = run_dir / REPORT_MD
     report_path.write_text(report_md, encoding="utf-8")
 
@@ -248,6 +310,8 @@ def main(argv: List[str] | None = None) -> int:
             for res in results
         ],
         "monotonicity": [check.__dict__ for check in monotonic_results],
+        "plausibility_checks": [check.__dict__ for check in plausibility_results],
+        "plausibility_stats": plausibility_stats,
     }
     checks.write_json_report(str(run_dir / RESULTS_JSON), payload)
 
