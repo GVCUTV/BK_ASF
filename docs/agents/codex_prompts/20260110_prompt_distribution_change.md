@@ -1,0 +1,42 @@
+## Codex Macro-Prompt: Analyze Distribution Change (Lognormal → Weibull)
+
+**Goal**  
+Determine why the distribution in `fit_summary.csv` for the DEV and TEST phases changed from lognormal to Weibull by analyzing the three consecutive commit diffs captured in `etl/commits_patches.txt`.
+
+**Context**  
+`etl/commits_patches.txt` contains the unified diffs of three consecutive commits. The change from lognormal to Weibull appears in `fit_summary.csv` for DEV and TEST phases. The objective is to trace which code or data processing changes in those commits caused the distribution selection to change.
+
+**Files to Read**  
+1. `etl/commits_patches.txt` (full file).  
+2. `etl/output/csv/fit_summary.csv` (or the current location of the file in the repo if different).  
+3. Every file referenced in the diffs that impacts distribution fitting, model selection, or summary CSV generation (e.g., ETL scripts, fitting modules, config files).
+
+**Objectives**  
+1. Parse the three commit diffs to identify all changes that could affect:  
+   - Distribution fitting logic.  
+   - Selection criteria between candidate distributions.  
+   - Input data preprocessing for DEV/TEST phases.  
+   - CSV output generation for `fit_summary.csv`.  
+2. Map each relevant diff hunk to a plausible effect on distribution selection (e.g., parameter changes, data filtering, criteria thresholds).  
+3. Determine which specific commit(s) introduced the change from lognormal to Weibull for DEV/TEST and explain the causal chain.  
+4. Confirm whether the observed change is due to updated data, changed fitting criteria, or changed code paths.  
+5. Produce a concise explanation with evidence tied to the exact diff hunks and file paths.
+
+**Output Requirements**  
+- Produce a single Markdown report with:  
+  - **Summary of Findings** (what changed and why).  
+  - **Commit-by-Commit Analysis** (cite the specific diff hunks responsible).  
+  - **Conclusion** (the root cause of the lognormal → Weibull switch for DEV/TEST).  
+- Include file paths and line references to the diff hunks from `etl/commits_patches.txt`.  
+- Do **not** modify any files.  
+- Do **not** run simulations.
+
+**Formatting Rules**  
+- One report only, in English.  
+- No extra commentary outside the requested report.  
+- Clearly identify commit boundaries as they appear in `etl/commits_patches.txt`.
+
+**Definition of Done**  
+- The report explains *why* the distribution changed for DEV/TEST, identifies the responsible commit(s), and ties the explanation to concrete diff evidence.  
+- All files listed above were read.  
+- No file modifications were made.
