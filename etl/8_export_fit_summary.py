@@ -105,9 +105,9 @@ def parse_params(val):
         return None
 
 
-def choose_winner(df):
-    """Index of winner: lowest MAE_KDE_PDF, then lower AIC, then lower BIC."""
-    cols = ["MAE_KDE_PDF"]
+def choose_winner(df, metric_col):
+    """Index of winner: lowest metric, then lower AIC, then lower BIC."""
+    cols = [metric_col]
     if "AIC" in df.columns:
         cols.append("AIC")
     if "BIC" in df.columns:
@@ -217,9 +217,18 @@ def main():
         df = pd.read_csv(csv_path)
         logging.info("[Stage: %s] Loaded distribution_fit_stats: rows=%d cols=%d", stage, len(df), len(df.columns))
 
-        need = {"Distribuzione", "Parametri", "MAE_KDE_PDF"}
-        if not need.issubset(df.columns):
-            logging.error("Missing required columns %s in %s", need, csv_path)
+        metric_col = None
+        if "MAE_KDE_PDF" in df.columns:
+            metric_col = "MAE_KDE_PDF"
+        elif "MSE_KDE_PDF" in df.columns:
+            metric_col = "MSE_KDE_PDF"
+
+        need = {"Distribuzione", "Parametri"}
+        if metric_col is None or not need.issubset(df.columns):
+            missing = set(need) - set(df.columns)
+            if metric_col is None:
+                missing.add("MAE_KDE_PDF or MSE_KDE_PDF")
+            logging.error("Missing required columns %s in %s", missing, csv_path)
             raise SystemExit(1)
 
         if args.require_plausible and "Plausible" in df.columns:
@@ -239,12 +248,13 @@ def main():
             logging.error("[Stage: %s] No usable rows after parsing 'Parametri'.", stage)
             raise SystemExit(1)
 
-        win_idx = choose_winner(df)
+        win_idx = choose_winner(df, metric_col)
         win = df.loc[win_idx]
-        logging.info("[Stage: %s] Winner: Distribuzione=%s | MAE_KDE_PDF=%.6g | AIC=%s | BIC=%s | Params=%s",
+        logging.info("[Stage: %s] Winner: Distribuzione=%s | %s=%.6g | AIC=%s | BIC=%s | Params=%s",
                      stage,
                      str(win.get("Distribuzione")),
-                     float(win.get("MAE_KDE_PDF")),
+                     metric_col,
+                     float(win.get(metric_col)),
                      str(win.get("AIC")) if "AIC" in df.columns else "n/a",
                      str(win.get("BIC")) if "BIC" in df.columns else "n/a",
                      str(win.get("_params")))
@@ -253,7 +263,7 @@ def main():
         row = {
             "stage": stage,
             "is_winner": True,
-            "mae": float(win["MAE_KDE_PDF"]),
+            "mae": float(win[metric_col]),
             "ks_pvalue": float(win["KS_pvalue"]) if "KS_pvalue" in df.columns and pd.notna(win["KS_pvalue"]) else None,
             "aic": float(win["AIC"]) if "AIC" in df.columns and pd.notna(win["AIC"]) else None,
             "bic": float(win["BIC"]) if "BIC" in df.columns and pd.notna(win["BIC"]) else None,
