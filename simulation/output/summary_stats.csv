@@ -1,34 +1,34 @@
 metric,value,units,description
-tickets_arrived,50,tickets,Total arrivals scheduled within the simulation horizon
-tickets_closed,38,tickets,Tickets processed to completion
-closure_rate,0.76,fraction,Closed tickets divided by arrivals
-mean_time_in_system,21.45633342686991,days,Average arrival-to-closure time
-median_time_in_system,6.4060255344494195,days,Median arrival-to-closure time
-p95_time_in_system,112.19255277965779,days,95th percentile of arrival-to-closure time
-mean_dev_cycles,1.0,cycles,Average dev cycles per ticket
-mean_review_cycles,0.9,cycles,Average review cycles per ticket
-mean_test_cycles,0.76,cycles,Average testing cycles per ticket
-throughput_dev,0.1232876712328767,tickets/day,Completed dev services per day
-avg_wait_dev,0.0,days,Average queue wait before dev service
-avg_queue_length_dev,0.0,tickets,Time-weighted average backlog length (dev queue)
-utilization_dev,0.10919068622663738,fraction,Server utilization for dev
-avg_servers_dev,27.96563624862001,servers,Time-averaged server capacity for dev
-avg_system_length_dev,3.0535870127513443,tickets,Average number of tickets in dev (queue + in service)
-throughput_review,0.10410958904109589,tickets/day,Completed review services per day
-avg_wait_review,0.0,days,Average queue wait before review service
-avg_queue_length_review,0.0,tickets,Time-weighted average queue length for review
-utilization_review,0.18938740884322436,fraction,Server utilization for review
-avg_servers_review,14.871112030046023,servers,Time-averaged server capacity for review
-avg_system_length_review,2.816401373987718,tickets,Average number of tickets in review (queue + in service)
-throughput_testing,0.10410958904109589,tickets/day,Completed testing services per day
-avg_wait_testing,0.0,days,Average queue wait before testing service
-avg_queue_length_testing,0.0,tickets,Time-weighted average queue length for testing
-utilization_testing,0.01071001200403695,fraction,Server utilization for testing
-avg_servers_testing,3.3736862530449176,servers,Time-averaged server capacity for testing
-avg_system_length_testing,0.036132220267965504,tickets,Average number of tickets in testing (queue + in service)
+tickets_arrived,181,tickets,Total arrivals scheduled within the simulation horizon
+tickets_closed,47,tickets,Tickets processed to completion
+closure_rate,0.2596685082872928,fraction,Closed tickets divided by arrivals
+mean_time_in_system,162.2004493364831,days,Average arrival-to-closure time
+median_time_in_system,174.58464155348773,days,Median arrival-to-closure time
+p95_time_in_system,262.5502267991686,days,95th percentile of arrival-to-closure time
+mean_dev_cycles,0.5248618784530387,cycles,Average dev cycles per ticket
+mean_review_cycles,0.34806629834254144,cycles,Average review cycles per ticket
+mean_test_cycles,0.27071823204419887,cycles,Average testing cycles per ticket
+throughput_dev,0.1726027397260274,tickets/day,Completed dev services per day
+avg_wait_dev,56.96652022964155,days,Average queue wait before dev service
+avg_queue_length_dev,35.18677145530641,tickets,Time-weighted average backlog length (dev queue)
+utilization_dev,0.9732759680213374,fraction,Server utilization for dev
+avg_servers_dev,27.698174936487767,servers,Time-averaged server capacity for dev
+avg_system_length_dev,62.144739479040894,tickets,Average number of tickets in dev (queue + in service)
+throughput_review,0.15342465753424658,tickets/day,Completed review services per day
+avg_wait_review,3.4410821382416614,days,Average queue wait before review service
+avg_queue_length_review,0.5939402046828073,tickets,Time-weighted average queue length for review
+utilization_review,0.6331761648411474,fraction,Server utilization for review
+avg_servers_review,8.693271898068204,servers,Time-averaged server capacity for review
+avg_system_length_review,6.098312765022954,tickets,Average number of tickets in review (queue + in service)
+throughput_testing,0.12876712328767123,tickets/day,Completed testing services per day
+avg_wait_testing,14.593966284325353,days,Average queue wait before testing service
+avg_queue_length_testing,2.337152780744915,tickets,Time-weighted average queue length for testing
+utilization_testing,0.7051830074330256,fraction,Server utilization for testing
+avg_servers_testing,2.79140884916068,servers,Time-averaged server capacity for testing
+avg_system_length_testing,4.305606867971204,tickets,Average number of tickets in testing (queue + in service)
 rework_rate_dev,1.0,fraction,Feedback loops per completion for dev
 rework_rate_review,1.0,fraction,Feedback loops per completion for review
 rework_rate_testing,1.0,fraction,Feedback loops per completion for testing
-markov_time_in_states,"{'OFF': 2843.1913959254484, 'DEV': 10207.457230746304, 'REV': 5427.9558909667985, 'TEST': 1231.395482361395}",days,Aggregate time spent by all agents in each developer state
-markov_stint_counts,"{'OFF': 117, 'DEV': 178, 'REV': 176, 'TEST': 100}",count,Number of stints observed per developer state during the run
-markov_stint_means,"{'OFF': 22.5697094017094, 'DEV': 183.88058988764047, 'REV': 28.49517045454546, 'TEST': 13.866600500000002}",days,Mean stint length per developer state (simulated)
+markov_time_in_states,"{'OFF': 1758.257675443244, 'DEV': 10109.833851818035, 'REV': 3173.0442427948947, 'TEST': 1018.8642299436483}",days,Aggregate time spent by all agents in each developer state
+markov_stint_counts,"{'OFF': 76, 'DEV': 86, 'REV': 89, 'TEST': 69}",count,Number of stints observed per developer state during the run
+markov_stint_means,"{'OFF': 22.470999999999997, 'DEV': 257.07801162790696, 'REV': 28.083752808988766, 'TEST': 11.298449739130435}",days,Mean stint length per developer state (simulated)
