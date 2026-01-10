@@ -24,6 +24,9 @@ export BK_ASF_SIM_SEED=42
 
 These are referenced via `STATE_PARAMETER_PATHS` in `simulation/config.py`.
 
+### Service-Time Fit Alignment
+- Service-time distributions now mirror the latest `etl/output/csv/fit_summary.csv` fits (Weibull-min for dev/testing, lognormal with loc shift for review).
+
 ---
 
 ## 2. Initialization Summary

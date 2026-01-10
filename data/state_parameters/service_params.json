@@ -1,23 +1,28 @@
 {
   "parameters": {
     "DEV": {
-      "distribution": "lognormal",
-      "mu": -0.5838221154638829,
-      "n": 192,
-      "sigma": 4.742488311894271
+      "c": 2.13046983,
+      "distribution": "weibull_min",
+      "loc": -279.07055412,
+      "n": null,
+      "scale": 335.38112967
     },
     "REV": {
-      "distribution": "lognormal",
-      "mu": 1.786792957779059,
-      "n": 192,
-      "sigma": 2.3343591432874167
+      "distribution": "lognorm",
+      "loc": -168.41875382,
+      "mu": 5.2273729009037355,
+      "n": null,
+      "s": 0.24601912,
+      "scale": 186.30272434,
+      "sigma": 0.24601912
     },
     "TEST": {
-      "distribution": "lognormal",
-      "mu": -5.9266976827399,
-      "n": 109,
-      "sigma": 4.536985240600843
+      "c": 2.39611187,
+      "distribution": "weibull_min",
+      "loc": -37.89737433,
+      "n": null,
+      "scale": 44.13777336
     }
   },
-  "version": "v3.2A-001"
+  "version": "v3.2A-002"
 }

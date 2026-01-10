@@ -56,7 +56,7 @@ def _draw_sample(dist_type: str, params: Dict[str, Any]) -> float:
         return float(_SERVICE_RNG.lognormal(mean=np.log(scale), sigma=sigma))
 
     if dist_type in {"weibull", "weibull_min"}:
-        shape = params.get("shape") or params.get("k")
+        shape = params.get("shape") or params.get("k") or params.get("c")
         if shape is None:
             raise ValueError("Weibull distribution requires 'shape' or 'k' parameter.")
         scale = params.get("scale", 1.0)
