@@ -161,6 +161,12 @@ def map_to_scipy_row(label, params):
     return row
 
 
+def _normalize_key(value):
+    """Normalize column names for case/whitespace/format-insensitive matching."""
+    text = str(value).strip().lower()
+    return "".join(ch for ch in text if ch.isalnum())
+
+
 def main():
     setup_logging()
 
@@ -217,9 +223,36 @@ def main():
         df = pd.read_csv(csv_path)
         logging.info("[Stage: %s] Loaded distribution_fit_stats: rows=%d cols=%d", stage, len(df), len(df.columns))
 
+        alias_map = {
+            "Distribuzione": ["Distribuzione", "Distribution", "Dist", "Distrib", "Distro"],
+            "Parametri": ["Parametri", "Params", "Parameters", "Parameter", "Param"],
+            "MAE_KDE_PDF": ["MAE_KDE_PDF", "MAE_KDE", "MAE", "MAE_KDEPDF", "MAE-KDE-PDF", "MAE KDE PDF"],
+        }
+        normalized_aliases = {}
+        for canonical, aliases in alias_map.items():
+            for alias in aliases:
+                normalized_aliases[_normalize_key(alias)] = canonical
+
+        rename_cols = {}
+        existing = set(df.columns)
+        for col in df.columns:
+            normalized = _normalize_key(col)
+            target = normalized_aliases.get(normalized)
+            if target and target not in existing:
+                rename_cols[col] = target
+                existing.add(target)
+        if rename_cols:
+            df = df.rename(columns=rename_cols)
+
         need = {"Distribuzione", "Parametri", "MAE_KDE_PDF"}
         if not need.issubset(df.columns):
-            logging.error("Missing required columns %s in %s", need, csv_path)
+            logging.error(
+                "Missing required columns %s in %s. Available columns: %s. Alias map: %s",
+                need,
+                csv_path,
+                list(df.columns),
+                alias_map,
+            )
             raise SystemExit(1)
 
         if args.require_plausible and "Plausible" in df.columns:
