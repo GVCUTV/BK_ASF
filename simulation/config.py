@@ -36,16 +36,16 @@ FEEDBACK_P_TEST = 0.0000000000
 # Names follow SciPy; params are explicit and include 'loc' (shift), if any.
 SERVICE_TIME_PARAMS = {
     "dev": {
-        "dist": "lognorm",
-        "params": {"s": 4.742488311894271, "scale": 0.557762454811239}
+        "dist": "weibull_min",
+        "params": {"c": 2.13046983, "loc": -279.07055412, "scale": 335.38112967}
     },
     "review": {
         "dist": "lognorm",
-        "params": {"s": 2.3343591432874167, "scale": 5.970274807660755}
+        "params": {"s": 0.24601912, "loc": -168.41875382, "scale": 186.30272434}
     },
     "testing": {
-        "dist": "lognorm",
-        "params": {"s": 4.536985240600843, "scale": 0.0026672756514741617}
+        "dist": "weibull_min",
+        "params": {"c": 2.39611187, "loc": -37.89737433, "scale": 44.13777336}
     }
 }
 
