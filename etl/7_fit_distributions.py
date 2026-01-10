@@ -65,8 +65,8 @@ def _valid_series(s: pd.Series) -> pd.Series:
     s = s[(s >= 0) & np.isfinite(s)]
     return s
 
-def _mae(y_true, y_pred):
-    return float(np.mean(np.abs(y_true - y_pred)))
+def _mse(y_true, y_pred):
+    return float(np.mean(np.square(y_true - y_pred)))
 
 def _mean_std_from_params(dist_name, params):
     # Distribuzione -> (mean, std) in giorni
@@ -139,7 +139,7 @@ def _fit_distribution_set(series: pd.Series):
 
     results = []
     best = None
-    best_mae = float("inf")
+    best_mse = float("inf")
 
     for label, dist in candidates.items():
         if label == 'Normale':
@@ -184,23 +184,23 @@ def _fit_distribution_set(series: pd.Series):
         fit_mean, fit_std = _mean_std_from_params(label, params)
         plausible = _plausible(emp_mean, emp_std, fit_mean, fit_std)
         ks_p, aic, bic = _ks_aic_bic(candidates[label], params, data)
-        mae = _mae(kde_y, pdf_vals)
+        mse = _mse(kde_y, pdf_vals)
 
         row = {
             "Distribuzione": label,
-            "FitType": "Best-MAE (curve_fit)",
+            "FitType": "Best-MSE (curve_fit)",
             "Parametri": params,
             "KS_pvalue": ks_p,
             "AIC": aic,
             "BIC": bic,
-            "MAE_KDE_PDF": mae,
+            "MSE_KDE_PDF": mse,
             "FitMean": fit_mean,
             "FitStd": fit_std,
             "Plausible": plausible,
         }
         results.append(row)
-        if mae < best_mae:
-            best_mae = mae
+        if mse < best_mse:
+            best_mse = mse
             best = row
 
     return data, x, kde_y, results, best
@@ -229,7 +229,7 @@ def _to_fit_summary_row(stage: str, win_row: dict) -> dict:
     else:
         out["dist"] = name
     # Metriche utili
-    out["mae"] = float(win_row.get("MAE_KDE_PDF", np.nan))
+    out["mse"] = float(win_row.get("MSE_KDE_PDF", np.nan))
     out["ks_pvalue"] = float(win_row.get("KS_pvalue", np.nan)) if win_row.get("KS_pvalue") is not None else None
     out["aic"] = float(win_row.get("AIC", np.nan)) if win_row.get("AIC") is not None else None
     out["bic"] = float(win_row.get("BIC", np.nan)) if win_row.get("BIC") is not None else None
@@ -273,8 +273,8 @@ def main():
             plt.legend(fontsize=9, ncol=2); plt.tight_layout()
             plt.savefig(PNG_DIR / "confronto_fit_resolution_time_days.png", dpi=200); plt.close()
             if best:
-                logging.info("WINNER [resolution_time_days]: %s, MAE=%.6f, params=%s",
-                             best["Distribuzione"], best["MAE_KDE_PDF"], best["Parametri"])
+                logging.info("WINNER [resolution_time_days]: %s, MSE=%.6f, params=%s",
+                             best["Distribuzione"], best["MSE_KDE_PDF"], best["Parametri"])
         else:
             logging.warning("Dati insufficienti per fit su resolution_time_days.")
     else:
@@ -316,8 +316,8 @@ def main():
 
         if best:
             summary_rows.append(_to_fit_summary_row(stage, best))
-            logging.info("WINNER [%s]: %s, MAE=%.6f, params=%s",
-                         stage, best["Distribuzione"], best["MAE_KDE_PDF"], best["Parametri"])
+            logging.info("WINNER [%s]: %s, MSE=%.6f, params=%s",
+                         stage, best["Distribuzione"], best["MSE_KDE_PDF"], best["Parametri"])
 
     # fit_summary.csv per simulation/generate_sim_config.py
     if summary_rows:
