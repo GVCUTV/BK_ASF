@@ -1,0 +1,28 @@
+metric,value,units,description
+tickets_arrived,136,tickets,Total arrivals scheduled within the simulation horizon
+tickets_closed,7,tickets,Tickets processed to completion
+closure_rate,0.051470588235294115,fraction,Closed tickets divided by arrivals
+mean_time_in_system,260.8061525457727,days,Average arrival-to-closure time
+median_time_in_system,286.2099537435953,days,Median arrival-to-closure time
+p95_time_in_system,322.05867103234186,days,95th percentile of arrival-to-closure time
+mean_dev_cycles,0.051470588235294115,cycles,Average dev cycles per ticket
+mean_review_cycles,0.051470588235294115,cycles,Average review cycles per ticket
+mean_test_cycles,0.051470588235294115,cycles,Average testing cycles per ticket
+throughput_dev,0.10410958904109589,tickets/day,Completed dev services per day
+avg_wait_dev,55.747718151272565,days,Average queue wait before dev service
+avg_queue_length_dev,0.0,tickets,Time-weighted average queue length for dev
+utilization_dev,1.4995249215353057,fraction,Server utilization for dev
+throughput_review,0.052054794520547946,tickets/day,Completed review services per day
+avg_wait_review,4.138336844902338,days,Average queue wait before review service
+avg_queue_length_review,0.9629668292362435,tickets,Time-weighted average queue length for review
+utilization_review,0.9784845218837328,fraction,Server utilization for review
+throughput_testing,0.019178082191780823,tickets/day,Completed testing services per day
+avg_wait_testing,40.40698976213357,days,Average queue wait before testing service
+avg_queue_length_testing,2.1720797709041766,tickets,Time-weighted average queue length for testing
+utilization_testing,1.4548801978288286,fraction,Server utilization for testing
+rework_rate_dev,1.0,fraction,Feedback loops per completion for dev
+rework_rate_review,1.0,fraction,Feedback loops per completion for review
+rework_rate_testing,1.0,fraction,Feedback loops per completion for testing
+markov_time_in_states,"{'OFF': 2184.9375464904124, 'DEV': 4743.738735452562, 'REV': 3546.126703501135, 'TEST': 756.4650439522147}",days,Aggregate time spent by all agents in each developer state
+markov_stint_counts,"{'OFF': 61, 'DEV': 70, 'REV': 76, 'TEST': 59}",count,Number of stints observed per developer state during the run
+markov_stint_means,"{'OFF': 35.30103278688526, 'DEV': 146.3816, 'REV': 30.912789473684214, 'TEST': 6.8047123220338985}",days,Mean stint length per developer state (simulated)

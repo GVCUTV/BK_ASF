@@ -1,0 +1,20 @@
+2025-11-08 15:57:17,380 - INFO - Logging initialized. Project root: /workspace/BK_ASF
+2025-11-08 15:57:17,381 - INFO - Loading developer stage data from etl/output/csv/tickets_prs_merged.csv
+2025-11-08 15:57:17,526 - INFO - Loaded 883 records with developer assignments.
+2025-11-08 15:57:18,267 - INFO - Parsed events for 20 developers.
+2025-11-08 15:57:18,272 - INFO - Computed transition counts with shape (4, 4)
+2025-11-08 15:57:18,273 - INFO - Transition matrix derived with Laplace smoothing α=1.00
+2025-11-08 15:57:18,274 - INFO - State OFF: computed PMF over 94 unique stint lengths.
+2025-11-08 15:57:18,275 - INFO - State DEV: computed PMF over 125 unique stint lengths.
+2025-11-08 15:57:18,275 - INFO - State REV: computed PMF over 172 unique stint lengths.
+2025-11-08 15:57:18,276 - INFO - State TEST: computed PMF over 29 unique stint lengths.
+2025-11-08 15:57:18,276 - INFO - Fitted lognormal for DEV with mu=-0.583822 sigma=4.742488 n=192
+2025-11-08 15:57:18,276 - INFO - Fitted lognormal for REV with mu=1.786793 sigma=2.334359 n=192
+2025-11-08 15:57:18,277 - INFO - Fitted lognormal for TEST with mu=-5.926698 sigma=4.536985 n=109
+2025-11-08 15:57:18,279 - INFO - Saved transition matrix to data/state_parameters/matrix_P.csv
+2025-11-08 15:57:18,280 - INFO - Saved PMF for OFF to data/state_parameters/stint_PMF_OFF.csv
+2025-11-08 15:57:18,281 - INFO - Saved PMF for DEV to data/state_parameters/stint_PMF_DEV.csv
+2025-11-08 15:57:18,283 - INFO - Saved PMF for REV to data/state_parameters/stint_PMF_REV.csv
+2025-11-08 15:57:18,283 - INFO - Saved PMF for TEST to data/state_parameters/stint_PMF_TEST.csv
+2025-11-08 15:57:18,284 - INFO - Saved service-time parameters to data/state_parameters/service_params.json
+2025-11-08 15:57:18,284 - INFO - State equation artifacts generated in data/state_parameters

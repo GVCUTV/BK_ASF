@@ -1,0 +1,6 @@
+# v1
+# file: simulation/sweeps/5_2B_sweeps.csv
+experiment_id,arrival_rate,feedback_dev,feedback_test,global_seed,sim_duration,churn_weight_add,markov_stint_scaler
+baseline,0.3074951954,0.0,0.0,22015001,365.0,1.0,1.0
+higher_arrival,0.45,0.0,0.0,22015011,365.0,1.0,1.0
+feedback_heavy,0.3074951954,0.1,0.08,22015021,365.0,1.2,1.0

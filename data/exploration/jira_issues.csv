@@ -1,0 +1,4 @@
+// v1.3C-Data-List
+// file: data/exploration/jira_issues.csv
+// DoD: normalized JIRA issue export.
+issue_key,assignee,assignment_date,close_date,status,changelog_count

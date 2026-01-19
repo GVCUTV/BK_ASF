@@ -1,0 +1,28 @@
+{
+  "parameters": {
+    "DEV": {
+      "c": 2.13046983,
+      "distribution": "weibull_min",
+      "loc": -279.07055412,
+      "n": null,
+      "scale": 335.38112967
+    },
+    "REV": {
+      "distribution": "lognorm",
+      "loc": -168.41875382,
+      "mu": 5.2273729009037355,
+      "n": null,
+      "s": 0.24601912,
+      "scale": 186.30272434,
+      "sigma": 0.24601912
+    },
+    "TEST": {
+      "c": 2.39611187,
+      "distribution": "weibull_min",
+      "loc": -37.89737433,
+      "n": null,
+      "scale": 44.13777336
+    }
+  },
+  "version": "v3.2A-002"
+}

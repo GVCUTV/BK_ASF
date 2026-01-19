@@ -1,91 +1,217 @@
-# v1
+# v8
 # file: simulation/workflow_logic.py
 
 """
-Manages ticket arrival, state transitions, and feedback cycles for BookKeeper simulation.
-All main workflow logic is here—event classes call these as needed.
+WorkflowLogic encapsulates the workflow semantics for BookKeeper DES runs.
+All routing, feedback, and queue/server transitions are handled here to keep
+other layers focused on plumbing and instrumentation.
 """
 
+from __future__ import annotations
+
 import logging
+from typing import Deque, Optional
+
 import numpy as np
-from config import ARRIVAL_RATE, FEEDBACK_P_DEV, FEEDBACK_P_TEST
-from service_distributions import sample_service_time
+
+from .config import (
+    ARRIVAL_RATE,
+    FEEDBACK_P_DEV,
+    FEEDBACK_P_TEST,
+    GLOBAL_RANDOM_SEED,
+    SERVICE_TIME_PARAMS,
+)
+from .developer_policy import select_with_churn
+from .service_distributions import sample_service_time
+
 
 class WorkflowLogic:
+    """Orchestrates arrivals, service completions, and feedback loops."""
+
     def __init__(self, state, stats):
         self.state = state
         self.stats = stats
+        self.developer_pool = state.developer_pool
+        required_stages = {"dev", "review", "testing"}
+        missing = sorted(required_stages.difference(SERVICE_TIME_PARAMS.keys()))
+        if missing:
+            raise ValueError(
+                f"SERVICE_TIME_PARAMS missing required stages: {missing}. Configure dev, review, and testing explicitly."
+            )
+        arrival_seed = GLOBAL_RANDOM_SEED + 1
+        feedback_seed = GLOBAL_RANDOM_SEED + 3
+        self.arrival_rng = np.random.default_rng(arrival_seed)
+        self.feedback_rng = np.random.default_rng(feedback_seed)
 
-    def handle_ticket_arrival(self, ticket, event_time, event_queue):
-        """
-        On ticket arrival: put in dev/review queue, schedule next arrival, try to start service.
-        """
-        logging.info(f"Ticket {ticket.ticket_id} arrived at {event_time:.2f}")
-        self.state.dev_review_queue.append((ticket, event_time))
-        self.try_start_service('dev_review', event_queue, event_time)
+    # ------------------------------------------------------------------
+    def handle_ticket_arrival(self, ticket_id: int, event_time: float, event_queue, completion_event_cls):
+        """Register an arrival, queue it, and start work when capacity is free."""
+        ticket = self.state.create_ticket(ticket_id, event_time)
+        ticket.current_stage = "backlog"
+        self.stats.log_arrival_event(ticket.ticket_id, event_time, "backlog")
+        self.stats.log_enqueue(ticket.ticket_id, "backlog", event_time, source="arrival")
+        logging.info("Ticket %s arrived at t=%.2f; queued to backlog", ticket.ticket_id, event_time)
+        self.state.enqueue_backlog(ticket, event_time)
+        self.try_start_service("dev", event_queue, event_time, completion_event_cls)
 
-    def schedule_next_arrival(self, event_queue, current_time, ticket_id, sim_duration, TicketArrivalEvent):
-        """
-        Schedules the next ticket arrival event.
-        """
-        next_time = current_time + np.random.exponential(1/ARRIVAL_RATE)
-        if next_time < self.state.sim_duration:
-            event_queue.push(TicketArrivalEvent(next_time, ticket_id + 1))
-            logging.info(f"Scheduled ticket {ticket_id + 1} arrival at {next_time:.2f}")
+    def schedule_next_arrival(self, event_queue, current_time: float, arrival_event_cls):
+        """Poisson arrivals based on ARRIVAL_RATE until sim horizon."""
+        if ARRIVAL_RATE <= 0:
+            logging.warning("ARRIVAL_RATE not positive; no additional arrivals scheduled.")
+            return
+        interarrival = self.arrival_rng.exponential(1 / ARRIVAL_RATE)
+        next_time = current_time + interarrival
+        if next_time > self.state.sim_duration:
+            logging.info("Reached simulation horizon; no more arrivals after t=%.2f", current_time)
+            return
+        next_ticket_id = self.state.issue_ticket_id()
+        event_queue.push(arrival_event_cls(next_time, next_ticket_id))
+        logging.info("Scheduled ticket %s arrival at t=%.2f", next_ticket_id, next_time)
+        self.stats.log_scheduled_arrival(next_ticket_id, next_time)
 
-    def handle_service_completion(self, ticket, stage, event_time, event_queue, ServiceCompletionEvent):
-        """
-        On service completion, check for feedback or progression to next stage or closure.
-        """
-        ticket.history.append((f'complete_{stage}', event_time))
-        if stage == 'dev_review':
-            ticket.dev_review_cycles += 1
-            # Free server
-            idx = self.state.dev_review_servers.index(ticket.ticket_id)
-            self.state.dev_review_servers[idx] = None
-            if np.random.rand() < FEEDBACK_P_DEV:
-                logging.info(f"Ticket {ticket.ticket_id} receives feedback at dev/review (loop back).")
-                self.state.dev_review_queue.append((ticket, event_time))
-                self.try_start_service('dev_review', event_queue, event_time)
+    # ------------------------------------------------------------------
+    def handle_service_completion(self, ticket, stage: str, event_time: float, event_queue, completion_event_cls, service_time: float):
+        """Release servers, determine routing, and continue processing."""
+        ticket.history.append((f"complete_{stage}", event_time))
+        logging.info("Ticket %s completed %s at t=%.2f", ticket.ticket_id, stage, event_time)
+        self.stats.log_service_completion(ticket.ticket_id, stage, event_time)
+
+        released_agent = self.state.release_server(stage, ticket.ticket_id)
+        if released_agent is None:
+            logging.error("Ticket %s not found on %s servers at completion.", ticket.ticket_id, stage)
+        changed_stages = self.developer_pool.on_service_completion(
+            released_agent if released_agent is not None else -1, stage, service_time, event_time, self.stats
+        )
+
+        if stage == "dev":
+            self.stats.log_feedback(ticket.ticket_id, stage, "progress", event_time)
+            self.state.enqueue("review", ticket, event_time)
+            self.stats.log_enqueue(ticket.ticket_id, "review", event_time, source="dev_complete")
+            self.try_start_service("review", event_queue, event_time, completion_event_cls)
+        elif stage == "review":
+            if self.feedback_rng.random() < FEEDBACK_P_DEV:
+                logging.info(
+                    "Ticket %s receives review feedback; routing back to backlog for dev re-entry.",
+                    ticket.ticket_id,
+                )
+                self.stats.log_feedback(ticket.ticket_id, stage, "feedback", event_time)
+                ticket.current_stage = "backlog"
+                self.state.enqueue_backlog(ticket, event_time)
+                self.stats.log_enqueue(ticket.ticket_id, "backlog", event_time, source="review_feedback")
+                self.try_start_service("dev", event_queue, event_time, completion_event_cls)
             else:
-                self.state.testing_queue.append((ticket, event_time))
-                self.try_start_service('testing', event_queue, event_time)
-            self.try_start_service('dev_review', event_queue, event_time)
-        elif stage == 'testing':
-            ticket.test_cycles += 1
-            idx = self.state.testing_servers.index(ticket.ticket_id)
-            self.state.testing_servers[idx] = None
-            if np.random.rand() < FEEDBACK_P_TEST:
-                logging.info(f"Ticket {ticket.ticket_id} receives feedback at testing (loop to dev/review).")
-                self.state.dev_review_queue.append((ticket, event_time))
-                self.try_start_service('dev_review', event_queue, event_time)
+                self.stats.log_feedback(ticket.ticket_id, stage, "progress", event_time)
+                self.state.enqueue("testing", ticket, event_time)
+                self.stats.log_enqueue(ticket.ticket_id, "testing", event_time, source="review_complete")
+                self.try_start_service("testing", event_queue, event_time, completion_event_cls)
+        elif stage == "testing":
+            if self.feedback_rng.random() < FEEDBACK_P_TEST:
+                logging.info(
+                    "Ticket %s receives testing feedback; routing to backlog for dev re-entry.",
+                    ticket.ticket_id,
+                )
+                self.stats.log_feedback(ticket.ticket_id, stage, "feedback", event_time)
+                ticket.current_stage = "backlog"
+                self.state.enqueue_backlog(ticket, event_time)
+                self.stats.log_enqueue(ticket.ticket_id, "backlog", event_time, source="test_feedback")
+                self.try_start_service("dev", event_queue, event_time, completion_event_cls)
             else:
+                self.stats.log_feedback(ticket.ticket_id, stage, "complete", event_time)
                 self.state.close_ticket(ticket, event_time, self.stats)
-            self.try_start_service('testing', event_queue, event_time)
+        else:
+            logging.error("Unknown stage %s encountered during completion for ticket %s.", stage, ticket.ticket_id)
 
-    def try_start_service(self, stage, event_queue, time):
-        """
-        Starts service for tickets if a server is free.
-        """
-        if stage == 'dev_review':
-            for idx, server in enumerate(self.state.dev_review_servers):
-                if server is None and self.state.dev_review_queue:
-                    ticket, queued_time = self.state.dev_review_queue.pop(0)
-                    self.state.dev_review_servers[idx] = ticket.ticket_id
-                    service_time = sample_service_time('dev_review')
-                    event_time = time + service_time
-                    from events import ServiceCompletionEvent
-                    event_queue.push(ServiceCompletionEvent(event_time, ticket.ticket_id, 'dev_review'))
-                    logging.info(f"Ticket {ticket.ticket_id} started dev/review on server {idx} (t={time:.2f}), will finish at t={event_time:.2f}")
-                    self.stats.log_queue_wait(ticket.ticket_id, stage, time - queued_time)
-        elif stage == 'testing':
-            for idx, server in enumerate(self.state.testing_servers):
-                if server is None and self.state.testing_queue:
-                    ticket, queued_time = self.state.testing_queue.pop(0)
-                    self.state.testing_servers[idx] = ticket.ticket_id
-                    service_time = sample_service_time('testing')
-                    event_time = time + service_time
-                    from events import ServiceCompletionEvent
-                    event_queue.push(ServiceCompletionEvent(event_time, ticket.ticket_id, 'testing'))
-                    logging.info(f"Ticket {ticket.ticket_id} started testing on server {idx} (t={time:.2f}), will finish at t={event_time:.2f}")
-                    self.stats.log_queue_wait(ticket.ticket_id, stage, time - queued_time)
+        self.try_start_service(stage, event_queue, event_time, completion_event_cls)
+        for affected in changed_stages:
+            self.try_start_service(affected, event_queue, event_time, completion_event_cls)
+
+    # ------------------------------------------------------------------
+    def try_start_service(self, stage: str, event_queue, current_time: float, completion_event_cls):
+        """Start as many tickets as possible on available servers for a stage."""
+        while True:
+            agent = self.state.available_agent(stage)
+            if agent is None:
+                break
+
+            selected = self._select_next_ticket(stage, current_time)
+            if selected is None:
+                break
+
+            ticket, queued_time, source_queue = selected
+            self.state.occupy_server(stage, agent, ticket.ticket_id)
+            ticket.current_stage = stage
+            wait_time = max(0.0, current_time - queued_time)
+            self.stats.log_queue_wait(ticket.ticket_id, stage, wait_time, current_time)
+            service_time = sample_service_time(stage)
+            completion_time = current_time + service_time
+            if stage == "dev":
+                ticket.dev_cycles += 1
+            elif stage == "review":
+                ticket.review_cycles += 1
+            elif stage == "testing":
+                ticket.test_cycles += 1
+            event_queue.push(completion_event_cls(completion_time, ticket.ticket_id, stage, service_time))
+            self.stats.log_service_start(
+                ticket.ticket_id,
+                stage,
+                agent.agent_id,
+                current_time,
+                wait_time,
+                service_time,
+                completion_time,
+                source_queue,
+            )
+            logging.info(
+                "Ticket %s started %s on server %s at t=%.2f (wait %.2f, svc %.2f, completes %.2f) from %s",
+                ticket.ticket_id,
+                stage,
+                agent.agent_id,
+                current_time,
+                wait_time,
+                service_time,
+                completion_time,
+                source_queue,
+            )
+
+    # ------------------------------------------------------------------
+    def _candidate_sources_for_stage(self, stage: str) -> list[str]:
+        """Ordered list of queues/backlogs to pull from for a given stage."""
+        if stage == "dev":
+            return ["backlog"]
+        if stage == "review":
+            return ["review"]
+        if stage == "testing":
+            return ["testing"]
+        return []
+
+    def _select_next_ticket(self, stage: str, current_time: float):
+        """Select the next ticket using a prioritized, overridable queue policy."""
+        for source in self._candidate_sources_for_stage(stage):
+            queue_item = self._dequeue_from_source(source, stage)
+            if queue_item is not None:
+                ticket, queued_time = queue_item
+                self.stats.log_dequeue(ticket.ticket_id, source, current_time)
+                self.stats.log_routing_decision(ticket.ticket_id, source, stage)
+                return ticket, queued_time, source
+        return None
+
+    def _dequeue_from_source(self, source: str, stage: str):
+        queue_ref: Optional[Deque]
+        if source == "backlog":
+            queue_ref = self.state.backlog_buffer
+        else:
+            queue_ref = self.state.stage_queues.get(source)
+        if queue_ref is None or len(queue_ref) == 0:
+            return None
+
+        if stage in {"dev", "review", "testing"} and len(queue_ref) > 1:
+            selected = select_with_churn(queue_ref)
+            if selected:
+                ticket, queued_time, idx = selected
+                try:
+                    item = queue_ref[idx]
+                    del queue_ref[idx]
+                    return item
+                except Exception:  # noqa: BLE001 - defensive against deque index issues
+                    logging.warning("Failed weighted selection pop; defaulting to FIFO.")
+        return queue_ref.popleft()
