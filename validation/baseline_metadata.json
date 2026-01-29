@@ -1,10 +1,10 @@
 {
-  "generated_at": "2026-01-03T14:57:11.967881Z",
+  "generated_at": "2026-01-29T18:46:30.415531Z",
   "config": {
-    "input_csv": "etl/output/csv/tickets_prs_merged.csv",
-    "fit_summary_csv": "etl/output/csv/fit_summary.csv",
-    "output_metrics_csv": "validation/baseline_metrics.csv",
-    "output_metadata_json": "validation/baseline_metadata.json",
+    "input_csv": "/workspace/BK_ASF/etl/output/csv/tickets_prs_merged.csv",
+    "fit_summary_csv": "/workspace/BK_ASF/etl/output/csv/fit_summary.csv",
+    "output_metrics_csv": "/workspace/BK_ASF/validation/baseline_metrics.csv",
+    "output_metadata_json": "/workspace/BK_ASF/validation/baseline_metadata.json",
     "random_seed": 12345,
     "bootstrap_samples": 500,
     "ci_level": 0.95,
@@ -90,6 +90,28 @@
       "rework_count": 0
     }
   },
+  "time_metrics": {
+    "time_in_system": {
+      "mean": 215.72883775157626,
+      "median": 21.15150462962963,
+      "p95": 1720.1226412037029,
+      "mean_ci": [
+        183.4849602403806,
+        247.7965419843991
+      ],
+      "count": 887
+    },
+    "queue_time": {
+      "mean": 199.85508400348832,
+      "median": 15.21701388888889,
+      "p95": 1752.19359375,
+      "mean_ci": [
+        165.3014207896562,
+        233.82254836638748
+      ],
+      "count": 791
+    }
+  },
   "fit_summary": {
     "dev": {
       "stage": "dev",
@@ -109,41 +131,41 @@
     "review": {
       "stage": "review",
       "is_winner": true,
-      "mae": 3.610828547412915e-05,
-      "ks_pvalue": 7.736714504950006e-21,
-      "aic": 2068.2919738787323,
-      "bic": 2078.126317856424,
+      "mae": 7.181505684691722e-09,
+      "ks_pvalue": 7.736714532826664e-21,
+      "aic": 2068.291973782626,
+      "bic": 2078.1263177603173,
       "dist": "lognorm",
-      "mu": 5.227372901708876,
+      "mu": 5.227372900903736,
       "sigma": 0.24601912,
       "s": 0.24601912,
       "c": null,
-      "scale": 186.30272449,
-      "loc": -168.41875397
+      "scale": 186.30272434,
+      "loc": -168.41875382
     },
     "testing": {
       "stage": "testing",
       "is_winner": true,
-      "mae": 0.0001919890121115,
-      "ks_pvalue": 7.438612332955596e-28,
-      "aic": 1587.2537220624042,
-      "bic": 1595.5657759358012,
+      "mae": 4.981252081710818e-08,
+      "ks_pvalue": 7.438611995302156e-28,
+      "aic": 1587.2537294959773,
+      "bic": 1595.5657833693742,
       "dist": "weibull_min",
       "mu": null,
       "sigma": null,
       "s": null,
-      "c": 2.39611186,
-      "scale": 44.13777317,
-      "loc": -37.89737413
+      "c": 2.39611187,
+      "scale": 44.13777336,
+      "loc": -37.89737433
     }
   },
   "input_hashes": {
-    "tickets_prs_merged.csv": "98c17cf1a29c0f87bb364f8e6acc4509c053c4a33d70198a582f060645ad586e",
-    "fit_summary.csv": "1f8be81d18a3fad12a44a46bc2a4ebf3c9da6b22a39e92c5d936bf589217457f"
+    "tickets_prs_merged.csv": "08534e797247235033944ec01ee8d438196471840b62dd2e8ad7753bfb9caa9c",
+    "fit_summary.csv": "194856f65a97a150815bbda233057a1fcd170f2ab11eb99030e811c734106e54"
   },
   "state_parameter_hashes": {
     "matrix_P": "e8ce5df24c478c550fb7b838d861ea91017fd24f2ca699d7bd5037f3c844d47e",
-    "service_params": "6e72f03b24284bb8fae0885b585393563748dc63b4e9b426be66d78da291e90d",
+    "service_params": "5ed75b6362d42fdfd831388487781779ba3c1734507cecc2d906de26bc08cf15",
     "stint_pmfs": {
       "stint_PMF_DEV.csv": "4bff83087eb50e476a63226e8afe00637dfb9af8238dd0fdd3fae0c3e50e814d",
       "stint_PMF_OFF.csv": "9af7b343fbd05e1bf7f0e39381b9f8e05cca1518f71057ebb38ae73419834fbd",
@@ -162,24 +184,27 @@
     "FEEDBACK_P_TEST": 0.0,
     "SERVICE_TIME_PARAMS": {
       "dev": {
-        "dist": "lognorm",
+        "dist": "weibull_min",
         "params": {
-          "s": 4.742488311894271,
-          "scale": 0.557762454811239
+          "c": 2.13046983,
+          "loc": -279.07055412,
+          "scale": 335.38112967
         }
       },
       "review": {
         "dist": "lognorm",
         "params": {
-          "s": 2.3343591432874167,
-          "scale": 5.970274807660755
+          "s": 0.24601912,
+          "loc": -168.41875382,
+          "scale": 186.30272434
         }
       },
       "testing": {
-        "dist": "lognorm",
+        "dist": "weibull_min",
         "params": {
-          "s": 4.536985240600843,
-          "scale": 0.0026672756514741617
+          "c": 2.39611187,
+          "loc": -37.89737433,
+          "scale": 44.13777336
         }
       }
     },
