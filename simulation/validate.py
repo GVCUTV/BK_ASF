@@ -65,8 +65,9 @@ def _load_baseline_metrics() -> Dict[str, Any]:
     return baseline
 
 
-def _scenario_overrides(base_seed: int) -> List[Dict[str, Any]]:
-    base_rate = sim_config.ARRIVAL_RATE
+def _scenario_overrides(base_seed: int, baseline_metrics: Dict[str, Any]) -> List[Dict[str, Any]]:
+    baseline_rate = baseline_metrics.get("arrival_rate")
+    base_rate = baseline_rate if isinstance(baseline_rate, (int, float)) else sim_config.ARRIVAL_RATE
     scaled_service = {}
     for stage, params in sim_config.SERVICE_TIME_PARAMS.items():
         new_params = dict(params)
@@ -77,7 +78,11 @@ def _scenario_overrides(base_seed: int) -> List[Dict[str, Any]]:
         scaled_service[stage] = new_params
 
     return [
-        {"id": "baseline", "description": "Current config", "overrides": {"GLOBAL_RANDOM_SEED": base_seed}},
+        {
+            "id": "baseline",
+            "description": "Current config",
+            "overrides": {"GLOBAL_RANDOM_SEED": base_seed, "ARRIVAL_RATE": base_rate},
+        },
         {
             "id": "arrival_high",
             "description": "Higher arrival rate to test queue pressure",
@@ -243,7 +248,7 @@ def main(argv: List[str] | None = None) -> int:
     _configure_logging(run_dir)
 
     baseline_metrics = _load_baseline_metrics()
-    scenarios = _scenario_overrides(args.seed)
+    scenarios = _scenario_overrides(args.seed, baseline_metrics)
 
     results: List[checks.ScenarioResult] = []
     for scenario in scenarios:
