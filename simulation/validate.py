@@ -140,7 +140,15 @@ def _run_single_scenario(base_dir: Path, scenario: Dict[str, Any], baseline_metr
     check_results.extend(checks.check_boundedness(summary_metrics))
     check_results.extend(checks.check_conservation(summary_metrics, tickets, sim_config.SIM_DURATION))
     if baseline_metrics and scenario.get("id") == "baseline":
-        check_results.extend(checks.check_baseline(summary_metrics, baseline_metrics, rel_tol=0.1, abs_tol=1e-6))
+        check_results.extend(
+            checks.check_baseline(
+                summary_metrics,
+                baseline_metrics,
+                rel_tol=0.1,
+                abs_tol=1e-6,
+                ticket_rows=tickets,
+            )
+        )
 
     verification_report = None
     try:

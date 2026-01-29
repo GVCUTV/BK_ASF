@@ -232,6 +232,54 @@ def compute_stage_summaries(df: pd.DataFrame, cfg: BaselineConfig, window_days: 
     return summaries
 
 
+def compute_time_metrics(df: pd.DataFrame, cfg: BaselineConfig) -> Dict[str, Dict[str, Any]]:
+    time_metrics: Dict[str, Dict[str, Any]] = {}
+    if "resolution_time_days" not in df.columns:
+        return time_metrics
+
+    resolution = pd.to_numeric(df["resolution_time_days"], errors="coerce").dropna()
+    resolution = resolution[resolution >= 0]
+    if not resolution.empty:
+        lower_ci, upper_ci = bootstrap_mean_ci(
+            resolution,
+            cfg.bootstrap_samples,
+            cfg.random_seed,
+            cfg.ci_level,
+        )
+        time_metrics["time_in_system"] = {
+            "mean": float(resolution.mean()),
+            "median": float(resolution.median()),
+            "p95": float(resolution.quantile(0.95)),
+            "mean_ci": (lower_ci, upper_ci),
+            "count": int(resolution.count()),
+        }
+
+    service_total = pd.Series(0.0, index=df.index)
+    for column in cfg.stage_columns.values():
+        if column in df.columns:
+            service_total = service_total.add(pd.to_numeric(df[column], errors="coerce").fillna(0.0), fill_value=0.0)
+
+    if not resolution.empty:
+        queue_time = resolution - service_total.loc[resolution.index]
+        queue_time = queue_time[queue_time >= 0]
+        if not queue_time.empty:
+            lower_ci, upper_ci = bootstrap_mean_ci(
+                queue_time,
+                cfg.bootstrap_samples,
+                cfg.random_seed,
+                cfg.ci_level,
+            )
+            time_metrics["queue_time"] = {
+                "mean": float(queue_time.mean()),
+                "median": float(queue_time.median()),
+                "p95": float(queue_time.quantile(0.95)),
+                "mean_ci": (lower_ci, upper_ci),
+                "count": int(queue_time.count()),
+            }
+
+    return time_metrics
+
+
 def load_fit_summary(path: Path) -> Dict[str, Dict[str, Any]]:
     if not path.exists():
         return {}
@@ -243,7 +291,11 @@ def load_fit_summary(path: Path) -> Dict[str, Dict[str, Any]]:
     return rows
 
 
-def build_metrics_vector(arrival_info: Dict[str, Any], stage_info: Dict[str, Dict[str, Any]]) -> pd.DataFrame:
+def build_metrics_vector(
+    arrival_info: Dict[str, Any],
+    stage_info: Dict[str, Dict[str, Any]],
+    time_metrics: Dict[str, Dict[str, Any]],
+) -> pd.DataFrame:
     records = []
     # Arrival and closure level metrics
     records.append({
@@ -273,6 +325,28 @@ def build_metrics_vector(arrival_info: Dict[str, Any], stage_info: Dict[str, Dic
         "ci_low": arrival_info.get("throughput_closed_ci", (float("nan"), float("nan")))[0],
         "ci_high": arrival_info.get("throughput_closed_ci", (float("nan"), float("nan")))[1],
     })
+    if time_metrics.get("time_in_system"):
+        time_info = time_metrics["time_in_system"]
+        records.append({
+            "metric": "mean_time_in_system",
+            "value": time_info.get("mean"),
+            "units": "days",
+            "source": "ETL resolution time",
+            "note": "Mean arrival-to-closure time from resolution_time_days",
+            "ci_low": time_info.get("mean_ci", (float("nan"), float("nan")))[0],
+            "ci_high": time_info.get("mean_ci", (float("nan"), float("nan")))[1],
+        })
+    if time_metrics.get("queue_time"):
+        queue_info = time_metrics["queue_time"]
+        records.append({
+            "metric": "mean_total_wait",
+            "value": queue_info.get("mean"),
+            "units": "days",
+            "source": "ETL durations",
+            "note": "Mean queue time = resolution_time_days - sum(stage durations)",
+            "ci_low": queue_info.get("mean_ci", (float("nan"), float("nan")))[0],
+            "ci_high": queue_info.get("mean_ci", (float("nan"), float("nan")))[1],
+        })
 
     for stage, stats in stage_info.items():
         records.append({
@@ -324,7 +398,13 @@ def build_metrics_vector(arrival_info: Dict[str, Any], stage_info: Dict[str, Dic
     return pd.DataFrame.from_records(records)
 
 
-def collect_metadata(cfg: BaselineConfig, arrival_info: Dict[str, Any], stage_info: Dict[str, Dict[str, Any]], fit_rows: Dict[str, Dict[str, Any]]) -> Dict[str, Any]:
+def collect_metadata(
+    cfg: BaselineConfig,
+    arrival_info: Dict[str, Any],
+    stage_info: Dict[str, Dict[str, Any]],
+    time_metrics: Dict[str, Dict[str, Any]],
+    fit_rows: Dict[str, Dict[str, Any]],
+) -> Dict[str, Any]:
     state_paths_raw = sim_config.STATE_PARAMETER_PATHS
     state_paths = {
         "matrix_P": _resolve_path(state_paths_raw["matrix_P"]),
@@ -350,6 +430,7 @@ def collect_metadata(cfg: BaselineConfig, arrival_info: Dict[str, Any], stage_in
         "config": dataclasses.asdict(cfg),
         "arrival_info": arrival_info,
         "stage_info": _replace_nan(stage_info),
+        "time_metrics": _replace_nan(time_metrics),
         "fit_summary": _replace_nan(fit_rows),
         "input_hashes": {
             "tickets_prs_merged.csv": sha256sum(cfg.input_csv),
@@ -369,13 +450,14 @@ def run(config_path: Path) -> None:
     df = pd.read_csv(cfg.input_csv)
     arrival_info = compute_arrival_and_closure(df, cfg)
     stage_info = compute_stage_summaries(df, cfg, arrival_info["window_days"])
+    time_metrics = compute_time_metrics(df, cfg)
     fit_rows = load_fit_summary(cfg.fit_summary_csv)
 
-    metrics_df = build_metrics_vector(arrival_info, stage_info)
+    metrics_df = build_metrics_vector(arrival_info, stage_info, time_metrics)
     cfg.output_metrics_csv.parent.mkdir(parents=True, exist_ok=True)
     metrics_df.to_csv(cfg.output_metrics_csv, index=False)
 
-    metadata = collect_metadata(cfg, arrival_info, stage_info, fit_rows)
+    metadata = collect_metadata(cfg, arrival_info, stage_info, time_metrics, fit_rows)
     cfg.output_metadata_json.parent.mkdir(parents=True, exist_ok=True)
     cfg.output_metadata_json.write_text(json.dumps(metadata, indent=2, default=str))
 
