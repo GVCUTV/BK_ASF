@@ -1,19 +1,21 @@
 metric,value,units,source,note,ci_low,ci_high
-arrival_rate,0.3074951954,tickets/day,simulation baseline,Configured arrival rate used in baseline runs,,
-closure_rate,0.78,fraction,simulation baseline,Closed tickets divided by arrivals in baseline,,
-throughput_closed,0.10684931506849316,tickets/day,simulation baseline,Tickets closed per day in baseline,,
-throughput_dev,0.1178082191780822,tickets/day,simulation baseline,Completed dev services per day in baseline,,
+arrival_rate,0.3075693954004596,tickets/day,ETL arrivals,Created tickets per day over empirical window,,
+closure_rate,0.9239583333333333,fraction,ETL closures,Resolved divided by created,0.907190673231969,0.9407259934346976
+throughput_closed,0.2841813059585496,tickets/day,ETL closures,Completion rate per day (all stages),0.26547923212652325,0.302883379790576
+mean_time_in_system,215.72883775157626,days,ETL resolution time,Mean arrival-to-closure time from resolution_time_days,183.4849602403806,247.7965419843991
+mean_total_wait,199.85508400348832,days,ETL durations,Mean queue time = resolution_time_days - sum(stage durations),165.3014207896562,233.82254836638748
+throughput_dev,0.06279541822759384,tickets/day,ETL stage durations,Stage completions per day (non-null durations),0.0540040596757307,0.07158677677945698
 avg_wait_dev,,days,not_observed,Queue waits not captured in ETL; requires simulation,,
 avg_queue_length_dev,,tickets,not_observed,Queue lengths require simulation; unavailable in ETL,,
 utilization_dev,,fraction,not_observed,Server utilization not directly observable; use simulation,,
 rework_rate_dev,,fraction,ETL proxy,Proxy from rework flags when available,,
-throughput_review,0.10684931506849316,tickets/day,simulation baseline,Completed review services per day in baseline,,
+throughput_review,0.06279541822759384,tickets/day,ETL stage durations,Stage completions per day (non-null durations),0.0540040596757307,0.07158677677945698
 avg_wait_review,,days,not_observed,Queue waits not captured in ETL; requires simulation,,
 avg_queue_length_review,,tickets,not_observed,Queue lengths require simulation; unavailable in ETL,,
 utilization_review,,fraction,not_observed,Server utilization not directly observable; use simulation,,
-rework_rate_review,1.0,fraction,simulation baseline,Feedback loops per completion for review in baseline,,
-throughput_testing,0.10684931506849316,tickets/day,simulation baseline,Completed testing services per day in baseline,,
+rework_rate_review,0.0,fraction,ETL proxy,Proxy from rework flags when available,,
+throughput_testing,0.03780540485130649,tickets/day,ETL stage durations,Stage completions per day (non-null durations),0.030984076410711846,0.04462673329190114
 avg_wait_testing,,days,not_observed,Queue waits not captured in ETL; requires simulation,,
 avg_queue_length_testing,,tickets,not_observed,Queue lengths require simulation; unavailable in ETL,,
 utilization_testing,,fraction,not_observed,Server utilization not directly observable; use simulation,,
-rework_rate_testing,1.0,fraction,simulation baseline,Feedback loops per completion for testing in baseline,,
+rework_rate_testing,0.0,fraction,ETL proxy,Proxy from rework flags when available,,

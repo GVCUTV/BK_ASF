@@ -251,10 +251,22 @@ def check_conservation(summary: Dict[str, Any], tickets: List[Dict[str, Any]], s
     return results
 
 
-def check_baseline(summary: Dict[str, Any], baseline: Dict[str, Any], rel_tol: float, abs_tol: float) -> List[CheckResult]:
+def check_baseline(
+    summary: Dict[str, Any],
+    baseline: Dict[str, Any],
+    rel_tol: float,
+    abs_tol: float,
+    ticket_rows: List[Dict[str, Any]] | None = None,
+) -> List[CheckResult]:
     results: List[CheckResult] = []
+    ticket_means: Dict[str, float] | None = None
+    if ticket_rows is not None:
+        ticket_means = aggregate_ticket_means(ticket_rows)
     for metric, expected in baseline.items():
-        observed = summary.get(metric)
+        if metric == "mean_total_wait" and ticket_means is not None:
+            observed = ticket_means.get("mean_total_wait")
+        else:
+            observed = summary.get(metric)
         if expected is None or expected == "":
             continue
         if not isinstance(expected, (int, float)) or observed is None or not isinstance(observed, (int, float)):
