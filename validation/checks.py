@@ -264,8 +264,14 @@ def check_baseline(
     if ticket_rows is not None:
         ticket_means = aggregate_ticket_means(ticket_rows)
     for metric, expected in baseline.items():
-        if metric == "mean_total_wait" and ticket_means is not None:
-            observed = ticket_means.get("mean_total_wait")
+        if metric == "mean_total_wait":
+            summary_value = summary.get(metric)
+            if isinstance(summary_value, (int, float)):
+                observed = summary_value
+            elif ticket_means is not None:
+                observed = ticket_means.get("mean_total_wait")
+            else:
+                observed = summary_value
         else:
             observed = summary.get(metric)
         if observed is None or not isinstance(observed, (int, float)):
