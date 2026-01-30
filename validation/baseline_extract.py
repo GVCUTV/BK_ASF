@@ -350,16 +350,21 @@ def build_metrics_vector(
 
     for stage, stats in stage_info.items():
         arrival_rate = arrival_info.get("arrival_rate")
-        wait_proxy = stats.get("mean")
-        wait_ci = stats.get("mean_ci", (float("nan"), float("nan")))
-        if arrival_rate is None or np.isnan(arrival_rate) or wait_proxy is None or np.isnan(wait_proxy):
+        service_time_proxy = stats.get("mean")
+        service_time_ci = stats.get("mean_ci", (float("nan"), float("nan")))
+        if (
+            arrival_rate is None
+            or np.isnan(arrival_rate)
+            or service_time_proxy is None
+            or np.isnan(service_time_proxy)
+        ):
             queue_length_proxy = float("nan")
             queue_ci_low = float("nan")
             queue_ci_high = float("nan")
         else:
-            queue_length_proxy = arrival_rate * wait_proxy
-            queue_ci_low = arrival_rate * wait_ci[0] if not np.isnan(wait_ci[0]) else float("nan")
-            queue_ci_high = arrival_rate * wait_ci[1] if not np.isnan(wait_ci[1]) else float("nan")
+            queue_length_proxy = arrival_rate * service_time_proxy
+            queue_ci_low = arrival_rate * service_time_ci[0] if not np.isnan(service_time_ci[0]) else float("nan")
+            queue_ci_high = arrival_rate * service_time_ci[1] if not np.isnan(service_time_ci[1]) else float("nan")
 
         records.append({
             "metric": f"throughput_{stage}",
@@ -372,12 +377,12 @@ def build_metrics_vector(
         })
         records.append({
             "metric": f"avg_service_time_{stage}",
-            "value": wait_proxy,
+            "value": service_time_proxy,
             "units": "days",
             "source": "ETL stage durations",
             "note": "Proxy: mean stage duration (service-time baseline)",
-            "ci_low": wait_ci[0],
-            "ci_high": wait_ci[1],
+            "ci_low": service_time_ci[0],
+            "ci_high": service_time_ci[1],
         })
         records.append({
             "metric": f"avg_queue_length_{stage}",

@@ -290,10 +290,9 @@ def check_baseline(
             else:
                 observed = summary_value
         elif metric.startswith("avg_service_time_"):
-            if ticket_means is not None:
-                observed = ticket_means.get(metric)
-            else:
-                observed = summary.get(metric)
+            if ticket_means is None:
+                continue
+            observed = ticket_means.get(metric)
         elif metric.startswith("throughput_"):
             stage = metric.split("throughput_", 1)[-1]
             participation_key = f"tickets_participating_{stage}"
