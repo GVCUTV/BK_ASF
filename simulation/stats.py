@@ -395,6 +395,11 @@ class StatsCollector:
             for stat in self.ticket_stats.values()
             if stat.get("closed_time") is not None and stat.get("final_time") is not None
         ]
+        closed_ticket_waits = [
+            sum(sum(wait_list) for wait_list in stat.get("queue_waits", {}).values())
+            for stat in self.ticket_stats.values()
+            if stat.get("closed_time") is not None
+        ]
         dev_cycles = [s.get("cycles", {}).get("dev", 0) for s in self.ticket_stats.values()]
         review_cycles = [s.get("cycles", {}).get("review", 0) for s in self.ticket_stats.values()]
         test_cycles = [s.get("cycles", {}).get("testing", 0) for s in self.ticket_stats.values()]
@@ -434,6 +439,12 @@ class StatsCollector:
                         "value": float(np.mean(closed_ticket_times)),
                         "units": "days",
                         "description": "Average arrival-to-closure time",
+                    },
+                    {
+                        "metric": "mean_total_wait",
+                        "value": float(np.mean(closed_ticket_waits)) if closed_ticket_waits else 0.0,
+                        "units": "days",
+                        "description": "Average total queue wait for closed tickets",
                     },
                     {
                         "metric": "median_time_in_system",
@@ -723,4 +734,3 @@ class StatsCollector:
                 horizon,
                 self.stage_throughput.get(stage, 0) / horizon,
             )
-
