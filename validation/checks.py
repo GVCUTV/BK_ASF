@@ -307,6 +307,13 @@ def check_baseline(
                 observed = summary.get(metric)
         else:
             observed = summary.get(metric)
+        if metric.startswith("avg_queue_length_"):
+            if expected is None:
+                continue
+            if isinstance(expected, float) and math.isnan(expected):
+                continue
+            if isinstance(expected, str) and expected.strip().lower() == "nan":
+                continue
         if observed is None or not isinstance(observed, (int, float)):
             continue
         ci = ci_bounds.get(metric)
