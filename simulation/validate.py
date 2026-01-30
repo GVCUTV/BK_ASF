@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import argparse
 import csv
+import hashlib
 import json
 import logging
 import shutil
@@ -10,6 +11,8 @@ import sys
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Sequence
+
+import yaml
 
 from simulation import config as sim_config
 from simulation import simulate
@@ -21,6 +24,8 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 DEFAULT_OUTDIR = REPO_ROOT / "simulation/experiments"
 SCENARIO_PREFIX = "validation"
 BASELINE_PATH = REPO_ROOT / "validation/baseline_metrics.csv"
+BASELINE_METADATA_PATH = REPO_ROOT / "validation/baseline_metadata.json"
+BASELINE_CONFIG_PATH = REPO_ROOT / "validation/baseline_config.yaml"
 SUMMARY_FILENAME = checks.SUMMARY_FILENAME
 TICKETS_FILENAME = checks.TICKETS_FILENAME
 RESULTS_JSON = "validation_results.json"
@@ -60,8 +65,75 @@ def _load_baseline_rows(path: Path = BASELINE_PATH) -> List[Dict[str, Any]]:
     return rows
 
 
+def _resolve_project_path(path_like: Path | str) -> Path:
+    path = Path(path_like).expanduser()
+    return path if path.is_absolute() else REPO_ROOT / path
+
+
+def _sha256sum(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as handle:
+        for chunk in iter(lambda: handle.read(8192), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def _load_baseline_config_paths(config_path: Path) -> Dict[str, Path]:
+    if not config_path.exists():
+        raise FileNotFoundError(f"Baseline config missing at {config_path}")
+    config = yaml.safe_load(config_path.read_text(encoding="utf-8")) or {}
+    input_csv = config.get("input_csv")
+    fit_summary_csv = config.get("fit_summary_csv")
+    if not input_csv or not fit_summary_csv:
+        raise ValueError("Baseline config must include input_csv and fit_summary_csv paths.")
+    return {
+        "tickets_prs_merged.csv": _resolve_project_path(input_csv),
+        "fit_summary.csv": _resolve_project_path(fit_summary_csv),
+    }
+
+
+def _regenerate_baseline(config_path: Path, reason: str) -> None:
+    logging.warning("ETL baseline metrics missing or stale (%s). Regenerating via %s.", reason, config_path)
+    from validation import baseline_extract
+    try:
+        baseline_extract.run(config_path)
+    except Exception as exc:  # noqa: BLE001
+        raise RuntimeError(
+            "Baseline regeneration failed. Run validation/baseline_extract.py manually to regenerate baselines."
+        ) from exc
+    logging.info("ETL baselines regenerated using %s.", config_path)
+
+
+def _ensure_baseline_fresh() -> bool:
+    if not BASELINE_PATH.exists() or not BASELINE_METADATA_PATH.exists():
+        _regenerate_baseline(BASELINE_CONFIG_PATH, "baseline metrics or metadata missing")
+        logging.info("ETL baselines regenerated and verified against %s.", BASELINE_METADATA_PATH)
+        return True
+    metadata = json.loads(BASELINE_METADATA_PATH.read_text(encoding="utf-8"))
+    expected_hashes = metadata.get("input_hashes", {})
+    try:
+        config_paths = _load_baseline_config_paths(BASELINE_CONFIG_PATH)
+    except Exception as exc:  # noqa: BLE001
+        raise RuntimeError(
+            "Unable to load baseline_config.yaml. Run validation/baseline_extract.py manually to regenerate baselines."
+        ) from exc
+    current_hashes = {key: _sha256sum(path) for key, path in config_paths.items()}
+    stale_keys = [
+        key
+        for key, current_hash in current_hashes.items()
+        if expected_hashes.get(key) != current_hash
+    ]
+    if stale_keys:
+        _regenerate_baseline(BASELINE_CONFIG_PATH, f"hash mismatch for {', '.join(stale_keys)}")
+        logging.info("ETL baselines regenerated and verified against %s.", BASELINE_METADATA_PATH)
+        return True
+    logging.info("ETL baselines loaded and verified against %s.", BASELINE_METADATA_PATH)
+    return False
+
+
 def _load_baseline_metrics(rows: Sequence[Dict[str, Any]] | None = None) -> Dict[str, Any]:
-    baseline_rows = list(rows) if rows is not None else _load_baseline_rows()
+    regenerated = _ensure_baseline_fresh()
+    baseline_rows = _load_baseline_rows() if regenerated or rows is None else list(rows)
     if not baseline_rows:
         return {}
     baseline: Dict[str, Any] = {}
@@ -293,8 +365,8 @@ def main(argv: List[str] | None = None) -> int:
     run_dir = base_outdir / f"{SCENARIO_PREFIX}_{stamp}"
     _configure_logging(run_dir)
 
+    baseline_metrics = _load_baseline_metrics()
     baseline_rows = _load_baseline_rows()
-    baseline_metrics = _load_baseline_metrics(baseline_rows)
     scenarios = _scenario_overrides(args.seed, baseline_metrics)
 
     results: List[checks.ScenarioResult] = []
