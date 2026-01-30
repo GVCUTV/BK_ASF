@@ -259,6 +259,7 @@ def check_baseline(
     ticket_rows: List[Dict[str, Any]] | None = None,
 ) -> List[CheckResult]:
     results: List[CheckResult] = []
+    ci_bounds = _load_baseline_ci_bounds()
     ticket_means: Dict[str, float] | None = None
     if ticket_rows is not None:
         ticket_means = aggregate_ticket_means(ticket_rows)
@@ -267,14 +268,57 @@ def check_baseline(
             observed = ticket_means.get("mean_total_wait")
         else:
             observed = summary.get(metric)
+        if observed is None or not isinstance(observed, (int, float)):
+            continue
+        ci = ci_bounds.get(metric)
+        if ci is not None:
+            ci_low, ci_high = ci
+            within = ci_low <= observed <= ci_high
+            if within:
+                details = f"observed={observed}, ci_low={ci_low}, ci_high={ci_high}"
+            else:
+                if observed < ci_low:
+                    deviation = observed - ci_low
+                    details = (
+                        f"observed={observed}, ci_low={ci_low}, ci_high={ci_high}, deviation={deviation} below ci_low"
+                    )
+                else:
+                    deviation = observed - ci_high
+                    details = (
+                        f"observed={observed}, ci_low={ci_low}, ci_high={ci_high}, deviation={deviation} above ci_high"
+                    )
+            if isinstance(expected, (int, float)):
+                details = f"{details}, baseline={expected}"
+            results.append(CheckResult(f"Baseline CI: {metric}", within, details))
+            continue
         if expected is None or expected == "":
             continue
-        if not isinstance(expected, (int, float)) or observed is None or not isinstance(observed, (int, float)):
+        if not isinstance(expected, (int, float)):
             continue
         passed = _approx_equal(observed, expected, rel_tol, abs_tol)
         details = f"observed={observed}, expected={expected}"
         results.append(CheckResult(f"Baseline: {metric}", passed, details))
     return results
+
+
+def _load_baseline_ci_bounds(path: str | None = None) -> Dict[str, Tuple[float, float]]:
+    import csv
+
+    baseline_path = Path(path) if path else Path(__file__).resolve().parent / "baseline_metrics.csv"
+    if not baseline_path.exists():
+        return {}
+    bounds: Dict[str, Tuple[float, float]] = {}
+    with baseline_path.open("r", encoding="utf-8", newline="") as handle:
+        reader = csv.DictReader(handle)
+        for row in reader:
+            metric = (row.get("metric") or "").strip()
+            if not metric:
+                continue
+            ci_low = parse_value(row.get("ci_low", ""))
+            ci_high = parse_value(row.get("ci_high", ""))
+            if isinstance(ci_low, (int, float)) and isinstance(ci_high, (int, float)):
+                bounds[metric] = (float(ci_low), float(ci_high))
+    return bounds
 
 
 def _normalize_config_service_params(service_cfg: Dict[str, Any]) -> Dict[str, Dict[str, Any]]:
