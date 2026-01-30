@@ -497,6 +497,7 @@ class StatsCollector:
             total_wait = 0.0
             tickets_in_stage = 0
             stage_participants = 0
+            stage_unique_completions = 0
             for ticket_stat in self.ticket_stats.values():
                 wait_sum = sum(ticket_stat.get("queue_waits", {}).get(stage, []))
                 service_sum = sum(
@@ -509,6 +510,10 @@ class StatsCollector:
                     total_wait += wait_sum
                     tickets_in_stage += 1
                     stage_participants += 1
+                if any(
+                    completion.get("stage") == stage for completion in ticket_stat.get("service_completions", [])
+                ):
+                    stage_unique_completions += 1
             avg_wait = total_wait / tickets_in_stage if tickets_in_stage else 0.0
             queue_area = self.queue_tracking.get(self._tracking_stage(stage), {}).get("area", 0.0)
             avg_queue_len = queue_area / horizon
@@ -534,6 +539,7 @@ class StatsCollector:
             avg_servers = capacity_time / horizon
             avg_system_length = avg_queue_len + avg_servers * utilization
             throughput = self.stage_throughput.get(stage, 0) / horizon
+            throughput_unique = stage_unique_completions / horizon
             summary_rows.extend(
                 [
                     {
@@ -543,10 +549,22 @@ class StatsCollector:
                         "description": f"Unique tickets with at least one {stage} service",
                     },
                     {
+                        "metric": f"tickets_completed_{stage}_unique",
+                        "value": stage_unique_completions,
+                        "units": "tickets",
+                        "description": f"Unique tickets completing {stage} at least once",
+                    },
+                    {
                         "metric": f"throughput_{stage}",
                         "value": throughput,
                         "units": "tickets/day",
                         "description": f"Completed {stage} services per day",
+                    },
+                    {
+                        "metric": f"throughput_{stage}_unique",
+                        "value": throughput_unique,
+                        "units": "tickets/day",
+                        "description": f"Unique tickets completing {stage} per day",
                     },
                     {
                         "metric": f"avg_wait_{stage}",
