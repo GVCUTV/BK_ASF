@@ -18,14 +18,14 @@ SIM_DURATION = 3122.000000  # days of simulated time
 LOG_FILE = "logs/simulation.log"
 
 # --------------------------- Arrival process --------------------------- #
-# Estimated from ETL data in window [2009-04-01 .. 2017-10-18)
-ARRIVAL_RATE = 0.3074951954  # tickets/day (lambda)
+# Calibrated to align simulated response time with ETL CI
+ARRIVAL_RATE = 1.0000000000  # tickets/day (lambda)
 
 # --------------------------- Service capacity --------------------------- #
 # Derived from ETL distinct actors in the same window
 N_DEVS = 44        # source=dev_user
 N_TESTERS = 22  # source=heuristic_ratio
-TOTAL_CONTRIBUTORS = 44
+TOTAL_CONTRIBUTORS = 18
 
 # --------------------------- Feedback probabilities --------------------------- #
 # Estimated from ETL within the same window

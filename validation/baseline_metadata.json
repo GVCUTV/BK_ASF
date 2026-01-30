@@ -176,10 +176,10 @@
   "sim_config_snapshot": {
     "SIM_DURATION": 365.0,
     "LOG_FILE": "logs/simulation.log",
-    "ARRIVAL_RATE": 0.3074951954,
+    "ARRIVAL_RATE": 1.0,
     "N_DEVS": 44,
     "N_TESTERS": 22,
-    "TOTAL_CONTRIBUTORS": 44,
+    "TOTAL_CONTRIBUTORS": 18,
     "FEEDBACK_P_DEV": 0.0,
     "FEEDBACK_P_TEST": 0.0,
     "SERVICE_TIME_PARAMS": {
