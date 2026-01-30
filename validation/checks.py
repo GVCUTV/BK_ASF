@@ -294,17 +294,25 @@ def check_baseline(
                 continue
             observed = ticket_means.get(metric)
         elif metric.startswith("throughput_"):
-            stage = metric.split("throughput_", 1)[-1]
-            participation_key = f"tickets_participating_{stage}"
-            ticket_count = summary.get(participation_key)
-            if (
-                isinstance(ticket_count, (int, float))
-                and inferred_horizon
-                and isinstance(inferred_horizon, (int, float))
-            ):
-                observed = float(ticket_count) / inferred_horizon
-            else:
+            if metric.endswith("_unique"):
                 observed = summary.get(metric)
+            else:
+                stage = metric.split("throughput_", 1)[-1]
+                unique_throughput_key = f"throughput_{stage}_unique"
+                unique_throughput = summary.get(unique_throughput_key)
+                if isinstance(unique_throughput, (int, float)):
+                    observed = unique_throughput
+                else:
+                    participation_key = f"tickets_completed_{stage}_unique"
+                    ticket_count = summary.get(participation_key)
+                    if (
+                        isinstance(ticket_count, (int, float))
+                        and inferred_horizon
+                        and isinstance(inferred_horizon, (int, float))
+                    ):
+                        observed = float(ticket_count) / inferred_horizon
+                    else:
+                        observed = summary.get(metric)
         else:
             observed = summary.get(metric)
         if metric.startswith("avg_queue_length_"):

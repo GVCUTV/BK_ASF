@@ -15,7 +15,7 @@ The table aligns simulator KPIs to measurable quantities or derived checks from 
 
 | Simulator metric | Real-system observable / proxy | Notes on horizon & units |
 | --- | --- | --- |
-| `closure_rate`, `throughput_*` | Ratio of closed to arrived tickets per day using creation/closure timestamps in `tickets_prs_merged.csv`; compare per-stage throughput to completion counts inferred from phase durations and service fits in `fit_summary.csv`. | Horizon: 365-day simulation by default; compare to ETL window averaged to tickets/day. |
+| `closure_rate`, `throughput_*`, `throughput_*_unique` | Ratio of closed to arrived tickets per day using creation/closure timestamps in `tickets_prs_merged.csv`; compare per-stage throughput to completion counts inferred from phase durations and service fits in `fit_summary.csv`. **Use `throughput_*_unique` for ETL comparisons**, while `throughput_*` includes all service completions (including rework loops). | Horizon: 365-day simulation by default; compare to ETL window averaged to tickets/day. |
 | `avg_service_time_*`, `avg_system_length_*`, `avg_queue_length_*` | Not directly observed; ETL phase durations (`phase_summary_stats.csv`) act as **service-time proxies**, not queue waits. Total wait is approximated by `resolution_time_days - sum(stage durations)` when available; per-stage queue lengths are **not** observable in ETL and are omitted from baseline comparisons. | Units are days; backlog = DEV queue. |
 | `utilization_*` | Compare simulated busy time divided by average capacity to expected server exposure from `markov_time_in_states` (derived from `matrix_P.csv` steady state) and the observed developer count (`N_DEVS`/`TOTAL_CONTRIBUTORS` in config). | Expect utilization in [0,1]. |
 | `rework_rate_*` | Measure reopen fractions in ETL (tickets returning to DEV after REVIEW/TEST) from `tickets_prs_merged.csv`; simulator rates should not exceed empirical reopen ratios when `FEEDBACK_P_*` stay at baseline. | When FEEDBACK rates are overridden upward, expect higher rework rates. |
@@ -24,7 +24,7 @@ The table aligns simulator KPIs to measurable quantities or derived checks from 
 
 ## 4. Acceptance criteria and tolerances
 - **Closure and throughput alignment:**
-  - Simulated `closure_rate` and `throughput_*` must be within **±10%** of the empirical tickets/day computed from the ETL window, after normalizing to the 365-day horizon. Deviations above 10% trigger manual review; above 20% are failures.
+  - Simulated `closure_rate` and `throughput_*_unique` must be within **±10%** of the empirical tickets/day computed from the ETL window, after normalizing to the 365-day horizon. Deviations above 10% trigger manual review; above 20% are failures.
 - **Service-time and queue metrics:**
   - `avg_service_time_*` should stay within **±20%** of the ETL-derived phase-duration means (service-time proxies, not queue waits). `avg_system_length_*` and `avg_queue_length_*` do not have ETL baselines; these are checked only for non-negativity and internal consistency, not against empirical CI bounds.
 - **Utilization bounds:**
