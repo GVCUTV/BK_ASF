@@ -272,6 +272,11 @@ def check_baseline(
                 observed = ticket_means.get("mean_total_wait")
             else:
                 observed = summary_value
+        elif metric.startswith("avg_service_time_"):
+            if ticket_means is not None:
+                observed = ticket_means.get(metric)
+            else:
+                observed = summary.get(metric)
         else:
             observed = summary.get(metric)
         if observed is None or not isinstance(observed, (int, float)):
@@ -375,9 +380,28 @@ def _extract_etl_params(
 def aggregate_ticket_means(tickets: List[Dict[str, Any]]) -> Dict[str, float]:
     waits = [float(row.get("total_wait", 0.0)) for row in tickets if isinstance(row.get("total_wait"), (int, float))]
     times = [float(row.get("time_in_system", 0.0)) for row in tickets if isinstance(row.get("time_in_system"), (int, float))]
+    service_means: Dict[str, float] = {}
+    stage_cycles = {
+        "dev": "dev_cycles",
+        "review": "review_cycles",
+        "testing": "test_cycles",
+    }
+    for stage, cycles_field in stage_cycles.items():
+        service_times: List[float] = []
+        service_field = f"service_time_{stage}"
+        for row in tickets:
+            service_time = row.get(service_field)
+            cycles = row.get(cycles_field)
+            if not isinstance(service_time, (int, float)) or math.isnan(service_time):
+                continue
+            if service_time <= 0 and not (isinstance(cycles, (int, float)) and cycles > 0):
+                continue
+            service_times.append(float(service_time))
+        service_means[f"avg_service_time_{stage}"] = _mean(service_times)
     return {
         "mean_total_wait": _mean(waits),
         "mean_time_in_system": _mean(times),
+        **service_means,
     }
 
 

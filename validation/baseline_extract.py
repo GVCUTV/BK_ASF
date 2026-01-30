@@ -371,11 +371,11 @@ def build_metrics_vector(
             "ci_high": stats.get("throughput_ci", (float("nan"), float("nan")))[1],
         })
         records.append({
-            "metric": f"avg_wait_{stage}",
+            "metric": f"avg_service_time_{stage}",
             "value": wait_proxy,
             "units": "days",
             "source": "ETL stage durations",
-            "note": "Proxy: mean stage duration (Little's Law inputs)",
+            "note": "Proxy: mean stage duration (service-time baseline)",
             "ci_low": wait_ci[0],
             "ci_high": wait_ci[1],
         })

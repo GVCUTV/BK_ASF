@@ -16,7 +16,7 @@ The table aligns simulator KPIs to measurable quantities or derived checks from 
 | Simulator metric | Real-system observable / proxy | Notes on horizon & units |
 | --- | --- | --- |
 | `closure_rate`, `throughput_*` | Ratio of closed to arrived tickets per day using creation/closure timestamps in `tickets_prs_merged.csv`; compare per-stage throughput to completion counts inferred from phase durations and service fits in `fit_summary.csv`. | Horizon: 365-day simulation by default; compare to ETL window averaged to tickets/day. |
-| `avg_wait_*`, `avg_system_length_*`, `avg_queue_length_*` | Not directly observed; approximate waits via ETL phase durations (`phase_summary_stats.csv`) and apply Little’s Law with ETL arrival rate to derive expected queue lengths/system lengths. Backlog waits map to `dev` metrics. | Units are days; backlog = DEV queue. |
+| `avg_service_time_*`, `avg_system_length_*`, `avg_queue_length_*` | Not directly observed; approximate **service times** via ETL phase durations (`phase_summary_stats.csv`). Apply Little’s Law with ETL arrival rate to derive expected queue lengths/system lengths as coarse proxies. Backlog waits map to `dev` metrics. | Units are days; backlog = DEV queue. |
 | `utilization_*` | Compare simulated busy time divided by average capacity to expected server exposure from `markov_time_in_states` (derived from `matrix_P.csv` steady state) and the observed developer count (`N_DEVS`/`TOTAL_CONTRIBUTORS` in config). | Expect utilization in [0,1]. |
 | `rework_rate_*` | Measure reopen fractions in ETL (tickets returning to DEV after REVIEW/TEST) from `tickets_prs_merged.csv`; simulator rates should not exceed empirical reopen ratios when `FEEDBACK_P_*` stay at baseline. | When FEEDBACK rates are overridden upward, expect higher rework rates. |
 | `markov_time_in_states`, `markov_stint_counts`, `markov_stint_means`, `avg_servers_*` | Compare to steady-state occupancy computed from `matrix_P.csv` and stint pmfs; ETL-derived stint distributions (per state PMF files) provide expected cycle timing. | Reported in developer-days over the horizon; divide by horizon to obtain average server counts. |
@@ -25,8 +25,8 @@ The table aligns simulator KPIs to measurable quantities or derived checks from 
 ## 4. Acceptance criteria and tolerances
 - **Closure and throughput alignment:**
   - Simulated `closure_rate` and `throughput_*` must be within **±10%** of the empirical tickets/day computed from the ETL window, after normalizing to the 365-day horizon. Deviations above 10% trigger manual review; above 20% are failures.
-- **Wait and queue metrics:**
-  - `avg_wait_*` should stay within **±20%** of the ETL-derived phase-duration means. Derived `avg_queue_length_*`/`avg_system_length_*` (via Little’s Law using ARRIVAL_RATE) should respect the same tolerance. Values trending negative or infinite are immediate failures.
+- **Service-time and queue metrics:**
+  - `avg_service_time_*` should stay within **±20%** of the ETL-derived phase-duration means. Derived `avg_queue_length_*`/`avg_system_length_*` (via Little’s Law using ARRIVAL_RATE and service-time baselines) should respect the same tolerance. Values trending negative or infinite are immediate failures.
 - **Utilization bounds:**
   - `utilization_*` must remain in **[0, 1.05]**. Values between 1.0 and 1.05 require justification (e.g., horizon clipping); above 1.05 fails. Average servers (`avg_servers_*`) should be within **±5%** of `N_DEVS * π_state` when using the canonical `matrix_P.csv` and seeds.
 - **Rework rates:**
@@ -56,7 +56,7 @@ The table aligns simulator KPIs to measurable quantities or derived checks from 
 
 ### Baseline extractions (empirical reference)
 - The script `validation/baseline_extract.py` reads `etl/output/csv/tickets_prs_merged.csv` and `etl/output/csv/fit_summary.csv` to export:
-  - `validation/baseline_metrics.csv`: KPIs aligned to `simulation/output/summary_stats.csv` (arrival rate, closure rate, throughput_* per stage, placeholders for wait/queue/utilization, and rework proxies) with confidence bounds when available.
+  - `validation/baseline_metrics.csv`: KPIs aligned to `simulation/output/summary_stats.csv` (arrival rate, closure rate, throughput_* per stage, service-time baselines, placeholders for queue/utilization, and rework proxies) with confidence bounds when available.
   - `validation/baseline_metadata.json`: provenance (source file hashes, ETL window, seed, config snapshot, state-parameter hashes) plus stage-level service-duration summaries.
 - Configuration lives in `validation/baseline_config.yaml`; paths, seeds, and window overrides can be adjusted without code edits.
 - Outputs are deterministic given fixed inputs/seeds and do **not** change simulator behavior; regenerate as needed to refresh “golden” baselines prior to validation runs.
