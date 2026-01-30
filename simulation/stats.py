@@ -581,9 +581,20 @@ class StatsCollector:
                 ]
             )
 
+        feedback_outcomes = ("feedback", "progress", "complete")
         for stage in self.stage_names:
+            stage_feedback = self.event_counters.get("feedback_events", {}).get(stage, {})
+            for outcome in feedback_outcomes:
+                summary_rows.append(
+                    {
+                        "metric": f"feedback_{stage}_{outcome}",
+                        "value": stage_feedback.get(outcome, 0),
+                        "units": "events",
+                        "description": f"{outcome} outcomes recorded for {stage}",
+                    }
+                )
             completions = self.event_counters["service_completions"].get(stage, 0)
-            feedbacks = self.event_counters.get("feedback_events", {}).get(stage, {}).get("feedback", 0)
+            feedbacks = stage_feedback.get("feedback", 0)
             rework_rate = feedbacks / completions if completions else 0.0
             summary_rows.append(
                 {
