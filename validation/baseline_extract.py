@@ -349,22 +349,11 @@ def build_metrics_vector(
         })
 
     for stage, stats in stage_info.items():
-        arrival_rate = arrival_info.get("arrival_rate")
         service_time_proxy = stats.get("mean")
         service_time_ci = stats.get("mean_ci", (float("nan"), float("nan")))
-        if (
-            arrival_rate is None
-            or np.isnan(arrival_rate)
-            or service_time_proxy is None
-            or np.isnan(service_time_proxy)
-        ):
-            queue_length_proxy = float("nan")
-            queue_ci_low = float("nan")
-            queue_ci_high = float("nan")
-        else:
-            queue_length_proxy = arrival_rate * service_time_proxy
-            queue_ci_low = arrival_rate * service_time_ci[0] if not np.isnan(service_time_ci[0]) else float("nan")
-            queue_ci_high = arrival_rate * service_time_ci[1] if not np.isnan(service_time_ci[1]) else float("nan")
+        queue_length_proxy = float("nan")
+        queue_ci_low = float("nan")
+        queue_ci_high = float("nan")
 
         records.append({
             "metric": f"throughput_{stage}",
@@ -388,8 +377,8 @@ def build_metrics_vector(
             "metric": f"avg_queue_length_{stage}",
             "value": queue_length_proxy,
             "units": "tickets",
-            "source": "ETL arrivals + stage duration",
-            "note": "Proxy via Little's Law: L = λ * W using ETL arrival rate",
+            "source": "not_observed",
+            "note": "Queue length not observed in ETL; baseline comparison disabled",
             "ci_low": queue_ci_low,
             "ci_high": queue_ci_high,
         })
