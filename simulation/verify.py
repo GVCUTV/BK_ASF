@@ -16,14 +16,18 @@ import datetime as dt
 import os
 import sys
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Any, Dict, Iterable, List, Sequence, Tuple
 
 from simulation.run_sweeps import SUMMARY_METRICS, parse_value
+from validation import checks as validation_checks
 
 SUMMARY_FILENAME = "summary_stats.csv"
 TICKETS_FILENAME = "tickets_stats.csv"
 REPORT_FILENAME = "verification_report.md"
 AGGREGATE_FILENAME = "aggregate_summary.csv"
+REPO_ROOT = Path(__file__).resolve().parent.parent
+DEFAULT_BASELINE_PATH = REPO_ROOT / "validation" / "baseline_metrics.csv"
 
 
 # ---------------------------------------------------------------------------
@@ -87,6 +91,14 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
         help="Relative tolerance for Little mean-jobs identity checks (default: 0.02).",
     )
     parser.add_argument(
+        "--baseline-metrics",
+        help="Path to validation baseline_metrics.csv to include ETL comparisons in the report.",
+    )
+    parser.add_argument(
+        "--etl-dir",
+        help="Path to the ETL directory; used to locate validation/baseline_metrics.csv for ETL comparisons.",
+    )
+    parser.add_argument(
         "--mode",
         choices=["single", "sweep"],
         default="single",
@@ -100,6 +112,24 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
         help="Alias for --mode sweep.",
     )
     return parser.parse_args(argv)
+
+
+def _resolve_baseline_path(etl_dir: str | None, baseline_metrics: str | None) -> str | None:
+    if baseline_metrics:
+        return baseline_metrics
+    if not etl_dir:
+        return None
+    etl_path = Path(etl_dir).resolve()
+    candidates = [
+        etl_path / "baseline_metrics.csv",
+        etl_path.parent / "validation" / "baseline_metrics.csv",
+        etl_path.parent.parent / "validation" / "baseline_metrics.csv",
+        DEFAULT_BASELINE_PATH,
+    ]
+    for candidate in candidates:
+        if candidate.is_file():
+            return str(candidate)
+    return str(candidates[-1])
 
 
 # ---------------------------------------------------------------------------
@@ -183,6 +213,41 @@ def _load_tickets(tickets_path: str) -> List[Dict[str, str]]:
     with open(tickets_path, "r", newline="") as handle:
         reader = csv.DictReader(handle)
         return list(reader)
+
+
+def _load_baseline_rows(baseline_path: str) -> List[Dict[str, Any]]:
+    rows: List[Dict[str, Any]] = []
+    with open(baseline_path, "r", newline="") as handle:
+        reader = csv.DictReader(handle)
+        for row in reader:
+            parsed = dict(row)
+            for key in ["value", "ci_low", "ci_high"]:
+                parsed[key] = parse_value(parsed.get(key, ""))
+            rows.append(parsed)
+    return rows
+
+
+def _baseline_checks(
+    summary_metrics: Dict[str, float],
+    ticket_rows: List[Dict[str, str]],
+    baseline_rows: Sequence[Dict[str, Any]],
+) -> List[CheckResult]:
+    baseline_metrics = {
+        (row.get("metric") or "").strip(): row.get("value")
+        for row in baseline_rows
+        if (row.get("metric") or "").strip()
+    }
+    if not baseline_metrics:
+        return []
+    ticket_parsed = [{k: parse_value(v or "") for k, v in row.items()} for row in ticket_rows]
+    baseline_results = validation_checks.check_baseline(
+        summary_metrics,
+        baseline_metrics,
+        rel_tol=0.1,
+        abs_tol=1e-6,
+        ticket_rows=ticket_parsed,
+    )
+    return [CheckResult(result.name, result.passed, result.details) for result in baseline_results]
 
 
 # ---------------------------------------------------------------------------
@@ -635,9 +700,16 @@ def _summary_bounds_check(summary_metrics: Dict[str, float], tolerance: float) -
 # Verification runners
 # ---------------------------------------------------------------------------
 def verify_single_run(
-    base_dir: str, tolerance: float, mean_jobs_rel_tolerance: float, fail_fast: bool
+    base_dir: str,
+    tolerance: float,
+    mean_jobs_rel_tolerance: float,
+    fail_fast: bool,
+    baseline_rows: Sequence[Dict[str, Any]] | None = None,
+    baseline_note: str | None = None,
 ) -> RunReport:
     results: List[CheckResult] = []
+    if baseline_note:
+        results.append(CheckResult("ETL baseline metrics present", False, baseline_note))
     if not os.path.isdir(base_dir):
         results.append(CheckResult("Input directory present", False, f"Directory not found: {base_dir}"))
         return RunReport(base_dir, results)
@@ -695,6 +767,8 @@ def verify_single_run(
     checks.append(_wait_decomposition_check(ticket_rows, tolerance))
     checks.extend(_avg_wait_alignment_check(summary_metrics, stage_samples, tolerance))
     checks.extend(_stage_identity_checks(stage_samples, tolerance))
+    if baseline_rows:
+        checks.extend(_baseline_checks(summary_metrics, ticket_rows, baseline_rows))
 
     for check in checks:
         results.append(check)
@@ -823,6 +897,8 @@ def verify_sweep(
     mean_jobs_rel_tolerance: float,
     fail_fast: bool,
     experiment_dirs: Sequence[str] | None = None,
+    baseline_rows: Sequence[Dict[str, Any]] | None = None,
+    baseline_note: str | None = None,
 ) -> Tuple[List[RunReport], bool]:
     run_reports: List[RunReport] = []
     if not os.path.isdir(input_dir):
@@ -837,7 +913,14 @@ def verify_sweep(
 
     overall_passed = True
     for subdir in experiments:
-        report = verify_single_run(subdir, tolerance, mean_jobs_rel_tolerance, fail_fast)
+        report = verify_single_run(
+            subdir,
+            tolerance,
+            mean_jobs_rel_tolerance,
+            fail_fast,
+            baseline_rows,
+            baseline_note,
+        )
         run_reports.append(report)
         overall_passed = overall_passed and report.passed
 
@@ -946,6 +1029,14 @@ def main(argv: Sequence[str] | None = None) -> int:
     args = parse_args(argv)
     mode = args.mode
     experiment_dirs = None
+    baseline_path = _resolve_baseline_path(args.etl_dir, args.baseline_metrics)
+    baseline_rows: List[Dict[str, Any]] = []
+    baseline_note = None
+    if baseline_path:
+        try:
+            baseline_rows = _load_baseline_rows(baseline_path)
+        except FileNotFoundError:
+            baseline_note = f"Missing baseline metrics file at {baseline_path}"
     if args.mode == "single":
         experiment_dirs = detect_sweep_experiments(args.input)
         if experiment_dirs:
@@ -953,11 +1044,22 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     if mode == "sweep":
         run_reports, overall_passed = verify_sweep(
-            args.input, args.tolerance, args.mean_jobs_rel_tolerance, args.fail_fast, experiment_dirs
+            args.input,
+            args.tolerance,
+            args.mean_jobs_rel_tolerance,
+            args.fail_fast,
+            experiment_dirs,
+            baseline_rows,
+            baseline_note,
         )
     else:
         run_report = verify_single_run(
-            args.input, args.tolerance, args.mean_jobs_rel_tolerance, args.fail_fast
+            args.input,
+            args.tolerance,
+            args.mean_jobs_rel_tolerance,
+            args.fail_fast,
+            baseline_rows,
+            baseline_note,
         )
         run_reports = [run_report]
         overall_passed = run_report.passed

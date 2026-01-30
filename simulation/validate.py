@@ -2,17 +2,18 @@
 from __future__ import annotations
 
 import argparse
+import csv
 import json
 import logging
 import shutil
 import sys
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Sequence
 
 from simulation import config as sim_config
 from simulation import simulate
-from simulation.run_sweeps import apply_config_overrides
+from simulation.run_sweeps import apply_config_overrides, parse_value
 from simulation.verify import main as verify_main
 from validation import checks
 
@@ -44,24 +45,31 @@ def _configure_logging(base_dir: Path) -> None:
     logging.info("Validation logging initialized at %s", logfile)
 
 
-def _load_baseline_metrics() -> Dict[str, Any]:
-    if not BASELINE_PATH.exists():
-        logging.warning("Baseline metrics file not found at %s", BASELINE_PATH)
+def _load_baseline_rows(path: Path = BASELINE_PATH) -> List[Dict[str, Any]]:
+    if not path.exists():
+        logging.warning("Baseline metrics file not found at %s", path)
+        return []
+    with path.open("r", encoding="utf-8", newline="") as handle:
+        reader = csv.DictReader(handle)
+        rows: List[Dict[str, Any]] = []
+        for row in reader:
+            parsed = dict(row)
+            for key in ["value", "ci_low", "ci_high"]:
+                parsed[key] = parse_value(parsed.get(key, ""))
+            rows.append(parsed)
+    return rows
+
+
+def _load_baseline_metrics(rows: Sequence[Dict[str, Any]] | None = None) -> Dict[str, Any]:
+    baseline_rows = list(rows) if rows is not None else _load_baseline_rows()
+    if not baseline_rows:
         return {}
     baseline: Dict[str, Any] = {}
-    with BASELINE_PATH.open("r", encoding="utf-8") as handle:
-        headers = handle.readline().strip().split(",")
-        if "metric" not in headers or "value" not in headers:
-            logging.warning("Baseline metrics missing required columns.")
-            return {}
-        metric_idx = headers.index("metric")
-        value_idx = headers.index("value")
-        for line in handle:
-            parts = [part.strip() for part in line.split(",")]
-            if len(parts) <= max(metric_idx, value_idx):
-                continue
-            metric = parts[metric_idx]
-            baseline[metric] = checks.parse_value(parts[value_idx]) if hasattr(checks, "parse_value") else parts[value_idx]
+    for row in baseline_rows:
+        metric = (row.get("metric") or "").strip()
+        if not metric:
+            continue
+        baseline[metric] = row.get("value")
     return baseline
 
 
@@ -182,7 +190,22 @@ def _render_markdown(
     monotonic_results: List[checks.CheckResult],
     plausibility_results: List[checks.CheckResult] | None = None,
     plausibility_stats: Dict[str, Any] | None = None,
+    baseline_rows: Sequence[Dict[str, Any]] | None = None,
 ) -> str:
+    def _format_value(value: Any) -> str:
+        if value in {None, ""}:
+            return "n/a"
+        if isinstance(value, (int, float)) and not isinstance(value, bool):
+            return f"{value:.4f}"
+        return str(value)
+
+    def _observed_metric(result: checks.ScenarioResult, metric: str) -> Any:
+        if metric in {"mean_total_wait", "mean_time_in_system"} and result.ticket_rows:
+            ticket_means = checks.aggregate_ticket_means(result.ticket_rows)
+            if metric in ticket_means:
+                return ticket_means[metric]
+        return result.summary_metrics.get(metric)
+
     lines: List[str] = []
     lines.append("# Validation Summary")
     lines.append("")
@@ -227,6 +250,29 @@ def _render_markdown(
                 )
     lines.append("")
 
+    baseline = next((res for res in scenario_results if res.name == "baseline"), None)
+    if baseline and baseline_rows:
+        lines.append("## ETL Baseline Comparisons")
+        lines.append("")
+        lines.append("| Metric | Observed | ETL baseline | CI low | CI high | Status |")
+        lines.append("| --- | --- | --- | --- | --- | --- |")
+        for row in baseline_rows:
+            metric = (row.get("metric") or "").strip()
+            if not metric:
+                continue
+            observed = _observed_metric(baseline, metric)
+            baseline_value = row.get("value")
+            ci_low = row.get("ci_low")
+            ci_high = row.get("ci_high")
+            status = "n/a"
+            if isinstance(observed, (int, float)) and isinstance(ci_low, (int, float)) and isinstance(ci_high, (int, float)):
+                status = "✅ within CI" if ci_low <= observed <= ci_high else "❌ outside CI"
+            lines.append(
+                f"| {metric} | {_format_value(observed)} | {_format_value(baseline_value)}"
+                f" | {_format_value(ci_low)} | {_format_value(ci_high)} | {status} |"
+            )
+        lines.append("")
+
     lines.append("## Artifacts")
     for result in scenario_results:
         lines.append(f"- **{result.name}**: outputs in `{result.output_dir}` (summary/tickets, config snapshot, verification report)")
@@ -247,7 +293,8 @@ def main(argv: List[str] | None = None) -> int:
     run_dir = base_outdir / f"{SCENARIO_PREFIX}_{stamp}"
     _configure_logging(run_dir)
 
-    baseline_metrics = _load_baseline_metrics()
+    baseline_rows = _load_baseline_rows()
+    baseline_metrics = _load_baseline_metrics(baseline_rows)
     scenarios = _scenario_overrides(args.seed, baseline_metrics)
 
     results: List[checks.ScenarioResult] = []
@@ -306,7 +353,14 @@ def main(argv: List[str] | None = None) -> int:
         }
         checks.write_json_report(str(run_dir / DISTRIBUTION_JSON), plausibility_stats)
 
-    report_md = _render_markdown(run_dir, results, monotonic_results, plausibility_results, plausibility_stats)
+    report_md = _render_markdown(
+        run_dir,
+        results,
+        monotonic_results,
+        plausibility_results,
+        plausibility_stats,
+        baseline_rows,
+    )
     report_path = run_dir / REPORT_MD
     report_path.write_text(report_md, encoding="utf-8")
 
