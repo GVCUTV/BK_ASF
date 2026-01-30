@@ -496,6 +496,7 @@ class StatsCollector:
         for stage in self.stage_names:
             total_wait = 0.0
             tickets_in_stage = 0
+            stage_participants = 0
             for ticket_stat in self.ticket_stats.values():
                 wait_sum = sum(ticket_stat.get("queue_waits", {}).get(stage, []))
                 service_sum = sum(
@@ -507,6 +508,7 @@ class StatsCollector:
                 if cycle_count > 0 or service_sum > 0.0:
                     total_wait += wait_sum
                     tickets_in_stage += 1
+                    stage_participants += 1
             avg_wait = total_wait / tickets_in_stage if tickets_in_stage else 0.0
             queue_area = self.queue_tracking.get(self._tracking_stage(stage), {}).get("area", 0.0)
             avg_queue_len = queue_area / horizon
@@ -534,6 +536,12 @@ class StatsCollector:
             throughput = self.stage_throughput.get(stage, 0) / horizon
             summary_rows.extend(
                 [
+                    {
+                        "metric": f"tickets_participating_{stage}",
+                        "value": stage_participants,
+                        "units": "tickets",
+                        "description": f"Unique tickets with at least one {stage} service",
+                    },
                     {
                         "metric": f"throughput_{stage}",
                         "value": throughput,

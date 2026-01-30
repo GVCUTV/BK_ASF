@@ -106,6 +106,22 @@ def _mean(values: Iterable[float]) -> float:
     return float(sum(vals) / len(vals)) if vals else 0.0
 
 
+def _infer_sim_duration(ticket_rows: List[Dict[str, Any]]) -> float:
+    if not ticket_rows:
+        return 0.0
+    horizons: List[float] = []
+    for row in ticket_rows:
+        arrival = row.get("arrival_time")
+        time_in_system = row.get("time_in_system")
+        closed_time = row.get("closed_time")
+        if isinstance(closed_time, (int, float)) and not math.isnan(closed_time):
+            horizons.append(float(closed_time))
+        if isinstance(arrival, (int, float)) and isinstance(time_in_system, (int, float)):
+            if not math.isnan(arrival) and not math.isnan(time_in_system):
+                horizons.append(float(arrival + time_in_system))
+    return max(horizons) if horizons else 0.0
+
+
 def _approx_equal(a: float, b: float, rel: float, abs_tol: float) -> bool:
     return abs(a - b) <= max(abs_tol, rel * max(1.0, abs(a), abs(b)))
 
@@ -261,6 +277,7 @@ def check_baseline(
     results: List[CheckResult] = []
     ci_bounds = _load_baseline_ci_bounds()
     ticket_means: Dict[str, float] | None = None
+    inferred_horizon = _infer_sim_duration(ticket_rows or [])
     if ticket_rows is not None:
         ticket_means = aggregate_ticket_means(ticket_rows)
     for metric, expected in baseline.items():
@@ -275,6 +292,18 @@ def check_baseline(
         elif metric.startswith("avg_service_time_"):
             if ticket_means is not None:
                 observed = ticket_means.get(metric)
+            else:
+                observed = summary.get(metric)
+        elif metric.startswith("throughput_"):
+            stage = metric.split("throughput_", 1)[-1]
+            participation_key = f"tickets_participating_{stage}"
+            ticket_count = summary.get(participation_key)
+            if (
+                isinstance(ticket_count, (int, float))
+                and inferred_horizon
+                and isinstance(inferred_horizon, (int, float))
+            ):
+                observed = float(ticket_count) / inferred_horizon
             else:
                 observed = summary.get(metric)
         else:
