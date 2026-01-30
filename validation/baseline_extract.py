@@ -349,6 +349,18 @@ def build_metrics_vector(
         })
 
     for stage, stats in stage_info.items():
+        arrival_rate = arrival_info.get("arrival_rate")
+        wait_proxy = stats.get("mean")
+        wait_ci = stats.get("mean_ci", (float("nan"), float("nan")))
+        if arrival_rate is None or np.isnan(arrival_rate) or wait_proxy is None or np.isnan(wait_proxy):
+            queue_length_proxy = float("nan")
+            queue_ci_low = float("nan")
+            queue_ci_high = float("nan")
+        else:
+            queue_length_proxy = arrival_rate * wait_proxy
+            queue_ci_low = arrival_rate * wait_ci[0] if not np.isnan(wait_ci[0]) else float("nan")
+            queue_ci_high = arrival_rate * wait_ci[1] if not np.isnan(wait_ci[1]) else float("nan")
+
         records.append({
             "metric": f"throughput_{stage}",
             "value": stats.get("throughput"),
@@ -358,24 +370,23 @@ def build_metrics_vector(
             "ci_low": stats.get("throughput_ci", (float("nan"), float("nan")))[0],
             "ci_high": stats.get("throughput_ci", (float("nan"), float("nan")))[1],
         })
-        # Queue waits not observable; store placeholder to align with simulator metrics
         records.append({
             "metric": f"avg_wait_{stage}",
-            "value": float("nan"),
+            "value": wait_proxy,
             "units": "days",
-            "source": "not_observed",
-            "note": "Queue waits not captured in ETL; requires simulation",
-            "ci_low": float("nan"),
-            "ci_high": float("nan"),
+            "source": "ETL stage durations",
+            "note": "Proxy: mean stage duration (Little's Law inputs)",
+            "ci_low": wait_ci[0],
+            "ci_high": wait_ci[1],
         })
         records.append({
             "metric": f"avg_queue_length_{stage}",
-            "value": float("nan"),
+            "value": queue_length_proxy,
             "units": "tickets",
-            "source": "not_observed",
-            "note": "Queue lengths require simulation; unavailable in ETL",
-            "ci_low": float("nan"),
-            "ci_high": float("nan"),
+            "source": "ETL arrivals + stage duration",
+            "note": "Proxy via Little's Law: L = λ * W using ETL arrival rate",
+            "ci_low": queue_ci_low,
+            "ci_high": queue_ci_high,
         })
         records.append({
             "metric": f"utilization_{stage}",
