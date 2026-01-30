@@ -1,6 +1,6 @@
 # Verification guide
 
-Use `simulation.verify` to confirm that simulation outputs are self-consistent before consuming them in analysis or regression comparisons. The verifier inspects per-ticket microdata and summary aggregates to catch drift in the dev queue/backlog workflow measurements.
+Use `simulation.verify` to confirm that simulation outputs are internally self-consistent before consuming them in analysis. Verification is limited to internal consistency checks; it does not compare simulation results to ETL baselines or external sources. For ETL comparisons and external validation workflows, see the validation documentation in `docs/validation/validation_plan.md` and `docs/validation/validation_runner.md`. The verifier inspects per-ticket microdata and summary aggregates to catch drift in the dev queue/backlog workflow measurements.
 
 ## Running the verifier
 
