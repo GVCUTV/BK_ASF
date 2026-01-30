@@ -41,7 +41,9 @@ class StatsCollector:
             "arrivals": 0,
             "service_starts": {stage: 0 for stage in self.stage_names},
             "service_completions": {stage: 0 for stage in self.stage_names},
-            "feedback": {stage: 0 for stage in self.stage_names},
+            "feedback_events": {
+                stage: {"feedback": 0, "progress": 0, "complete": 0} for stage in self.stage_names
+            },
             "routes": {"backlog": 0, **{stage: 0 for stage in self.stage_names}},
             "closures": 0,
         }
@@ -254,7 +256,8 @@ class StatsCollector:
         self._record_event(ticket_id, "service_completion", event_time, stage=stage)
 
     def log_feedback(self, ticket_id: int, stage: str, outcome: str, event_time: float) -> None:
-        self.event_counters["feedback"][stage] = self.event_counters["feedback"].get(stage, 0) + 1
+        stage_feedback = self.event_counters.setdefault("feedback_events", {}).setdefault(stage, {})
+        stage_feedback[outcome] = stage_feedback.get(outcome, 0) + 1
         feedback_list = self._ensure_ticket(ticket_id).setdefault("feedback", [])
         feedback_list.append({"stage": stage, "outcome": outcome, "time": event_time})
         self._record_event(ticket_id, "feedback", event_time, stage=stage, details={"outcome": outcome})
@@ -572,7 +575,7 @@ class StatsCollector:
 
         for stage in self.stage_names:
             completions = self.event_counters["service_completions"].get(stage, 0)
-            feedbacks = self.event_counters["feedback"].get(stage, 0)
+            feedbacks = self.event_counters.get("feedback_events", {}).get(stage, {}).get("feedback", 0)
             rework_rate = feedbacks / completions if completions else 0.0
             summary_rows.append(
                 {
