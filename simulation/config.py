@@ -12,7 +12,7 @@ import os
 from typing import Any, Dict
 
 # ----------------------------- General ----------------------------- #
-SIM_DURATION = 365.000000  # days of simulated time
+SIM_DURATION = 3122.000000  # days of simulated time
 
 # ----------------------------- Logging ----------------------------- #
 LOG_FILE = "logs/simulation.log"
